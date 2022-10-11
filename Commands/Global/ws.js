@@ -1,8 +1,6 @@
 const {
     SlashCommandBuilder,
 } = require("@discordjs/builders")
-//const PermissionFlagsBits 
-//https://github.com/AnIdiotsGuide/discordjs-bot-guide/blob/master/understanding/roles.md
 const {
     PermissionFlagsBits,
     ChannelType,
@@ -242,10 +240,10 @@ module.exports = {
             subcommand
             .setName('overlay')
             .setDescription('Creates overlay of whitestar with coordinates')
-            .addAttachmentOption((option)=> option
-            .setRequired(true)
-            .setName("image")
-            .setDescription("Crop an image of the whitestar to the edge of the actual whitestar borders then upload."))
+            .addAttachmentOption((option) => option
+                .setRequired(true)
+                .setName("image")
+                .setDescription("Crop an image of the whitestar to the edge of the actual whitestar borders then upload."))
         )
         .addSubcommand((subcommand) =>
             subcommand
@@ -531,21 +529,21 @@ module.exports = {
                                     break;
                                 case 'roles':
                                     let newRoles = [];
-                                    for(i = 1; i < 6; i++) {
-                                        const theRole = interaction.options.getRole('role'+i);
-                                        if(!!theRole) {
+                                    for (i = 1; i < 6; i++) {
+                                        const theRole = interaction.options.getRole('role' + i);
+                                        if (!!theRole) {
                                             newRoles.push(theRole.id);
                                         }
                                     };
-                                    newRoles = [...new Set(newRoles)];//remove any duplicates
-                                    db.prepare('DELETE FROM management WHERE guild = ?').run(interaction.guildId);//rather than update, lets remove. Maybe change later if we need more information in management.
+                                    newRoles = [...new Set(newRoles)]; //remove any duplicates
+                                    db.prepare('DELETE FROM management WHERE guild = ?').run(interaction.guildId); //rather than update, lets remove. Maybe change later if we need more information in management.
                                     db.prepare('INSERT INTO management (guild, extraRoles) VALUES(?,?)').run(interaction.guildId, JSON.stringify(newRoles));
                                     let msg = "";
-                                    for(i in newRoles) {
+                                    for (i in newRoles) {
                                         msg += "<@&" + newRoles[i] + ">";
                                     };
                                     interaction.editReply({
-                                        content: "Added "+msg+" to default whitestar roles.",
+                                        content: "Added " + msg + " to default whitestar roles.",
                                         ephemeral: true
                                     });
                                     break;
@@ -684,7 +682,7 @@ module.exports = {
                     day = inputTime.match(/(\d+)[d]/i);
                     hour = inputTime.match(/(\d+)[h]/i);
                     minute = inputTime.match(/(\d+)[m]/i);
-                    if(day == 0 && hour == 0 && minute == 0) {
+                    if (day == 0 && hour == 0 && minute == 0) {
                         interaction.editReply({
                             content: "Syntax error, I did not understand the time.",
                             ephemeral: true
@@ -701,14 +699,14 @@ module.exports = {
                             (hour * 60 * 60) +
                             (minute * 60) +
                             Math.floor(Date.now() / 1000);
-                            console.log(endTime - 388800 );             
-                            console.log(Math.floor((Date.now() / 1000)));
-                            if((endTime - 388800) > (Date.now() / 1000)) {
-                                const WwiteStarMsg = "<@&"+roleIds[0]+">⠀⠀Preparation period ends.";
-                                db.prepare('Delete FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?').run(interaction.guildId, roleIds[0], WwiteStarMsg, '10');
-                                db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who) VALUES(?,?,?,?,?)').run(interaction.guildId, roleIds[0], (endTime - 388800), WwiteStarMsg, '10');
+                        console.log(endTime - 388800);
+                        console.log(Math.floor((Date.now() / 1000)));
+                        if ((endTime - 388800) > (Date.now() / 1000)) {
+                            const WwiteStarMsg = "<@&" + roleIds[0] + ">⠀⠀Preparation period ends.";
+                            db.prepare('Delete FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?').run(interaction.guildId, roleIds[0], WwiteStarMsg, '10');
+                            db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who) VALUES(?,?,?,?,?)').run(interaction.guildId, roleIds[0], (endTime - 388800), WwiteStarMsg, '10');
                             //388800 = 4.5 days, the exact time of the whitestar. So we can calculate when it goes live.
-                            };
+                        };
                         db.prepare('UPDATE whitestar SET lifeTime = ?, novaDone = 1 WHERE guild = ? AND mRoleId = ?').run(endTime, interaction.guildId, roleIds[0]);
                         interaction.editReply({
                             content: 'Set Nova timer for: ' + day + 'd' + hour + 'h' + minute + 'm',
@@ -730,7 +728,7 @@ module.exports = {
                             const theUser = await interaction.options.getString('opponent' + i);
                             if (!!theUser) {
                                 let theOpponent = String(theUser).slice(0, 20);
-                                if(opponents.indexOf(theOpponent) == -1) opponents.push(theOpponent);//unique values only
+                                if (opponents.indexOf(theOpponent) == -1) opponents.push(theOpponent); //unique values only
                             }
                         };
                         if (opponents.length > 0) db.prepare('UPDATE whitestar SET opponents = ? WHERE guild = ? AND mRoleId = ?').run(JSON.stringify(opponents), interaction.guildId, roleIds[0]);
@@ -738,11 +736,11 @@ module.exports = {
                             content: "OK.",
                             ephemeral: true
                         });
-                    } else 
-                    interaction.editReply({
-                        content: "Syntax error, I did not understand that.",
-                        ephemeral: true
-                    });
+                    } else
+                        interaction.editReply({
+                            content: "Syntax error, I did not understand that.",
+                            ephemeral: true
+                        });
                 };
 
 
@@ -776,9 +774,9 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                                 const aWho = interaction.options.getUser('who');
                                 if (aWho && aShip != 'FS') {
                                     who = aWho.id;
-                                    msg += "<@"+aWho.id+"> ";
+                                    msg += "<@" + aWho.id + "> ";
                                 } else who = interaction.user.id;
-                                if(aShip == 'FS') {
+                                if (aShip == 'FS') {
                                     what = "<@&" + checkRoles.mRoleId + ">⠀⠀" + awayBoard.myEmojis.Friendly[aShip][0];
                                     who = '10';
                                     msg = what;
@@ -786,7 +784,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                                 msg += what;
                                 noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis['Friendly'][aShip][1] - (hTime + mTime));
                                 await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?')
-                                .run(interaction.guildId, checkRoles.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one technically. 
+                                    .run(interaction.guildId, checkRoles.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one technically. 
                                 break;
                             case 'enemy':
                                 const eShip = interaction.options.getString('ship');
@@ -798,7 +796,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                                 msg = what;
                                 noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis['Enemy'][eShip][1] - (hTime + mTime));
                                 await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?')
-                                .run(interaction.guildId, checkRoles.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one technically. 
+                                    .run(interaction.guildId, checkRoles.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one technically. 
                                 break;
                             case 'afk':
                                 const gWho = interaction.options.getMentionable('who');
@@ -810,7 +808,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                                     } else who = gWho.id;
                                 } else {
                                     who = interaction.user.id;
-                                    msg += "<@"+interaction.user.id+"> ";
+                                    msg += "<@" + interaction.user.id + "> ";
                                 };
                                 if (gNotice) what += gNotice;
                                 msg += what;
@@ -822,7 +820,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                         await db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromwho) VALUES(?,?,?,?,?,?)').run(interaction.guildId, checkRoles.mRoleId, noticeTime, what, who, interaction.user.id);
                         try {
                             interaction.editReply({
-                                content: "/ws afk "+mType+" "+msg,
+                                content: "/ws " + mType + " " + msg,
                                 ephemeral: false
                             });
                         } catch {
@@ -841,36 +839,33 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                 async function overlay() {
                     const Jimp = require('jimp');
                     const fname = 'Whitestar' + Math.floor(Math.random() * 10000) + '.png';
-            const attachment = await interaction.options.getAttachment("image");
-                        if (attachment.hasOwnProperty('url') && attachment.hasOwnProperty('name')) {
-                            const WSimages = [];
-                            WSimages.push(Jimp.read(attachment.url));
-                            WSimages.push(Jimp.read('./files/wsOverlay.png'));
-                            await Promise.all(WSimages).then(function(data) {
-                                return Promise.all(WSimages);
-                            }).then(async function(data) {
-                                await data[1].resize(attachment.width, attachment.height);
-                                await data[0].composite(data[1], 0, 0);
-                                let att = await new AttachmentBuilder()
+                    const attachment = await interaction.options.getAttachment("image");
+                    if (attachment.hasOwnProperty('url') && attachment.hasOwnProperty('name')) {
+                        const WSimages = [];
+                        WSimages.push(Jimp.read(attachment.url));
+                        WSimages.push(Jimp.read('./files/wsOverlay.png'));
+                        await Promise.all(WSimages).then(function(data) {
+                            return Promise.all(WSimages);
+                        }).then(async function(data) {
+                            await data[1].resize(attachment.width, attachment.height);
+                            await data[0].composite(data[1], 0, 0);
+                            let att = await new AttachmentBuilder()
                                 .setFile(await data[0].getBufferAsync(Jimp.MIME_PNG))
                                 .setName(fname)
                                 .setDescription("Overlay of Whitestar");
-            
-                interaction.editReply({
-                                        files: [att],
-                  ephemeral: false 
-                })
-                            });
-                        } else {
-                interaction.reply({
-                  content: "Sorry, that did not make sense to me",
-                  ephemeral: true 
-                })
-                        };
+
+                            interaction.editReply({
+                                files: [att],
+                                ephemeral: false
+                            })
+                        });
+                    } else {
+                        interaction.reply({
+                            content: "Sorry, that did not make sense to me",
+                            ephemeral: true
+                        })
+                    };
                 }
-
-
-
 
                 async function startWS() {
                     async function getColour() {
@@ -922,8 +917,6 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                         const lRoleId = await newRole(nextWS + 'Lead');
                         const chanList = [];
                         //need check, if role creation failed, do not move ahead
-
-
                         //create category
                         let newPosition = 0;
                         //interaction.channelId
@@ -962,11 +955,11 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                             }];
                             for (i in extraRoles) {
                                 const extraRole = await interaction.guild.roles.cache.get(extraRoles[i]);
-                                if(!!extraRole)
-                                permissions.push({
-                                    id: extraRoles[i],
-                                    allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]
-                                })
+                                if (!!extraRole)
+                                    permissions.push({
+                                        id: extraRoles[i],
+                                        allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]
+                                    })
                             };
                             try {
                                 const channel = await interaction.guild.channels.create({
@@ -1069,9 +1062,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                         return false;
                     };
 
-
                 };
-
 
 
             };
