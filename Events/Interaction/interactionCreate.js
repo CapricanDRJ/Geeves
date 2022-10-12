@@ -227,7 +227,7 @@ module.exports = async (client, interaction) => {
                     time = String(Math.floor(t * 10) / 10 + "h").padEnd(5,'⠀');;
                     if(time.indexOf(".") > -1) time += '⠀';
                 dropDown.push({
-                    label: String(time + awayTimers[xa].what).replace(/<:(\w+):\d+>/gi, "$1"),
+                    label: String(time + awayTimers[xa].what).replace(/<:(\w+):\d+>/g, "$1"),
                     value: String(xa + ".") + String(awayTimers[xa].lifeTime) //added the xa+"." to prevent the odd time that two messages have the same lifeTime and cause a bot crash.
                 })
             };
