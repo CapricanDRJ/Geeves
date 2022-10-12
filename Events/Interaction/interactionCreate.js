@@ -159,6 +159,9 @@ module.exports = async (client, interaction) => {
             case 'flagship':
                 flagship();
                 break;
+            case 'relicDrone':
+                afkBreak();
+                break;
             case 'enemyBattleship':
                 destroyedShip(true);
                 break;

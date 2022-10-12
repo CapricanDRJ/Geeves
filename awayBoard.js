@@ -30,8 +30,9 @@ const myEmojis = {
     Marvin: '<:Marvin:1028931972694814760>',
     Nova: '<:Nova:1028931971688190012>',
     Whitestar: '<:Whitestar:1028931971688190012>',
+    relicDrone: '<:relicDrone:1029781633198456893>'
 };
-const myButtons = [{
+const myButtons = [{//Any additions must also be added to the switch statement in interactionCreate.js
     id: '⌚',
     name: '⌚',
     time: 4 * 3600,
@@ -67,6 +68,13 @@ const myButtons = [{
     past: "",
     post: "is due to return"
 }, {
+    id: '1029781633198456893',
+    name: 'relicDrone',
+    time: 2 * 3600,
+    inline: "<:relicDrone:1029781633198456893>",
+    past: "drone ready!",
+    post: "drone ready!"
+},  {
     id: '1028931977375658094',
     name: 'enemyBattleship',
     time: 18 * 3600,
