@@ -19,6 +19,8 @@ const chanProperties = { // type: [name, leader, restricted]
     3: ["leader", true, true],
     4: ["afk", false, false]
 };
+const awayBoard = require('../../awayBoard.js');
+
 async function checkTemplate(guildId) {
     let template = await db.prepare('SELECT * FROM template WHERE guild = ? ORDER BY type ASC').all(guildId);
     console.log(template);
@@ -71,6 +73,61 @@ const ships = [{
     name: 'Flagship',
     value: 'FS'
 }];
+
+function addEmojis (args, redBlue) {
+    let msg = String(args).split(' ');
+    switch (msg[0].toLowerCase()) {
+        case 'work':
+            msg[0] = awayBoard.myEmojis.Work;
+            break;
+        case 'working':
+            msg[0] = awayBoard.myEmojis.Work;
+            break;
+        case 'battleship':
+            msg[0] = awayBoard.myEmojis[redBlue].BS[0];
+            break;
+        case 'bs':
+            msg[0] = awayBoard.myEmojis[redBlue].BS[0];
+            break;
+        case 'transport':
+            msg[0] = awayBoard.myEmojis[redBlue].TS[0];
+            break;
+        case 'ts':
+            msg[0] = awayBoard.myEmojis[redBlue].TS[0];
+            break;
+        case 'miner':
+            msg[0] = awayBoard.myEmojis[redBlue].MR[0];
+            break;
+        case 'squishie':
+            msg[0] = awayBoard.myEmojis[redBlue].SQ[0];
+            break;
+        case 'squishy':
+            msg[0] = awayBoard.myEmojis[redBlue].SQ[0];
+            break;
+        case 'sq':
+            msg[0] = awayBoard.myEmojis[redBlue].SQ[0];
+            break;
+        case 'flagship':
+            msg[0] = awayBoard.myEmojis[redBlue].FS[0];
+            break;
+        case 'fs':
+            msg[0] = awayBoard.myEmojis[redBlue].FS[0];
+            break;
+        case 'sleep':
+            msg[0] = awayBoard.myEmojis.Sleep;
+            break;
+        case 'sleeping':
+            msg[0] = awayBoard.myEmojis.Sleep;
+            break;
+        case 'zzz':
+            msg[0] = awayBoard.myEmojis.Sleep;
+            break;
+        case 'away':
+            msg[0] = awayBoard.myEmojis.Away;
+            break;
+    };
+    return msg;
+};
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -665,7 +722,6 @@ module.exports = {
                 }
 
                 async function nova() {
-                    const awayBoard = require('../../awayBoard.js');
                     const roleIds = await checkPermissions(2); //2=leader
                     const inputTime = String(interaction.options.getString('time')).replace(/\s/g, "");
                     if (inputTime == "expire") {
@@ -742,10 +798,7 @@ module.exports = {
                             ephemeral: true
                         });
                 };
-
-
                 async function afk(mType) {
-                    const awayBoard = require('../../awayBoard.js');
                     const checkRoles = await db.prepare('SELECT * FROM channels WHERE guild = ? AND channelId = ?').get(interaction.guildId, interaction.channelId);
                     if (!!checkRoles) { //if it doesn't exist, lets return false.
                         const minutes = interaction.options.getNumber('minutes');
@@ -810,7 +863,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                                     who = interaction.user.id;
                                     msg += "<@" + interaction.user.id + "> ";
                                 };
-                                if (gNotice) what += gNotice;
+                                if (gNotice) what += addEmojis(gNotice, 'Friendly');
                                 msg += what;
                                 noticeTime = Math.floor((Date.now() / 1000) + (hTime + mTime));
                                 break;

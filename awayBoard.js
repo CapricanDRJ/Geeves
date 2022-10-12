@@ -23,9 +23,10 @@ const myEmojis = {
         SQ: ['<:enemySquishie:1028931974448021564>', 18 * 3600],
         FS: ['<:enemyFlagship:1028931973563027456>', 16 * 3600]
     },
-    Sleep: ':zzz:',
-    Away: ':person_shrugging:',
-    Morning: ':yawning_face:',
+    Sleep: '💤',
+    Work: '⌚',
+    Away: '🤷',
+    Morning: '🥱',
     Marvin: '<:Marvin:1028931972694814760>',
     Nova: '<:Nova:1028931971688190012>',
     Whitestar: '<:Whitestar:1028931971688190012>',
@@ -93,7 +94,6 @@ const myButtons = [{
     past: "",
     post: ""
 }];
-//4d12h
 const afkContent = [
 "AWAY LIST ",
 0x8b0000,
