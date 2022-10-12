@@ -216,10 +216,18 @@ module.exports = async (client, interaction) => {
                     ephemeral: true
                 }).catch(console.log);
             }
+            const curTime = Math.floor(Date.now() / 1000);
             let dropDown = [];
             for (xa in awayTimers) {
+                const t = ((awayTimers[xa].lifeTime - curTime) / 3600);
+                let time;
+                if (t < 1)
+                    time = String(Math.floor(t * 60) + "m").padEnd(5,'⠀');
+                else
+                    time = String(Math.floor(t * 10) / 10 + "h").padEnd(5,'⠀');;
+                    if(time.indexOf(".") > -1) time += '⠀';
                 dropDown.push({
-                    label: String(awayTimers[xa].what),
+                    label: String(time + awayTimers[xa].what).replace(/<:(\w+):\d+>/gi, "$1"),
                     value: String(xa + ".") + String(awayTimers[xa].lifeTime) //added the xa+"." to prevent the odd time that two messages have the same lifeTime and cause a bot crash.
                 })
             };
