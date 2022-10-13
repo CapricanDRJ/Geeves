@@ -126,7 +126,7 @@ function addEmojis (args, redBlue) {
             msg[0] = awayBoard.myEmojis.Away;
             break;
     };
-    return msg;
+    return msg.join(' ');
 };
 
 module.exports = {
