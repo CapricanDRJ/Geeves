@@ -84,7 +84,7 @@ module.exports = {
             let msg = "";
             if (who) msg = '<@' + who.id + '> ';
             const memeDir = fs.readdirSync("./files/memes");
-            msg += fileTest.test(memeDir[xz]) ? String(memeDir[xz]).match(fileTest)[1] : '🤷';
+            msg += fileTest.test(memeFile) ? String(memeFile).match(fileTest)[1] : '🤷';
             if (memeDir.indexOf(memeFile) > -1) {
                 const attachment = new AttachmentBuilder('./files/memes/' + memeFile, {
                     name: memeFile
