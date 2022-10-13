@@ -754,9 +754,7 @@ module.exports = {
                         const endTime = (day * 24 * 60 * 60) +
                             (hour * 60 * 60) +
                             (minute * 60) +
-                            Math.floor(Date.now() / 1000);
-                        console.log(endTime - 388800);
-                        console.log(Math.floor((Date.now() / 1000)));
+                        Math.floor(Date.now() / 1000);
                         if ((endTime - 388800) > (Date.now() / 1000)) {
                             const WwiteStarMsg = "<@&" + roleIds[0] + ">⠀⠀Preparation period ends.";
                             db.prepare('Delete FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?').run(interaction.guildId, roleIds[0], WwiteStarMsg, '10');
@@ -818,7 +816,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
  */
                         let who;
                         let what = "";
-                        let msg = "";
+                        let msg = "**" + awayBoard.displayTime(hTime+mTime) + "** ";
                         let noticeTime;
                         switch (mType) {
                             case 'allied':
@@ -873,7 +871,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                         await db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromwho) VALUES(?,?,?,?,?,?)').run(interaction.guildId, checkRoles.mRoleId, noticeTime, what, who, interaction.user.id);
                         try {
                             interaction.editReply({
-                                content: "/ws " + mType + " " + msg,
+                                content: "/ws " + mType + " \n" + msg,
                                 ephemeral: false
                             });
                         } catch {
@@ -969,10 +967,9 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                         const mRoleId = await newRole(nextWS);
                         const lRoleId = await newRole(nextWS + 'Lead');
                         const chanList = [];
-                        //need check, if role creation failed, do not move ahead
+                        //need to create check, if role creation failed, do not move ahead
                         //create category
                         let newPosition = 0;
-                        //interaction.channelId
                         let inputChan = interaction.guild.channels.cache.get(interaction.channelId);
                         if (inputChan?.parent)
                             newPosition = inputChan.parent.position;

@@ -30,7 +30,8 @@ const myEmojis = {
     Marvin: '<:Marvin:1028931972694814760>',
     Nova: '<:Nova:1028931971688190012>',
     Whitestar: '<:Whitestar:1028931971688190012>',
-    relicDrone: '<:relicDrone:1029781633198456893>'
+    relicDrone: '<:relicDrone:1029781633198456893>',
+    removeTimer: '🗑'
 };
 const myButtons = [{//Any additions must also be added to the switch statement in interactionCreate.js
     id: '⌚',
@@ -134,6 +135,14 @@ const db = require('better-sqlite3')('db/geeves.db', {
 });
 
 var displayName = {};
+
+function displayTime (seconds) {
+    let timeString;
+    let delTime = (seconds / 3600);
+    if(delTime < 1) timeString = Math.floor(delTime * 60) + "m";
+    else timeString = Math.floor(delTime * 10) / 10 + "h";
+    return timeString;
+}
 
 async function postAFKs(guild) {
 	   const curTime = Math.floor(Date.now() / 1000);
@@ -414,5 +423,6 @@ module.exports = {
     postAFKs,
     removeDeadAFKs,
     delExpiredChans,
-    myEmojis
+    myEmojis,
+    displayTime
 }
