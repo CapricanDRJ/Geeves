@@ -1,4 +1,6 @@
 const fs = require("node:fs")
+const fileTest = new RegExp(/(\w+)/);
+const extensionTest = new RegExp(/^.*\.(jpg|gif|png|jpeg)$/i);
 
 const {
     SlashCommandBuilder,
@@ -25,7 +27,7 @@ module.exports = {
             const memes = [];
             for (xz in memeDir) {
                 memes.push({
-                    name: /(\w+)/.test(memeDir[xz]) ? String(memeDir[xz]).match(/(\w+)/)[0] : '🤷',
+                    name: fileTest.test(memeDir[xz]) ? String(memeDir[xz]).match(fileTest)[0] : '🤷',
                     value: String(memeDir[xz])
                 })
             };
@@ -36,6 +38,13 @@ module.exports = {
         const attachment = await interaction.options.getAttachment("upload");
         const authorized = ['115211754081878021', '454459089720967168', '426723001266995207', '499571330103115806', '283485587191758849', '509498956179439628', '455453866046259211'];
         if (attachment && attachment.hasOwnProperty('url') && attachment.hasOwnProperty('name')) {
+            if(!!!extensionTest.test(attachment.name)) {
+                interaction.reply({
+                    content: "Not a file type that I allow",
+                    ephemeral: true
+                });
+                return;
+            }
             let localFile = String('./files/memes/' + attachment.name).replace(/_/g, ' ');
             if (await fs.existsSync(localFile)) {
                 interaction.reply({
@@ -67,8 +76,8 @@ module.exports = {
         } else {
             let msg = "";
             if (who) msg = '<@' + who.id + '> ';
-            msg += String(memeFile).match(/(.+?)\.[^\.]+$/)[1];
             const memeDir = fs.readdirSync("./files/memes");
+            msg += fileTest.test(memeDir[xz]) ? String(memeDir[xz]).match(fileTest)[0] : '🤷';
             if (memeDir.indexOf(memeFile) > -1) {
                 const attachment = new AttachmentBuilder('./files/memes/' + memeFile, {
                     name: memeFile
