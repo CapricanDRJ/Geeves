@@ -1,5 +1,5 @@
 const fs = require("node:fs")
-const fileTest = new RegExp(/(\w+)/);
+const fileTest = new RegExp(/(.+?)\.[^\.]+$/);
 const extensionTest = new RegExp(/^.*\.(jpg|gif|png|jpeg)$/i);
 
 const {
@@ -27,7 +27,7 @@ module.exports = {
             const memes = [];
             for (xz in memeDir) {
                 memes.push({
-                    name: fileTest.test(memeDir[xz]) ? String(memeDir[xz]).match(fileTest)[0] : '🤷',
+                    name: fileTest.test(memeDir[xz]) ? String(memeDir[xz]).match(fileTest)[1] : '🤷',
                     value: String(memeDir[xz])
                 })
             };
@@ -44,7 +44,14 @@ module.exports = {
                     ephemeral: true
                 });
                 return;
-            }
+            };
+            if(attachment.size > 6000000) {//6mb file limit
+                interaction.reply({
+                    content: "Sorry, file too large. It must be under 6mb.",
+                    ephemeral: true
+                });
+                return;
+            };
             let localFile = String('./files/memes/' + attachment.name).replace(/_/g, ' ');
             if (await fs.existsSync(localFile)) {
                 interaction.reply({
@@ -77,7 +84,7 @@ module.exports = {
             let msg = "";
             if (who) msg = '<@' + who.id + '> ';
             const memeDir = fs.readdirSync("./files/memes");
-            msg += fileTest.test(memeDir[xz]) ? String(memeDir[xz]).match(fileTest)[0] : '🤷';
+            msg += fileTest.test(memeDir[xz]) ? String(memeDir[xz]).match(fileTest)[1] : '🤷';
             if (memeDir.indexOf(memeFile) > -1) {
                 const attachment = new AttachmentBuilder('./files/memes/' + memeFile, {
                     name: memeFile
