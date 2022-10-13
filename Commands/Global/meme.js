@@ -25,7 +25,7 @@ module.exports = {
             const memes = [];
             for (xz in memeDir) {
                 memes.push({
-                    name: String(memeDir[xz]).match(/(.+?)\.[^\.]+$/)[1],
+                    name: /(\w+)/.test(memeDir[xz]) ? String(memeDir[xz]).match(/(\w+)/)[0] : '🤷',
                     value: String(memeDir[xz])
                 })
             };
