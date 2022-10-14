@@ -369,6 +369,14 @@ module.exports = {
             .setDescription('Queues the whitestar channels for deletion. (Usually less than 1 minute)')
         ),
     async execute(interaction) {
+        if(!interaction.channel.isTextBased()) return;
+        if(!interaction.guild.members.me.permissionsIn(interaction.channel.id).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
+            await interaction.reply({
+                content: 'Sorry, I am missing permission to post here.(view channel/send messages)',
+                ephemeral: true
+            });
+            return;
+        }
         if (interaction.isAutocomplete()) {
             if (interaction.options.getSubcommandGroup() == 'template' && interaction.options.getSubcommand() == 'delete') { // ws template delete options
                 let template = await checkTemplate(interaction.guildId);

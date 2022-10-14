@@ -4,7 +4,8 @@ const extensionTest = new RegExp(/^.*\.(jpg|gif|png|jpeg)$/i);
 
 const {
     SlashCommandBuilder,
-    AttachmentBuilder
+    AttachmentBuilder,
+    PermissionFlagsBits
 } = require('discord.js');
 
 module.exports = {
@@ -22,6 +23,14 @@ module.exports = {
             .setName("upload")
             .setDescription("Unless you have explicit permission, this will fail.")),
     async execute(interaction) {
+        if(!interaction.channel.isTextBased()) return;
+        if(!interaction.guild.members.me.permissionsIn(interaction.channel.id).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
+            await interaction.reply({
+                content: 'Sorry, I am missing permission to post here.(view channel/send messages)',
+                ephemeral: true
+            });
+            return;
+        }
         if (interaction.isAutocomplete()) {
             const memeDir = fs.readdirSync("./files/memes");
             const memes = [];
