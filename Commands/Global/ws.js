@@ -286,21 +286,21 @@ module.exports = {
         )
         .addSubcommand((subcommand) =>
             subcommand
-            .setName('afk')
-            .setDescription('General afk')
-            .addStringOption(option => option.setName('message').setDescription('Your message.').setRequired(true))
-            .addNumberOption(option => option.setName('hours').setDescription('Can be any of the following: 1.3, 6, 0, 0.2').setRequired(true))
-            .addNumberOption(option => option.setName('minutes').setDescription('Minutes'))
-            .addMentionableOption(option => option.setName('who').setDescription('Who to mention?'))
-        )
-        .addSubcommand((subcommand) =>
-            subcommand
             .setName('overlay')
             .setDescription('Creates overlay of whitestar with coordinates')
             .addAttachmentOption((option) => option
                 .setRequired(true)
                 .setName("image")
-                .setDescription("Crop an image of the whitestar to the edge of the actual whitestar borders then upload."))
+                .setDescription("Crop an screenshot of the whitestar to the edge of the actual whitestar borders, then upload."))
+        )
+        .addSubcommand((subcommand) =>
+            subcommand
+            .setName('afk')
+            .setDescription('General afk')
+            .addNumberOption(option => option.setName('hours').setDescription('Can be any of the following: 1.3, 6, 0, 0.2'))
+            .addNumberOption(option => option.setName('minutes').setDescription('Minutes'))
+            .addStringOption(option => option.setName('message').setDescription('Your message.'))
+            .addMentionableOption(option => option.setName('who').setDescription('Who to mention?'))
         )
         .addSubcommand((subcommand) =>
             subcommand
@@ -313,8 +313,8 @@ module.exports = {
                 .addChoices(...ships)
                 .setRequired(true)
             )
-            .addStringOption(option => option.setName('who').setDescription('Who lost the ship?').setRequired(true).setAutocomplete(true))
-            .addNumberOption(option => option.setName('hours').setDescription('How long ago? ex: 1.3, 6, 0').setRequired(true))
+            .addStringOption(option => option.setName('who').setDescription('Who lost the ship?').setAutocomplete(true))
+            .addNumberOption(option => option.setName('hours').setDescription('How long ago? ex: 1.3, 6, 0'))
             .addNumberOption(option => option.setName('minutes').setDescription('How long ago? ex: 1, 60, 8'))
         )
         .addSubcommand((subcommand) =>
@@ -328,9 +328,9 @@ module.exports = {
                 .addChoices(...ships)
                 .setRequired(true)
             )
-            .addNumberOption(option => option.setName('hours').setDescription('How long ago? ex: 1.3, 6, 0').setRequired(true))
+            .addUserOption(option => option.setName('who').setDescription('Who lost a ship?').setRequired(true))
+            .addNumberOption(option => option.setName('hours').setDescription('How long ago? ex: 1.3, 6, 0'))
             .addNumberOption(option => option.setName('minutes').setDescription('How long ago? ex: 1, 60, 8'))
-            .addUserOption(option => option.setName('who').setDescription('Who lost a ship?'))
         )
         .addSubcommand(subcommand =>
             subcommand
@@ -843,7 +843,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                                 msg += what;
                                 noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis['Friendly'][aShip][1] - (hTime + mTime));
                                 await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?')
-                                    .run(interaction.guildId, checkRoles.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one technically. 
+                                    .run(interaction.guildId, checkRoles.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one, technically. 
                                 break;
                             case 'enemy':
                                 const eShip = interaction.options.getString('ship');
@@ -855,7 +855,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                                 msg = what;
                                 noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis['Enemy'][eShip][1] - (hTime + mTime));
                                 await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?')
-                                    .run(interaction.guildId, checkRoles.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one technically. 
+                                    .run(interaction.guildId, checkRoles.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one, technically. 
                                 break;
                             case 'afk':
                                 const gWho = interaction.options.getMentionable('who');
@@ -870,12 +870,21 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                                     msg += "<@" + interaction.user.id + "> ";
                                 };
                                 if (gNotice) what += addEmojis(gNotice, 'Friendly');
+                                if(what.length == 0) what = awayBoard.myEmojis.Away;
                                 msg += what;
                                 noticeTime = Math.floor((Date.now() / 1000) + (hTime + mTime));
                                 break;
                             default:
-                                // code block
-                        };
+                            try {    
+                                interaction.editReply({
+                                        content: "This is a strange error that should never happen",
+                                        ephemeral: true
+                                    });
+                            } catch {
+                                console.log
+                            };
+                            return;
+                            };
                         await db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromwho) VALUES(?,?,?,?,?,?)').run(interaction.guildId, checkRoles.mRoleId, noticeTime, what, who, interaction.user.id);
                         try {
                             interaction.editReply({
