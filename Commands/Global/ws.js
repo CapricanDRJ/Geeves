@@ -74,56 +74,56 @@ const ships = [{
     value: 'FS'
 }];
 
-function addEmojis (args, redBlue) {
+function addEmojis (args) {
     let msg = String(args).split(' ');
     switch (msg[0].toLowerCase()) {
         case 'work':
-            msg[0] = awayBoard.myEmojis.Work;
+            msg[0] = awayBoard.myEmojis.Work.inline;
             break;
         case 'working':
-            msg[0] = awayBoard.myEmojis.Work;
+            msg[0] = awayBoard.myEmojis.Work.inline;
             break;
         case 'battleship':
-            msg[0] = awayBoard.myEmojis[redBlue].BS[0];
+            msg[0] = awayBoard.myEmojis.Battleship.inline;
             break;
         case 'bs':
-            msg[0] = awayBoard.myEmojis[redBlue].BS[0];
+            msg[0] = awayBoard.myEmojis.Battleship.inline;
             break;
         case 'transport':
-            msg[0] = awayBoard.myEmojis[redBlue].TS[0];
+            msg[0] = awayBoard.myEmojis.Transport.inline;
             break;
         case 'ts':
-            msg[0] = awayBoard.myEmojis[redBlue].TS[0];
+            msg[0] = awayBoard.myEmojis.Transport.inline;
             break;
         case 'miner':
-            msg[0] = awayBoard.myEmojis[redBlue].MR[0];
+            msg[0] = awayBoard.myEmojis.Miner.inline;
             break;
         case 'squishie':
-            msg[0] = awayBoard.myEmojis[redBlue].SQ[0];
+            msg[0] = awayBoard.myEmojis.Squishie.inline;
             break;
         case 'squishy':
-            msg[0] = awayBoard.myEmojis[redBlue].SQ[0];
+            msg[0] = awayBoard.myEmojis.Squishie.inline;
             break;
         case 'sq':
-            msg[0] = awayBoard.myEmojis[redBlue].SQ[0];
+            msg[0] = awayBoard.myEmojis.Squishie.inline;
             break;
         case 'flagship':
-            msg[0] = awayBoard.myEmojis[redBlue].FS[0];
+            msg[0] = awayBoard.myEmojis.Flagship.inline;
             break;
         case 'fs':
-            msg[0] = awayBoard.myEmojis[redBlue].FS[0];
+            msg[0] = awayBoard.myEmojis.Flagship.inline;
             break;
         case 'sleep':
-            msg[0] = awayBoard.myEmojis.Sleep;
+            msg[0] = awayBoard.myEmojis.Sleep.inline;
             break;
         case 'sleeping':
-            msg[0] = awayBoard.myEmojis.Sleep;
+            msg[0] = awayBoard.myEmojis.Sleep.inline;
             break;
         case 'zzz':
-            msg[0] = awayBoard.myEmojis.Sleep;
+            msg[0] = awayBoard.myEmojis.Sleep.inline;
             break;
         case 'away':
-            msg[0] = awayBoard.myEmojis.Away;
+            msg[0] = awayBoard.myEmojis.Away.inline;
             break;
     };
     return msg.join(' ');
@@ -836,24 +836,24 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                                     msg += "<@" + aWho.id + "> ";
                                 } else who = interaction.user.id;
                                 if (aShip == 'FS') {
-                                    what = "<@&" + checkRoles.mRoleId + ">⠀⠀" + awayBoard.myEmojis.Friendly[aShip][0];
+                                    what = "<@&" + checkRoles.mRoleId + ">⠀⠀" + awayBoard.myEmojis[aShip].inline;
                                     who = '10';
                                     msg = what;
-                                } else what = awayBoard.myEmojis.Friendly[aShip][0];
+                                } else what = awayBoard.myEmojis[aShip].inline;
                                 msg += what;
-                                noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis['Friendly'][aShip][1] - (hTime + mTime));
+                                noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis[aShip].time - (hTime + mTime));
                                 await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?')
                                     .run(interaction.guildId, checkRoles.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one, technically. 
                                 break;
                             case 'enemy':
                                 const eShip = interaction.options.getString('ship');
                                 const eWho = interaction.options.getString('who');
-                                what = awayBoard.myEmojis.Enemy[eShip][0];
+                                what = awayBoard.myEmojis[eShip].inline;
                                 who = '0';
                                 console.log(eShip);
                                 if (eWho && eShip != 'FS') what += " " + eWho;
                                 msg = what;
-                                noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis['Enemy'][eShip][1] - (hTime + mTime));
+                                noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis[eShip].time - (hTime + mTime));
                                 await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?')
                                     .run(interaction.guildId, checkRoles.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one, technically. 
                                 break;
@@ -869,8 +869,8 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                                     who = interaction.user.id;
                                     msg += "<@" + interaction.user.id + "> ";
                                 };
-                                if (gNotice) what += addEmojis(gNotice, 'Friendly');
-                                if(what.length == 0) what = awayBoard.myEmojis.Away;
+                                if (gNotice) what += addEmojis(gNotice);
+                                if(what.length == 0) what = awayBoard.myEmojis.Away.inline;
                                 msg += what;
                                 noticeTime = Math.floor((Date.now() / 1000) + (hTime + mTime));
                                 break;

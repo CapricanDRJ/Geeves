@@ -5,135 +5,155 @@ const {
     EmbedBuilder,
     ActivityType
 } = require('discord.js');
-const wait = require('node:timers/promises').setTimeout;
 
 const myEmojis = {
-    E: '<:E:1028931983293808690>',
-    Friendly: {
-        BS: ['<:battleship:1028931981934854235>', 18 * 3600],
-        TS: ['<:transport:1028931981033082930>', 18 * 3600],
-        MR: ['<:miner:1028931980039028797>', 18 * 3600],
-        SQ: ['<:squishie:1028931979103711232>', 18 * 3600],
-        FS: ['<:flagship:1028931978172579870>', 16 * 3600]
+    Sleep: {
+        id:'💤',
+        time: 8*3600,
+        past: "just woke up",
+        post: "Should be awake now",
+        button: true
     },
-    Enemy: {
-        BS: ['<:enemyBattleship:1028931977375658094>', 18 * 3600],
-        TS: ['<:enemyTransport:1028931976373223444>', 18 * 3600],
-        MR: ['<:enemyMiner:1028931975274303549>', 18 * 3600],
-        SQ: ['<:enemySquishie:1028931974448021564>', 18 * 3600],
-        FS: ['<:enemyFlagship:1028931973563027456>', 16 * 3600]
+    Work: {
+        id:'⌚',
+        time: 4*3600,
+        past: "has returned!",
+        post: "Should be present for a HS break",
+        button: true
     },
-    Sleep: '💤',
-    Work: '⌚',
-    Away: '🤷',
-    Morning: '🥱',
-    Marvin: '<:Marvin:1028931972694814760>',
-    Nova: '<:Nova:1028931971688190012>',
-    Whitestar: '<:Whitestar:1028931971688190012>',
-    relicDrone: '<:relicDrone:1029781633198456893>',
-    removeTimer: '🗑'
+    Battleship: {
+        id: '1028931981934854235',
+        time: 18 * 3600,
+        past: "set their battleship as back",
+        post: "is due to return",
+        button: true
+    },
+    Transport: {
+        id: '1028931981033082930',
+        time: 18 * 3600,
+        button: false
+    },
+    Miner: {
+        id: '1028931980039028797',
+        time: 18 * 3600,
+        button: false
+    },
+    Squishie: {
+        id: '1028931979103711232',
+        time: 18 * 3600,
+        past: "set their squshie as back",
+        post: "is due to return",
+        button: true
+    },
+    Flagship: {
+        id: '1028931978172579870',
+        time: 16 * 3600,
+        post: "is due to return",
+        button: true
+    },
+    RelicDrone: {
+        id: '1029781633198456893',
+        past: "drone ready!",
+        post: "drone ready!",
+        button: false
+    },
+    EnemyBattleship: {
+        id: '1028931977375658094',
+        time: 18 * 3600,
+        post: "",
+        button: true
+    },
+    EnemyTransport: {
+        id: '1028931976373223444',
+        time: 18 * 3600,
+        post: "",
+        button: false
+    },
+    EnemyMiner: {
+        id: '1028931975274303549',
+        time: 18 * 3600,
+        post: "",
+        button: false
+    },
+    EnemySquishie: {
+        id: '1028931974448021564',
+        time: 18 * 3600,
+        post: "",
+        button: true
+    },
+    EnemyFlagship: {
+        id: '1028931973563027456',
+        time: 16 * 3600,
+        past: "set the enemy battleship as returned",
+        post: "is due to return",
+        button: true
+    },
+    WasteBasket: {
+        id: '🗑',
+        button: true
+    },
+    E: {
+        id: '1028931983293808690',
+        button: false
+    },
+    Away: {
+        id: '🤷',
+        button: false
+    },
+    Morning: {
+        id: '🥱',
+        button: false
+    },
+    Marvin: {
+        id: '1028931972694814760',
+        button: false
+    },
+    Nova: {
+        id: '1028931971688190012',
+        button: false
+    },
+    Whitestar: {
+        id: '1028931971688190012',
+        button: false
+    }
 };
-const myButtons = [{//Any additions must also be added to the switch statement in interactionCreate.js
-    id: '⌚',
-    name: '⌚',
-    time: 4 * 3600,
-    inline: "⌚",
-    past: "has returned!",
-    post: "Should be present for a HS break"
-}, {
-    id: '💤',
-    name: '💤',
-    time: 8 * 3600,
-    inline: "💤",
-    past: "just woke up",
-    post: "Should be awake now"
-}, {
-    id: '1028931981934854235', // friendlybs
-    name: 'battleship',
-    time: 18 * 3600,
-    inline: "<:battleship:1028931981934854235>",
-    past: "set their battleship as back",
-    post: "is due to return"
-}, {
-    id: '1028931979103711232',
-    name: 'squishie',
-    time: 18 * 3600,
-    inline: "<:squishie:1028931979103711232>",
-    past: "set their squshie as back",
-    post: "is due to return"
-}, {
-    id: '1028931978172579870',
-    name: 'flagship',
-    time: 16 * 3600,
-    inline: "<:flagship:1028931978172579870>",
-    past: "",
-    post: "is due to return"
-}, {
-    id: '1029781633198456893',
-    name: 'relicDrone',
-    time: 2 * 3600,
-    inline: "<:relicDrone:1029781633198456893>",
-    past: "drone ready!",
-    post: "drone ready!"
-},  {
-    id: '1028931977375658094',
-    name: 'enemyBattleship',
-    time: 18 * 3600,
-    inline: "<:enemyBattleship:1028931977375658094>",
-    past: "",
-    post: ""
-}, {
-    id: '1028931974448021564',
-    name: 'enemySquishie',
-    time: 18 * 3600,
-    inline: "<:enemySquishie:1028931974448021564>",
-    past: "",
-    post: ""
-}, {
-    id: '1028931973563027456',
-    name: 'enemyFlagship',
-    time: 16 * 3600,
-    inline: "<:enemyFlagship:1028931973563027456>",
-    past: "set the enemy battleship as returned",
-    post: "is due to return"
-}, {
-    id: '🗑',
-    name: 'RemoveTimer',
-    time: 0,
-    past: "",
-    post: ""
-}];
-const afkContent = [
-"AWAY LIST ",
-0x8b0000,
-"Time⠀⠀User / Reason\n",
-"/ws afk /ws allied /ws enemy\n⠀",
-"`Empty`"
-];//move to constants file later
-
-let size = myButtons.length;
-let row = [];
-for (nCount = 0; nCount < size; nCount++) {
-    if (nCount >= 15) {
-        break;
-    }
-    const r = Math.floor(nCount/5);
-    if (!row[r]) {
-        row[r] = new ActionRowBuilder();
-    }
-    row[r].addComponents(
-        new ButtonBuilder()
-        .setCustomId(myButtons[nCount].name)
-        .setEmoji(myButtons[nCount].id)
-        .setStyle(ButtonStyle.Secondary),
-    );
-}
-const defButtons = row;
+function setupButtons() {
+    const external = new RegExp(/\d+/);
+    let bCount = 0;
+    const row = [];
+    for(key in myEmojis) {
+        if(external.test(myEmojis[key].id))
+        myEmojis[key].inline = '<:'+key+':'+myEmojis[key].id+'>';
+        else myEmojis[key].inline = myEmojis[key].id;
+        if(myEmojis[key].button && bCount < 16) {
+            const r = Math.floor(bCount/5);
+            bCount++;
+            if(!row[r]) {
+                row[r] = new ActionRowBuilder();
+            }
+            row[r].addComponents(
+                new ButtonBuilder()
+                .setCustomId(key)
+                .setEmoji(myEmojis[key].id)
+                .setStyle(ButtonStyle.Secondary),
+            );
+        }
+    };
+    return row;
+};
+const defButtons = setupButtons();
 
 const db = require('better-sqlite3')('db/geeves.db', {
     verbose: console.log
 });
-
+const afkContent = [
+    "AWAY LIST ",
+    0x8b0000,
+    "Time⠀⠀User / Reason\n",
+    "/ws afk /ws allied /ws enemy\n⠀",
+    "`Empty`"
+    ];//move to constants file later
+    
 var displayName = {};
 
 function displayTime (seconds) {
@@ -179,7 +199,7 @@ if(afkTimers.length > 0) {
                let per = "";
                switch (awayTimer.who) {
                   case '0':
-                     msgNotice += myEmojis.E + '`nemy` ' + awayTimer.what;
+                     msgNotice += myEmojis.E.inline + '`nemy` ' + awayTimer.what;
                      pingable = [];
                      break;
                   case '10':
@@ -277,7 +297,7 @@ if(!whiteStar.awayChId) return;
                     novaTime = (curTime - whiteStar.lifeTime) / 3600;
                     neg = '-';
                 };
-                let novaMsg = "" + myEmojis.Nova + neg + "**" 
+                let novaMsg = "" + myEmojis.Nova.inline + neg + "**" 
                 days = Math.floor(novaTime / 24);
                 novaMsg += days ? days+"d" : "";
                 hours = Math.floor(novaTime) - (days * 24);
@@ -285,12 +305,12 @@ if(!whiteStar.awayChId) return;
                 minutes = Math.floor((novaTime * 60) - (days * 24 * 60) - (hours * 60));
                 novaMsg += minutes + "m**\n";
                 let msg = "";
-        if(whiteStar.novaDone == 0) msg += '**0m**⠀⠀'+myEmojis.Whitestar+'`/ws nova` has not been set.\n';
+        if(whiteStar.novaDone == 0) msg += '**0m**⠀⠀'+myEmojis.Whitestar.inline+'`/ws nova` has not been set.\n';
         if(whiteStar.novaDone == 2) {
             let delTime = (((whiteStar.lifeTime+12 * 3600) - curTime) / 3600);
             if(delTime < 1) msg += "**"+Math.floor(delTime * 60) + "m";
             else msg += "**" + Math.floor(delTime * 10) / 10 + "h";
-            msg += '**⠀⠀'+myEmojis.Whitestar+'<@&' + whiteStar.mRoleId + '> Deletion, or **/ws nova expire** to expedite\n';
+            msg += '**⠀⠀'+myEmojis.Whitestar.inline+'<@&' + whiteStar.mRoleId + '> Deletion, or **/ws nova expire** to expedite\n';
         };
         for (n in afkTimers) {
             const awayTimer = afkTimers[n];//without this, the information sometimes changes. really odd bug
@@ -307,10 +327,10 @@ if(!whiteStar.awayChId) return;
                 curLine = "";
                 switch (awayTimer.who) {
                     case "0":
-                        msg += "" + myEmojis.E + "`nemy`⠀⠀";
+                        msg += "" + myEmojis.E.inline + "`nemy`⠀⠀";
                         break;
                     case "10"://role notice
-                        msg += "" + myEmojis.Whitestar;
+                        msg += "" + myEmojis.Whitestar.inline;
                         break;
                     default:
                         curLine += '`';
@@ -415,7 +435,6 @@ async function delExpiredChans(guild) {
    
 module.exports = {
     afkContent,
-    myButtons,
     defButtons,
     db,
     cacheNames,

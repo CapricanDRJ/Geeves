@@ -137,41 +137,40 @@ module.exports = async (client, interaction) => {
     if (interaction.isButton()) {
         let afkId = interaction.customId;
         if (menuCache[interaction.message.id] && menuCache[interaction.message.id].hasOwnProperty('ship')) afkId = menuCache[interaction.message.id].ship; //if this is the second time around, we have a cache.
-        const buttonIndex = awayBoard.myButtons.map(object => object.name).indexOf(afkId);
-        const button = awayBoard.myButtons[buttonIndex];
+        const button = awayBoard.myEmojis[afkId];
         let posted = false;
         const wsRole = await awayBoard.db.prepare('SELECT mRoleId FROM channels WHERE guild = ? AND channelId = ?').get(interaction.guildId, interaction.channelId);
         const whiteStar = await awayBoard.db.prepare('SELECT * FROM whiteStar WHERE guild = ? AND mRoleId = ?').get(interaction.guildId, wsRole.mRoleId);
-
+console.log(interaction.customId);
         switch (interaction.customId) {
-            case '⌚':
+            case 'Work':
                 afkBreak();
                 break;
-            case '💤':
+            case 'Sleep':
                 afkBreak();
                 break;
-            case 'battleship':
+            case 'Battleship':
                 destroyedShip();
                 break;
-            case 'squishie':
+            case 'Squishie':
                 destroyedShip();
                 break;
-            case 'flagship':
+            case 'Flagship':
                 flagship();
                 break;
-            case 'relicDrone':
+            case 'RelicDrone':
                 afkBreak();
                 break;
-            case 'enemyBattleship':
+            case 'EnemyBattleship':
                 destroyedShip(true);
                 break;
-            case 'enemySquishie':
+            case 'EnemySquishie':
                 destroyedShip(true);
                 break;
-            case 'enemyFlagship':
+            case 'EnemyFlagship':
                 flagship();
                 break;
-            case 'RemoveTimer':
+            case 'WasteBasket':
                 printTimers();
                 break;
             case 'Cancel':
@@ -271,7 +270,7 @@ module.exports = async (client, interaction) => {
                 return; //catch
             };
             if (interaction.customId == 'OK') {
-                if (button.name == 'enemyFlagship') {
+                if (button.id == awayBoard.myEmojis.EnemyFlagship.id) {
                     who = '0'
                     what = button.inline;
                 } else {
