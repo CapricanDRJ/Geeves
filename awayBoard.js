@@ -55,6 +55,7 @@ const myEmojis = {
         id: '1029781633198456893',
         past: "drone ready!",
         post: "drone ready!",
+        time: 2 * 3600,
         button: true
     },
     EnemyBattleship: {
