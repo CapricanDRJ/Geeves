@@ -55,7 +55,7 @@ const myEmojis = {
         id: '1029781633198456893',
         past: "drone ready!",
         post: "drone ready!",
-        button: false
+        button: true
     },
     EnemyBattleship: {
         id: '1028931977375658094',
@@ -122,7 +122,7 @@ function setupButtons() {
     let bCount = 0;
     const row = [];
     for(key in myEmojis) {
-        if(external.test(myEmojis[key].id))
+        if(external.test(myEmojis[key].id))//iterating the loop anyway, so we setup inline here.
         myEmojis[key].inline = '<:'+key+':'+myEmojis[key].id+'>';
         else myEmojis[key].inline = myEmojis[key].id;
         if(myEmojis[key].button && bCount < 16) {
