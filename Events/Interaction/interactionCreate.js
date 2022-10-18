@@ -331,10 +331,6 @@ console.log(interaction.customId);
                 let nCount = 0;
                 const tagCheck = new RegExp(/\[[\s\S]*\](.*)$/i); //remove corp tags
                 for (const [key, value] of mRoleId.members) {
-                    nCount++;
-                    if (nCount > 15) {
-                        break;
-                    }
                     let displayName = String(value.displayName);
                     if (!!tagCheck.test(displayName)) {
                         let displayNameTest = displayName.match(tagCheck);
@@ -342,7 +338,6 @@ console.log(interaction.customId);
                             if (displayNameTest[1].length > 4) displayName = displayNameTest[1];
                     };
                     displayName = displayName.slice(0, 20);
-                    console.log("3" + displayName)
                     const r = Math.floor(nCount / 5);
                     if (!menuButtons[r]) {
                         menuButtons[r] = new ActionRowBuilder();
@@ -351,11 +346,16 @@ console.log(interaction.customId);
                         new ButtonBuilder()
                         .setCustomId(value.id)
                         .setLabel(displayName)
-                        .setStyle(1), //1 is blue
+                        .setStyle(1), //1 is bluef
                     )
+                    nCount++;
+                    if (nCount > 14) {//counting starts at zero, max (14)15 due to rules of 5 per row and 5 rows max. buttonbar takes up 2 rows. 3 rows for people.
+                        break;
+                    };
                 };
             };
             menuButtons = timeButtons.concat(menuButtons); //Put the drop down menus first.
+            console.log(menuButtons)
             const message = await interaction.reply({
                 ephemeral: true,
                 fetchReply: true,
