@@ -59,19 +59,19 @@ async function checkTemplate(guildId) {
 
 const ships = [{
     name: 'Battleship',
-    value: 'BS'
+    value: 'Battleship'
 }, {
     name: 'Squishie',
-    value: 'SQ'
+    value: 'Squishie'
 }, {
     name: 'Transport',
-    value: 'TS'
+    value: 'Transport'
 }, {
     name: 'Miner',
-    value: 'MR'
+    value: 'Miner'
 }, {
     name: 'Flagship',
-    value: 'FS'
+    value: 'Flagship'
 }];
 
 function addEmojis (args) {
@@ -848,12 +848,13 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                             case 'enemy':
                                 const eShip = interaction.options.getString('ship');
                                 const eWho = interaction.options.getString('who');
-                                what = awayBoard.myEmojis[eShip].inline;
+                                console.log(awayBoard.myEmojis[eShip]);
+                                what = awayBoard.myEmojis['Enemy'+eShip].inline;
                                 who = '0';
                                 console.log(eShip);
-                                if (eWho && eShip != 'FS') what += " " + eWho;
+                                if (eWho && eShip != 'Flagship') what += " " + eWho;
                                 msg = what;
-                                noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis[eShip].time - (hTime + mTime));
+                                noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis['Enemy'+eShip].time - (hTime + mTime));
                                 await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?')
                                     .run(interaction.guildId, checkRoles.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one, technically. 
                                 break;
