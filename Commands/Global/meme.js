@@ -15,9 +15,7 @@ module.exports = {
         .setDMPermission(false)
         .addStringOption(option =>
             option.setName('meme')
-            .setDescription('Which one?')
-            .setAutocomplete(true)
-            .setRequired(true))
+            .setDescription('Type the name of the meme, or type options for a list'))
         .addUserOption(option => option.setName('who').setDescription('Select person to annoy.'))
         .addAttachmentOption((option) => option
             .setName("upload")
@@ -42,7 +40,6 @@ module.exports = {
             };
             interaction.respond(memes).catch(console.error);
         } else {
-        const memeFile = interaction.options.getString('meme');
         const who = interaction.options.getUser('who');
         const attachment = await interaction.options.getAttachment("upload");
         const authorized = ['115211754081878021', '454459089720967168', '426723001266995207', '499571330103115806', '283485587191758849', '509498956179439628', '455453866046259211'];
@@ -90,13 +87,40 @@ module.exports = {
                     });
             };
         } else {
-            let msg = "";
-            if (who) msg = '<@' + who.id + '> ';
             const memeDir = fs.readdirSync("./files/memes");
-            msg += fileTest.test(memeFile) ? String(memeFile).match(fileTest)[1] : '🤷';
-            if (memeDir.indexOf(memeFile) > -1) {
-                const attachment = new AttachmentBuilder('./files/memes/' + memeFile, {
-                    name: memeFile
+            const memeFile = interaction.options.getString('meme');
+            const memes = [];
+            for (xz in memeDir) {
+                memes.push(fileTest.test(memeDir[xz]) ? String(memeDir[xz]).match(fileTest)[1] : '🤷');
+            };
+            if(String(memeFile).toLowerCase() == "options") {
+                interaction.reply({
+                    content: memes.join('\n'),
+                    ephemeral: true
+                })
+            } else {
+            if(memeFile == null) {
+                const attachment = new AttachmentBuilder('./files/marvin.gif', {
+                    name: "marvin.jpg"
+                });
+                interaction.reply({
+                    content: "No meme entered",
+                    ephemeral: false,
+                    files: [attachment],
+                    parse: ['users', 'roles']
+                })
+                return;
+            }
+            for(xy in memes) {
+                memes[xy] = String(memes[xy]).toLowerCase().replaceAll(' ','');
+            };
+            let selectedMeme = memes.indexOf(String(memeFile).toLowerCase().replaceAll(' ',''));
+            if (selectedMeme > -1) {
+                let msg = "";
+                if (who) msg = '<@' + who.id + '> ';
+                msg += fileTest.test(memeDir[selectedMeme]) ? String(memeDir[selectedMeme]).match(fileTest)[1] : '🤷';
+                const attachment = new AttachmentBuilder('./files/memes/' + memeDir[selectedMeme], {
+                    name: memeDir[selectedMeme]
                 });
                 interaction.reply({
                     content: msg,
@@ -109,6 +133,7 @@ module.exports = {
                     content: "That is not one of my memes",
                     ephemeral: true
                 });
+            }
         }
     }
   }
