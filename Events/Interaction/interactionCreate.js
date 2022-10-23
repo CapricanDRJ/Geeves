@@ -130,7 +130,6 @@ module.exports = async (client, interaction) => {
             menuCache[interaction.message.id][interaction.customId] = interaction.values[0];
             menuCache[interaction.message.id].timeStamp = Math.floor(Date.now() / 1000);
         };
-        //console.log(menuCache[interaction.message.id]);
         interaction.deferUpdate();
         return;
     };
@@ -141,7 +140,6 @@ module.exports = async (client, interaction) => {
         let posted = false;
         const wsRole = await awayBoard.db.prepare('SELECT mRoleId FROM channels WHERE guild = ? AND channelId = ?').get(interaction.guildId, interaction.channelId);
         const whiteStar = await awayBoard.db.prepare('SELECT * FROM whiteStar WHERE guild = ? AND mRoleId = ?').get(interaction.guildId, wsRole.mRoleId);
-console.log(interaction.customId);
         switch (interaction.customId) {
             case 'Work':
                 afkBreak();
@@ -310,25 +308,25 @@ console.log(interaction.customId);
                     }).catch(console.log);
                     return;
                 } else
-                    for (nCount = 0; nCount < opponents.length; nCount++) {
-                        if (nCount > 15) {
+                    for (bCount = 0; bCount < opponents.length; bCount++) {
+                        if (bCount > 14) {
                             break;
                         }
-                        const r = Math.floor(nCount / 5);
+                        const r = Math.floor(bCount / 5);
                         if (!menuButtons[r]) {
                             menuButtons[r] = new ActionRowBuilder();
                         }
                         menuButtons[r].addComponents(
                             new ButtonBuilder()
-                            .setCustomId(String(nCount))
-                            .setLabel(String(opponents[nCount]).slice(0, 20))
+                            .setCustomId(String(bCount))
+                            .setLabel(String(opponents[bCount]).slice(0, 20))
                             .setStyle(4), //4 is red
                         );
                     };
             } else {
                 //friendly 
                 const mRoleId = await interaction.guild.roles.cache.get(wsRole.mRoleId);
-                let nCount = 0;
+                let bCount = 0;
                 const tagCheck = new RegExp(/\[[\s\S]*\](.*)$/i); //remove corp tags
                 for (const [key, value] of mRoleId.members) {
                     let displayName = String(value.displayName);
@@ -338,7 +336,7 @@ console.log(interaction.customId);
                             if (displayNameTest[1].length > 4) displayName = displayNameTest[1];
                     };
                     displayName = displayName.slice(0, 20);
-                    const r = Math.floor(nCount / 5);
+                    const r = Math.floor(bCount / 5);
                     if (!menuButtons[r]) {
                         menuButtons[r] = new ActionRowBuilder();
                     }
@@ -348,15 +346,14 @@ console.log(interaction.customId);
                         .setLabel(displayName)
                         .setStyle(1), //1 is bluef
                     )
-                    nCount++;
-                    if (nCount > 14) {//counting starts at zero, max (14)15 due to rules of 5 per row and 5 rows max. buttonbar takes up 2 rows. 3 rows for people.
+                    bCount++;
+                    if (bCount > 14) {//counting starts at zero, max (14)15 due to rules of 5 per row and 5 rows max. buttonbar takes up 2 rows. 3 rows for people.
                         break;
                     };
                 };
             };
             menuButtons = timeButtons.concat(menuButtons); //Put the drop down menus first.
-            console.log(menuButtons)
-            const message = await interaction.reply({
+            const message = await interaction.reply({//add try catch later
                 ephemeral: true,
                 fetchReply: true,
                 components: menuButtons
@@ -398,7 +395,6 @@ console.log(interaction.customId);
                 ship: interaction.customId,
             };
         };
-
         async function afkBreak() {
             const checkEntry = await awayBoard.db.prepare('SELECT * FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?').get(interaction.guildId, wsRole.mRoleId, button.inline, interaction.user.id);
             if (!checkEntry) {

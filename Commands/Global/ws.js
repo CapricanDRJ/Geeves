@@ -362,11 +362,6 @@ module.exports = {
             .addStringOption(option => option.setName('opponent13').setDescription('Thirteenth opponent.'))
             .addStringOption(option => option.setName('opponent14').setDescription('Fourteenth opponent.'))
             .addStringOption(option => option.setName('opponent15').setDescription('Fifteenth opponent.'))
-        )
-        .addSubcommand(subcommand =>
-            subcommand
-            .setName('expire')
-            .setDescription('Queues the whitestar channels for deletion. (Usually less than 1 minute)')
         ),
     async execute(interaction) {
         if(!interaction.channel.isTextBased()) return;
@@ -1065,7 +1060,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                             try {
                                 const channel = await interaction.client.channels.resolve(chId);
                                 const msg = await channel.send({
-                                    content: "```The following commands are required for proper function:\n\/ws opponents\n\/ws nova\n```"
+                                    content: "```The following commands are required for proper function:\n\/ws opponents\n\/ws nova\n\nTo change default channel names and default roles added such as additional bots, server Admins may use\n/ws template```"
                                 });
                                 msg.pin();
                             } catch (e) {

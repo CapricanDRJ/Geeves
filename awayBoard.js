@@ -126,7 +126,7 @@ function setupButtons() {
         if(external.test(myEmojis[key].id))//iterating the loop anyway, so we setup inline here.
         myEmojis[key].inline = '<:'+key+':'+myEmojis[key].id+'>';
         else myEmojis[key].inline = myEmojis[key].id;
-        if(myEmojis[key].button && bCount < 16) {
+        if(myEmojis[key].button && bCount < 15) {
             const r = Math.floor(bCount/5);
             bCount++;
             if(!row[r]) {
