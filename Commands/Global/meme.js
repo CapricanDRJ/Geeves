@@ -15,7 +15,7 @@ module.exports = {
         .setDMPermission(false)
         .addStringOption(option =>
             option.setName('meme')
-            .setDescription('Type the name of the meme, or type options for a list'))
+            .setDescription('Type the name of the meme, or type list for a list of options').setRequired(true))
         .addUserOption(option => option.setName('who').setDescription('Select person to annoy.'))
         .addAttachmentOption((option) => option
             .setName("upload")
@@ -93,14 +93,14 @@ module.exports = {
             for (xz in memeDir) {
                 memes.push(fileTest.test(memeDir[xz]) ? String(memeDir[xz]).match(fileTest)[1] : '🤷');
             };
-            if(String(memeFile).toLowerCase() == "options") {
+            if(String(memeFile).toLowerCase() == "options" || String(memeFile).toLowerCase() == "list") {
                 interaction.reply({
                     content: memes.join('\n'),
                     ephemeral: true
                 })
             } else {
             if(memeFile == null) {
-                const attachment = new AttachmentBuilder('./files/marvin.gif', {
+                const attachment = new AttachmentBuilder('./files/marvin.jpg', {
                     name: "marvin.jpg"
                 });
                 interaction.reply({
