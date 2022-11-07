@@ -7,18 +7,18 @@ const {
 } = require('discord.js');
 
 const myEmojis = {
-    Work: {
-        id:'⌚',
-        time: 4*3600,
-        past: "has returned!",
-        post: "Should be present for a HS break",
-        button: true
-    },
     Sleep: {
         id:'💤',
         time: 8*3600,
         past: "just woke up",
         post: "Should be awake now",
+        button: true
+    },
+    Work: {
+        id:'⌚',
+        time: 4*3600,
+        past: "has returned!",
+        post: "Should be present for a HS break",
         button: true
     },
     Battleship: {
@@ -55,7 +55,8 @@ const myEmojis = {
         id: '1029781633198456893',
         past: "drone ready!",
         post: "drone ready!",
-        button: false
+        time: 2 * 3600,
+        button: true
     },
     EnemyBattleship: {
         id: '1028931977375658094',
@@ -122,10 +123,10 @@ function setupButtons() {
     let bCount = 0;
     const row = [];
     for(key in myEmojis) {
-        if(external.test(myEmojis[key].id))
+        if(external.test(myEmojis[key].id))//iterating the loop anyway, so we setup inline here.
         myEmojis[key].inline = '<:'+key+':'+myEmojis[key].id+'>';
         else myEmojis[key].inline = myEmojis[key].id;
-        if(myEmojis[key].button && bCount < 16) {
+        if(myEmojis[key].button && bCount < 15) {
             const r = Math.floor(bCount/5);
             bCount++;
             if(!row[r]) {
@@ -199,7 +200,7 @@ if(afkTimers.length > 0) {
                let per = "";
                switch (awayTimer.who) {
                   case '0':
-                     msgNotice += myEmojis.E + '`nemy` ' + awayTimer.what;
+                     msgNotice += myEmojis.E.inline + '`nemy` ' + awayTimer.what;
                      pingable = [];
                      break;
                   case '10':
@@ -297,7 +298,7 @@ if(!whiteStar.awayChId) return;
                     novaTime = (curTime - whiteStar.lifeTime) / 3600;
                     neg = '-';
                 };
-                let novaMsg = "" + myEmojis.Nova + neg + "**" 
+                let novaMsg = "" + myEmojis.Nova.inline + neg + "**" 
                 days = Math.floor(novaTime / 24);
                 novaMsg += days ? days+"d" : "";
                 hours = Math.floor(novaTime) - (days * 24);
@@ -305,12 +306,12 @@ if(!whiteStar.awayChId) return;
                 minutes = Math.floor((novaTime * 60) - (days * 24 * 60) - (hours * 60));
                 novaMsg += minutes + "m**\n";
                 let msg = "";
-        if(whiteStar.novaDone == 0) msg += '**0m**⠀⠀'+myEmojis.Whitestar+'`/ws nova` has not been set.\n';
+        if(whiteStar.novaDone == 0) msg += '**0m**⠀⠀'+myEmojis.Whitestar.inline+'`/ws nova` has not been set.\n';
         if(whiteStar.novaDone == 2) {
             let delTime = (((whiteStar.lifeTime+12 * 3600) - curTime) / 3600);
             if(delTime < 1) msg += "**"+Math.floor(delTime * 60) + "m";
             else msg += "**" + Math.floor(delTime * 10) / 10 + "h";
-            msg += '**⠀⠀'+myEmojis.Whitestar+'<@&' + whiteStar.mRoleId + '> Deletion, or **/ws nova expire** to expedite\n';
+            msg += '**⠀⠀'+myEmojis.Whitestar.inline+'<@&' + whiteStar.mRoleId + '> Deletion, or **/ws nova expire** to expedite\n';
         };
         for (n in afkTimers) {
             const awayTimer = afkTimers[n];//without this, the information sometimes changes. really odd bug
@@ -327,10 +328,10 @@ if(!whiteStar.awayChId) return;
                 curLine = "";
                 switch (awayTimer.who) {
                     case "0":
-                        msg += "" + myEmojis.E + "`nemy`⠀⠀";
+                        msg += "" + myEmojis.E.inline + "`nemy`⠀⠀";
                         break;
                     case "10"://role notice
-                        msg += "" + myEmojis.Whitestar;
+                        msg += "" + myEmojis.Whitestar.inline;
                         break;
                     default:
                         curLine += '`';
@@ -435,7 +436,6 @@ async function delExpiredChans(guild) {
    
 module.exports = {
     afkContent,
-    myButtons,
     defButtons,
     db,
     cacheNames,
