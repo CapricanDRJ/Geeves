@@ -7,18 +7,18 @@ const {
 } = require('discord.js');
 
 const myEmojis = {
-    Sleep: {
-        id:'💤',
-        time: 8*3600,
-        past: "just woke up",
-        post: "Should be awake now",
-        button: true
-    },
     Work: {
         id:'⌚',
         time: 4*3600,
         past: "has returned!",
         post: "Should be present for a HS break",
+        button: true
+    },
+    Sleep: {
+        id:'💤',
+        time: 8*3600,
+        past: "just woke up",
+        post: "Should be awake now",
         button: true
     },
     Battleship: {
