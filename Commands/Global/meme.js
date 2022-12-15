@@ -42,7 +42,7 @@ module.exports = {
         } else {
         const who = interaction.options.getUser('who');
         const attachment = await interaction.options.getAttachment("upload");
-        const authorized = ['115211754081878021', '454459089720967168', '426723001266995207', '499571330103115806', '283485587191758849', '509498956179439628', '455453866046259211'];
+        const authorized = ['115211754081878021', '454459089720967168', '426723001266995207', '499571330103115806', '283485587191758849', '509498956179439628', '455453866046259211', '309151533340295169'];
         if (attachment && attachment.hasOwnProperty('url') && attachment.hasOwnProperty('name')) {
             if(!!!extensionTest.test(attachment.name)) {
                 interaction.reply({
