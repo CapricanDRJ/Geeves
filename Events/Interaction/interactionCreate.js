@@ -14,12 +14,12 @@ const {
     ButtonStyle,
     EmbedBuilder,
     PermissionFlagsBits,
-    SelectMenuBuilder
+    StringSelectMenuBuilder
 } = require('discord.js');
 const timeButtons = [];
 timeButtons[0] = new ActionRowBuilder()
     .addComponents(
-        new SelectMenuBuilder()
+        new StringSelectMenuBuilder()
         .setCustomId('hours')
         .setPlaceholder('How many hours ago?')
         .addOptions({
@@ -80,7 +80,7 @@ timeButtons[0] = new ActionRowBuilder()
     );
 timeButtons[1] = new ActionRowBuilder()
     .addComponents(
-        new SelectMenuBuilder()
+        new StringSelectMenuBuilder()
         .setCustomId('minutes')
         .setPlaceholder('How many minutes ago?')
         .addOptions({
@@ -122,8 +122,8 @@ timeButtons[1] = new ActionRowBuilder()
         })
     );
 module.exports = async (client, interaction) => {
-    if (!interaction.isCommand() && !interaction.isContextMenuCommand() && !interaction.isButton() && !interaction.isAutocomplete() && !interaction.isSelectMenu()) return; // When the interaction is not a command, not a contextmenu, or not a button, it will not execute.
-    if (interaction.isSelectMenu()) {
+    if (!interaction.isCommand() && !interaction.isContextMenuCommand() && !interaction.isButton() && !interaction.isAutocomplete() && !interaction.isStringSelectMenu()) return; // When the interaction is not a command, not a contextmenu, or not a button, it will not execute.
+    if (interaction.isStringSelectMenu()) {
         if (menuCache.hasOwnProperty(interaction.message.id)) {
             menuCache[interaction.message.id][interaction.customId] = interaction.values[0];
         } else {
@@ -242,7 +242,7 @@ module.exports = async (client, interaction) => {
             let selectMenu = [];
             selectMenu[0] = new ActionRowBuilder()
                 .addComponents(
-                    new SelectMenuBuilder()
+                    new StringSelectMenuBuilder()
                     .setCustomId('afkMessage')
                     .setPlaceholder('Select afk?')
                     .addOptions(...dropDown));
