@@ -8,7 +8,7 @@ const {
 
 const myEmojis = {
     Work: {
-        id:'⌚',
+        id:'☕',
         time: 4*3600,
         past: "has returned!",
         post: "Should be present for a HS break",
