@@ -13,6 +13,7 @@ const {
     ButtonBuilder,
     ButtonStyle,
     EmbedBuilder,
+    PermissionFlagsBits,
     SelectMenuBuilder
 } = require('discord.js');
 const timeButtons = [];
@@ -133,6 +134,13 @@ module.exports = async (client, interaction) => {
         interaction.deferUpdate();
         return;
     };
+    if (!interaction.guild.members.me.permissions.has([
+        PermissionFlagsBits.ManageRoles,
+        PermissionFlagsBits.ManageChannels,
+        PermissionFlagsBits.ManageMessages,
+        PermissionFlagsBits.EmbedLinks,
+        PermissionFlagsBits.AttachFiles,
+        PermissionFlagsBits.UseExternalEmojis])) return;//permissions missing, lets not make errors
     if (interaction.isButton()) {
         let afkId = interaction.customId;
         if (menuCache[interaction.message.id] && menuCache[interaction.message.id].hasOwnProperty('ship')) afkId = menuCache[interaction.message.id].ship; //if this is the second time around, we have a cache.

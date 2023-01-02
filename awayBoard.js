@@ -170,6 +170,7 @@ async function postAFKs(guild) {
       const whiteStar = await db.prepare('SELECT * from whiteStar WHERE guild = ?').all(guild.id);
       if (!whiteStar) return;
       for (i in whiteStar) { //iterate through multiple whitestars on the same server
+        if(!whiteStar[i].mRoleId) continue;//for a weird bug that can happen on other servers where permissions have been played with.
 		  //if it's just for edit do <Client | Guild>.channels.cache.get(channelId).messages.edit(messageId, { content })
          const afkChan = await guild.channels.cache.get(whiteStar[i].awayChId);
          if(!afkChan)continue;
@@ -188,7 +189,7 @@ async function postAFKs(guild) {
                });
             };
             const mRole = await guild.roles.cache.get(whiteStar[i].mRoleId);
-            if (!mRole) continue; //no idea, but that does not make sense.
+            if (!mRole || !whiteStar[i]?.mRoleId) continue; //no idea, but that does not make sense.
 	  const afkTimers = await db.prepare('SELECT * FROM awayTimers WHERE mRoleId = ? AND guild = ? AND lifeTime < ? ORDER BY lifeTime ASC').all(whiteStar[i].mRoleId, guild.id, curTime);
 if(afkTimers.length > 0) {
       for(n in afkTimers) {
@@ -237,7 +238,6 @@ if(afkTimers.length > 0) {
          makeAwayBoard(guild, whiteStar[i].mRoleId, posted);//after posting all the messages, we update the away list.
       };
    };
-
 
 async function getDisplayName(guild, id, maxlength) {
         if (displayName[id]) return displayName[id];

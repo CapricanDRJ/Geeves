@@ -3,7 +3,8 @@ const {
     GatewayIntentBits,
     Collection,
     ActivityType,
-    EmbedBuilder
+    EmbedBuilder,
+    PermissionFlagsBits
 } = require('discord.js');
 const Config = require("./geeves.json")
 const {
@@ -28,8 +29,16 @@ client.commands = new Collection();
 client.once('ready', (server) => {
 async function checkTimers () {
 await client.guilds.cache.forEach(async (guild) => {
+  if (guild.members.me.permissions.has([
+    PermissionFlagsBits.ManageRoles,
+    PermissionFlagsBits.ManageChannels,
+    PermissionFlagsBits.ManageMessages,
+    PermissionFlagsBits.EmbedLinks,
+    PermissionFlagsBits.AttachFiles,
+    PermissionFlagsBits.UseExternalEmojis])) {//broken if the permissions are removed anyway
    await awayBoard.delExpiredChans(guild);
    await awayBoard.postAFKs(guild);
+  }
 });
 };
 setTimeout(checkTimers, 500);

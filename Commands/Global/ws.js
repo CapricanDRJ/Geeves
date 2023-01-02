@@ -408,7 +408,14 @@ module.exports = {
             //<GuildMember>.roles.highest.position will return a number that you can compare with other role positions
             if (interaction.commandName === 'ws') {
                 //check if bot has permission
-                if (!interaction.guild.members.me.permissions.has([PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageMessages, PermissionFlagsBits.ManageRoles])) {
+                if (!interaction.guild.members.me.permissions.has([
+                    PermissionFlagsBits.ManageRoles,
+                    PermissionFlagsBits.ManageChannels,
+                    PermissionFlagsBits.ManageMessages,
+                    PermissionFlagsBits.EmbedLinks,
+                    PermissionFlagsBits.AttachFiles,
+                    PermissionFlagsBits.UseExternalEmojis
+                ])) {
                     interaction.reply({
                         content: "Sorry, I am missing permissions.",
                         ephemeral: true
@@ -475,7 +482,6 @@ module.exports = {
                     //nova for has leader
                     const isOfficer = interaction.member.permissions.has([PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles], true);
                     const checkRoles = await db.prepare('SELECT * FROM channels WHERE guild = ? AND channelId = ?').get(interaction.guildId, interaction.channelId);
-                    console.log(checkRoles);
                     if (!!checkRoles) { //if it doesn't exist, lets return false.
                         const mRoleId = await interaction.guild.roles.cache.get(checkRoles.mRoleId);
                         const lRoleId = await interaction.guild.roles.cache.get(checkRoles.lRoleId);
@@ -1001,7 +1007,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                             const leader = chanProperties[cType][1];
                             const restricted = chanProperties[cType][2];
                             const eRoles = await db.prepare('SELECT extraRoles FROM management WHERE guild = ?').get(interaction.guildId);
-                            const extraRoles = JSON.parse(eRoles.extraRoles); //collection of roles to add to new channels, ideal for other bots
+                            const extraRoles = eRoles ? JSON.parse(eRoles.extraRoles) : []; //collection of roles to add to new channels, ideal for other bots
                             let permissions = [{
                                 id: interaction.guildId,
                                 allow: [PermissionFlagsBits.AttachFiles, PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.AddReactions, PermissionFlagsBits.ReadMessageHistory],
