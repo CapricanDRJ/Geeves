@@ -15,9 +15,9 @@ node 16.17.1
 
 node: better-sqlite 3 7.6.2
 
-node: canvas 2.10.1
+node: canvas 2.11.0
 
-node: discord.js 14.5.0
+node: discord.js 14.7.1
   
 node: gm 1.25.0
   
