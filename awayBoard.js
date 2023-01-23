@@ -190,8 +190,6 @@ async function postAFKs(guild) {
                 });
             };
             const mRole = await guild.roles.cache.get(whiteStar[i].mRoleId);
-            console.log("looking for any version where this does not exist below");
-            console.log(mRole);
             if (mRole) { //if this does not exist, we don't continue here.
                 const afkTimers = await db.prepare('SELECT * FROM awayTimers WHERE mRoleId = ? AND guild = ? AND lifeTime < ? ORDER BY lifeTime ASC').all(whiteStar[i].mRoleId, guild.id, curTime);
                 if (afkTimers.length > 0) {
