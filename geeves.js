@@ -87,6 +87,7 @@ const rest = new REST({
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
     console.error(error);
+    process.exit();
   }
 })();
 client.login(Config.Token).catch(console.error);
