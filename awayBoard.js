@@ -235,8 +235,8 @@ async function postAFKs(guild) {
                         }));
                 };
                 await db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND lifeTime < ?').run(guild.id, mRole.id, curTime); //if there were any above, delete them now. 
-                makeAwayBoard(guild, mRole.id, posted); //after posting all the messages, we update the away list.
             };
+            await makeAwayBoard(guild, mRole.id, posted); //after posting all the messages, we update the away list.
         }
     };
 };
