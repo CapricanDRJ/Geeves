@@ -190,7 +190,7 @@ async function postAFKs(guild) {
                 });
             };
             const mRole = await guild.roles.cache.get(whiteStar[i].mRoleId);
-            if (!mRole || !whiteStar[i]?.mRoleId) continue; //no idea, but that does not make sense.
+            if (!mRole) continue; //no idea, but that does not make sense.
             const afkTimers = await db.prepare('SELECT * FROM awayTimers WHERE mRoleId = ? AND guild = ? AND lifeTime < ? ORDER BY lifeTime ASC').all(whiteStar[i].mRoleId, guild.id, curTime);
             if (afkTimers.length > 0) {
                 for (n in afkTimers) {
@@ -235,8 +235,8 @@ async function postAFKs(guild) {
                         }));
                 };
                 await db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND lifeTime < ?').run(guild.id, mRole.id, curTime); //if there were any above, delete them now. 
+                makeAwayBoard(guild, mRole.id, posted); //after posting all the messages, we update the away list.
             };
-            makeAwayBoard(guild, whiteStar[i].mRoleId, posted); //after posting all the messages, we update the away list.
         }
     };
 };
