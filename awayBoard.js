@@ -190,53 +190,56 @@ async function postAFKs(guild) {
                 });
             };
             const mRole = await guild.roles.cache.get(whiteStar[i].mRoleId);
-            if (!mRole) continue; //no idea, but that does not make sense.
-            const afkTimers = await db.prepare('SELECT * FROM awayTimers WHERE mRoleId = ? AND guild = ? AND lifeTime < ? ORDER BY lifeTime ASC').all(whiteStar[i].mRoleId, guild.id, curTime);
-            if (afkTimers.length > 0) {
-                for (n in afkTimers) {
-                    let awayTimer = afkTimers[n];
-                    const afkChan = await guild.channels.cache.get(whiteStar[i].awayChId);
-                    posted = true;
-                    let msgNotice = '';
-                    let pingable = ['users', 'roles'];
-                    let per = "";
-                    switch (awayTimer.who) {
-                        case '0':
-                            msgNotice += myEmojis.E.inline + '`nemy` ' + awayTimer.what;
-                            pingable = [];
-                            break;
-                        case '10':
-                            msgNotice += awayTimer.what;
-                            if (awayTimer.fromWho) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
-                            break;
-                        case '20':
-                            msgNotice += '  <@&' + whiteStar[i].mRoleId + '>  ' + awayTimer.what;
-                            if (!!awayTimer.fromWho) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
-                            break;
-                        default:
-                            msgNotice += '  <@' + awayTimer.who + '>  ' + awayTimer.what;
-                            if (!!awayTimer.fromWho && awayTimer.fromWho != awayTimer.who) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
+            console.log("looking for any version where this does not exist below");
+            console.log(mRole);
+            if (mRole) { //if this does not exist, we don't continue here.
+                const afkTimers = await db.prepare('SELECT * FROM awayTimers WHERE mRoleId = ? AND guild = ? AND lifeTime < ? ORDER BY lifeTime ASC').all(whiteStar[i].mRoleId, guild.id, curTime);
+                if (afkTimers.length > 0) {
+                    for (n in afkTimers) {
+                        let awayTimer = afkTimers[n];
+                        const afkChan = await guild.channels.cache.get(whiteStar[i].awayChId);
+                        posted = true;
+                        let msgNotice = '';
+                        let pingable = ['users', 'roles'];
+                        let per = "";
+                        switch (awayTimer.who) {
+                            case '0':
+                                msgNotice += myEmojis.E.inline + '`nemy` ' + awayTimer.what;
+                                pingable = [];
+                                break;
+                            case '10':
+                                msgNotice += awayTimer.what;
+                                if (awayTimer.fromWho) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
+                                break;
+                            case '20':
+                                msgNotice += '  <@&' + whiteStar[i].mRoleId + '>  ' + awayTimer.what;
+                                if (!!awayTimer.fromWho) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
+                                break;
+                            default:
+                                msgNotice += '  <@' + awayTimer.who + '>  ' + awayTimer.what;
+                                if (!!awayTimer.fromWho && awayTimer.fromWho != awayTimer.who) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
+                        };
+                        if (per == "")
+                            await afkChan.send({
+                                content: msgNotice,
+                                allowedMentions: {
+                                    parse: pingable
+                                }
+                            })
+                        else
+                            await afkChan.send({
+                                content: msgNotice,
+                                allowedMentions: {
+                                    parse: pingable
+                                }
+                            }).then((sentMessage) => sentMessage.edit({
+                                content: msgNotice + per
+                            }));
                     };
-                    if (per == "")
-                        await afkChan.send({
-                            content: msgNotice,
-                            allowedMentions: {
-                                parse: pingable
-                            }
-                        })
-                    else
-                        await afkChan.send({
-                            content: msgNotice,
-                            allowedMentions: {
-                                parse: pingable
-                            }
-                        }).then((sentMessage) => sentMessage.edit({
-                            content: msgNotice + per
-                        }));
+                    await db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND lifeTime < ?').run(guild.id, mRole.id, curTime); //if there were any above, delete them now. 
                 };
-                await db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND lifeTime < ?').run(guild.id, mRole.id, curTime); //if there were any above, delete them now. 
-            };
-            await makeAwayBoard(guild, mRole.id, posted); //after posting all the messages, we update the away list.
+                await makeAwayBoard(guild, mRole.id, posted); //after posting all the messages, we update the away list.
+            }
         }
     };
 };
