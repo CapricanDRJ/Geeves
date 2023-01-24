@@ -28,6 +28,7 @@ client.commands = new Collection();
 
 client.once('ready', (server) => {
 async function checkTimers () {
+  aliveCheck();
 await client.guilds.cache.forEach(async (guild) => {
   if (guild.members.me.permissions.has([
     PermissionFlagsBits.ManageRoles,
@@ -41,6 +42,15 @@ await client.guilds.cache.forEach(async (guild) => {
   }
 });
 };
+const pingServer = client.guilds.cache.get("1028931876485873734");
+const pingChannel = pingServer.channels.cache.get("1067323944065048576");
+let pingCount = 0;
+function aliveCheck() {
+  pingChannel.send({
+    content: String(pingCount > 60 ? Math.floor(pingCount/60*10)/10+"h" : pingCount+"m")
+});
+pingCount++;
+}
 setTimeout(checkTimers, 500);
 setInterval(checkTimers, 60*1000);//every minute
 //    setInterval(awayBoard.removeDeadAFKs, 1000 * 60 * 60 * 12); // every 12 hours is a good check
@@ -72,6 +82,7 @@ fs.readdirSync('./Commands').forEach(dirs => {
     client.commands.set(command.data.name, command)
   }
 })
+
 const rest = new REST({
   version: '9'
 }).setToken(Config.Token);
@@ -87,7 +98,6 @@ const rest = new REST({
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
     console.error(error);
-    process.exit();
   }
 })();
 client.login(Config.Token).catch(console.error);
