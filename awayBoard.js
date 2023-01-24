@@ -170,32 +170,33 @@ async function postAFKs(guild) {
     const curTime = Math.floor(Date.now() / 1000);
     const whiteStar = await db.prepare('SELECT * from whiteStar WHERE guild = ?').all(guild.id);
     if (!whiteStar) return;
-    for (i in whiteStar) { //iterate through multiple whitestars on the same server
-        if (whiteStar[i] && whiteStar[i]?.mRoleId) { //for a weird bug that can happen on other servers where permissions have been played with.
+    for (const wsAFK of whiteStar) {
+    //for (i in whiteStar) { //iterate through multiple whitestars on the same server
+        if (wsAFK && wsAFK?.mRoleId) { //for a weird bug that can happen on other servers where permissions have been played with.
             //if it's just for edit do <Client | Guild>.channels.cache.get(channelId).messages.edit(messageId, { content })
-            const afkChan = await guild.channels.cache.get(whiteStar[i].awayChId);
+            const afkChan = await guild.channels.cache.get(wsAFK.awayChId);
             if (!afkChan) continue;
             let posted = false;
-            if ((whiteStar[i].lifeTime - curTime) < 0 && (whiteStar[i].novaDone < 2)) { //they only get one nova per whitestar set of channels
+            if ((wsAFK.lifeTime - curTime) < 0 && (wsAFK.novaDone < 2)) { //they only get one nova per whitestar set of channels
                 posted = true;
-                db.prepare('UPDATE whiteStar SET novaDone = 2 WHERE guild = ? AND mRoleId = ?').run(guild.id, whiteStar[i].mRoleId);
+                db.prepare('UPDATE whiteStar SET novaDone = 2 WHERE guild = ? AND mRoleId = ?').run(guild.id, wsAFK.mRoleId);
                 const fs = require('fs');
                 const novaFiles = await fs.readdirSync('./files/novaFiles/');
                 afkChan.send({
-                    content: '  <@&' + whiteStar[i].mRoleId + '> Whitestar has gone nova\n\nChannels and Roles will be deleted 12 hours from now',
+                    content: '  <@&' + wsAFK.mRoleId + '> Whitestar has gone nova\n\nChannels and Roles will be deleted 12 hours from now',
                     allowedMentions: {
                         parse: ["roles"]
                     },
                     files: ['./files/novaFiles/' + novaFiles[Math.floor(Math.random() * novaFiles.length)]],
                 });
             };
-            const mRole = await guild.roles.cache.get(whiteStar[i].mRoleId);
+            const mRole = await guild.roles.cache.get(wsAFK.mRoleId);
             if (mRole) { //if this does not exist, we don't continue here.
-                const afkTimers = await db.prepare('SELECT * FROM awayTimers WHERE mRoleId = ? AND guild = ? AND lifeTime < ? ORDER BY lifeTime ASC').all(whiteStar[i].mRoleId, guild.id, curTime);
+                const afkTimers = await db.prepare('SELECT * FROM awayTimers WHERE mRoleId = ? AND guild = ? AND lifeTime < ? ORDER BY lifeTime ASC').all(wsAFK.mRoleId, guild.id, curTime);
                 if (afkTimers.length > 0) {
-                    for (n in afkTimers) {
-                        let awayTimer = afkTimers[n];
-                        const afkChan = await guild.channels.cache.get(whiteStar[i].awayChId);
+                    for (const awayTimer of afkTimers) {
+                    //for (n in afkTimers) {
+                        const afkChan = await guild.channels.cache.get(wsAFK.awayChId);
                         posted = true;
                         let msgNotice = '';
                         let pingable = ['users', 'roles'];
@@ -210,7 +211,7 @@ async function postAFKs(guild) {
                                 if (awayTimer.fromWho) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
                                 break;
                             case '20':
-                                msgNotice += '  <@&' + whiteStar[i].mRoleId + '>  ' + awayTimer.what;
+                                msgNotice += '  <@&' + wsAFK.mRoleId + '>  ' + awayTimer.what;
                                 if (!!awayTimer.fromWho) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
                                 break;
                             default:
@@ -316,8 +317,7 @@ async function makeAwayBoard(guild, mRoleId, posted) {
         else msg += "**" + Math.floor(delTime * 10) / 10 + "h";
         msg += '**⠀⠀' + myEmojis.Whitestar.inline + '<@&' + whiteStar.mRoleId + '> Deletion, or **/ws nova expire** to expedite\n';
     };
-    for (n in afkTimers) {
-        const awayTimer = afkTimers[n]; //without this, the information sometimes changes. really odd bug
+    for (const awayTimer of afkTimers) {
         let curLine = "";
         let t = ((awayTimer.lifeTime - curTime) / 3600);
         if (t < 1)
@@ -435,10 +435,10 @@ async function delExpiredChans(guild) {
         const delRoleLead = await guild.roles.cache.get(expiredChan[0].lRoleId);
         if (delRole) await delRole.delete('Time expired').catch((err) => console.log('error deleting role: ' + err.message));
         if (delRoleLead) await delRoleLead.delete('Time expired').catch((err) => console.log('error deleting leader role: ' + err.message));
-        for (i in expiredChan) {
-            const channel = await guild.channels.cache.get(expiredChan[i].channelId);
+        for (const theChan of expiredChan) {
+            const channel = await guild.channels.cache.get(theChan.channelId);
             if (channel) await channel.delete('time expired').catch((err) => console.log('error deleting message: ' + err.message));
-            db.prepare('DELETE FROM channels WHERE guild = ? AND mRoleId = ? AND channelId = ?').run(guild.id, expiredChan[i].mRoleId, expiredChan[i].channelId);
+            db.prepare('DELETE FROM channels WHERE guild = ? AND mRoleId = ? AND channelId = ?').run(guild.id, theChan.mRoleId, theChan.channelId);
         };
         db.prepare('DELETE FROM whiteStar WHERE guild = ? AND mRoleId = ?').run(guild.id, expired.mRoleId);
     };
