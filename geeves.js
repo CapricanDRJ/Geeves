@@ -28,7 +28,6 @@ client.commands = new Collection();
 
 client.once('ready', (server) => {
   async function checkTimers() {
-      aliveCheck();
       await client.guilds.cache.forEach(async (guild) => {
           if (guild.members.me.permissions.has([
                   PermissionFlagsBits.ManageRoles,
