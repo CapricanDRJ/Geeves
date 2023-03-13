@@ -22,5 +22,5 @@ CREATE TABLE IF NOT EXISTS "whiteStar" (
 "awayMsgId" TEXT,
 "awayChId" TEXT, 
 "opponents" TEXT DEFAULT "[]",
-"colour" TEXT,
+"colour" INTEGER,
 "novaDone" INTEGER NOT NULL DEFAULT 0);
