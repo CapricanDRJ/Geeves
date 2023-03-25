@@ -183,7 +183,7 @@ async function postAFKs(guild) {
                 const fs = require('fs');
                 const novaFiles = await fs.readdirSync('./files/novaFiles/');
                 afkChan.send({
-                    content: '  <@&' + wsAFK.mRoleId + '> Whitestar has gone nova\n\nChannels and Roles will be deleted 12 hours from now',
+                    content: '  <@&' + wsAFK.mRoleId + '> The White Star mission is over\n\nChannels and Roles will be deleted 12 hours from now',
                     allowedMentions: {
                         parse: ["roles"]
                     },
