@@ -90,4 +90,10 @@ const rest = new REST({
       console.error(error);
   }
 })();
+
+client.on('error', (error) => {
+  console.error('An error occurred:', error);
+  // Attempt to reconnect
+  client.login(Config.Token);
+});
 client.login(Config.Token).catch(console.error);
