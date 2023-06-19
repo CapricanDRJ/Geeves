@@ -124,6 +124,7 @@ function setupButtons() {
     let bCount = 0;
     const row = [];
     for (key in myEmojis) {
+        myEmojis[key].name = key;
         if (external.test(myEmojis[key].id)) //iterating the loop anyway, so we setup inline here.
             myEmojis[key].inline = '<:' + key + ':' + myEmojis[key].id + '>';
         else myEmojis[key].inline = myEmojis[key].id;
@@ -354,10 +355,12 @@ async function makeAwayBoard(guild, mRoleId, posted) {
     };
     if (msg.length > 0) msgArray.push(msg);
     if (msg.length == 0 && msgArray.length == 0) msgArray.push(afkContent[4]);
+    const shipCounter = myEmojis["Battleship"].inline + whiteStar.Battleship + myEmojis["Squishie"].inline + whiteStar.Squishie + myEmojis["Flagship"].inline + whiteStar.Flagship +
+    myEmojis["EnemyBattleship"].inline + whiteStar.EnemyBattleship + myEmojis["EnemySquishie"].inline + whiteStar.EnemySquishie + myEmojis["EnemyFlagship"].inline + whiteStar.EnemyFlagship;
     const embed = new EmbedBuilder()
         .setTitle(afkContent[0] + ' ' + novaMsg)
         .setColor(whiteStar.colour)
-        .setDescription(afkContent[2] + '\n' + msgArray[0])
+        .setDescription(afkContent[2] + '\n'+ msgArray[0])
         .setTimestamp()
         .setFooter({
             text: afkContent[3]
@@ -372,11 +375,16 @@ async function makeAwayBoard(guild, mRoleId, posted) {
                 inline: false
             });
             xx++;
-        } while (xx < msgArray.length && xx < 3);
+        } while (xx < msgArray.length && xx < 2);
     }
     if (msgArray[xx]) embed.addFields({
         name: '**Message limit exceeded, not all messages shown**',
         value: 'All afks are recorded, later afks will be shown as newer ones expire',
+        inline: false
+    });
+    embed.addFields({
+        name: "Death Counter",
+        value: shipCounter,
         inline: false
     });
     afkChan.messages.fetch().then((messages) => {
@@ -423,7 +431,7 @@ async function makeAwayBoard(guild, mRoleId, posted) {
 };
 
 function removeDeadAFKs() {
-    db.prepare('DELETE FROM awayTimers WHERE lifeTime < ?').run(Math.floor((Date.now() / 1000)) - (12 * 3600)); // 12 hours grace and delete
+    db.prepare('DELETE FROM awayTimers WHERE lifeTime < ?').run(Math.floor((Date.now() / 1000)) - (30 * 3600)); // 30 hours grace and delete
 };
 async function delExpiredChans(guild) {
     const curTime = Math.floor(Date.now() / 1000);
@@ -440,6 +448,7 @@ async function delExpiredChans(guild) {
             if (channel) await channel.delete('time expired').catch((err) => console.log('error deleting message: ' + err.message));
             db.prepare('DELETE FROM channels WHERE guild = ? AND mRoleId = ? AND channelId = ?').run(guild.id, theChan.mRoleId, theChan.channelId);
         };
+        db.prepare('DELETE from awayTimers WHERE guild = ? AND mRoleId = ?').run(guild.id, expired.mRoleId);
         db.prepare('DELETE FROM whiteStar WHERE guild = ? AND mRoleId = ?').run(guild.id, expired.mRoleId);
     };
 };

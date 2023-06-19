@@ -121,7 +121,7 @@ timeButtons[1] = new ActionRowBuilder()
             value: '55',
         })
     );
-module.exports = async (client, interaction) => {
+module.exports = async(client, interaction) => {
     if (!interaction.isCommand() && !interaction.isContextMenuCommand() && !interaction.isButton() && !interaction.isAutocomplete() && !interaction.isStringSelectMenu()) return; // When the interaction is not a command, not a contextmenu, or not a button, it will not execute.
     if (interaction.isStringSelectMenu()) {
         if (menuCache.hasOwnProperty(interaction.message.id)) {
@@ -135,12 +135,13 @@ module.exports = async (client, interaction) => {
         return;
     };
     if (!interaction.guild.members.me.permissions.has([
-        PermissionFlagsBits.ManageRoles,
-        PermissionFlagsBits.ManageChannels,
-        PermissionFlagsBits.ManageMessages,
-        PermissionFlagsBits.EmbedLinks,
-        PermissionFlagsBits.AttachFiles,
-        PermissionFlagsBits.UseExternalEmojis])) return;//permissions missing, lets not make errors
+            PermissionFlagsBits.ManageRoles,
+            PermissionFlagsBits.ManageChannels,
+            PermissionFlagsBits.ManageMessages,
+            PermissionFlagsBits.EmbedLinks,
+            PermissionFlagsBits.AttachFiles,
+            PermissionFlagsBits.UseExternalEmojis
+        ])) return; //permissions missing, lets not make errors
     if (interaction.isButton()) {
         let afkId = interaction.customId;
         if (menuCache[interaction.message.id] && menuCache[interaction.message.id].hasOwnProperty('ship')) afkId = menuCache[interaction.message.id].ship; //if this is the second time around, we have a cache.
@@ -216,7 +217,7 @@ module.exports = async (client, interaction) => {
 
         async function printTimers() {
             const awayTimers = await awayBoard.db.prepare('SELECT what,lifeTime FROM awayTimers WHERE guild = ? AND mRoleId = ? AND (who = ? OR fromWho = ?)').all(interaction.guildId, wsRole.mRoleId, interaction.user.id, interaction.user.id);
-           // console.log(awayTimers); //figure out what empty looks like
+            // console.log(awayTimers); //figure out what empty looks like
             if (awayTimers.length < 1) {
                 interaction.reply({
                     content: "No messages available.",
@@ -230,10 +231,10 @@ module.exports = async (client, interaction) => {
                 const t = ((awayTimers[xa].lifeTime - curTime) / 3600);
                 let time;
                 if (t < 1)
-                    time = String(Math.floor(t * 60) + "m").padEnd(5,'⠀');
+                    time = String(Math.floor(t * 60) + "m").padEnd(5, '⠀');
                 else
-                    time = String(Math.floor(t * 10) / 10 + "h").padEnd(5,'⠀');;
-                    if(time.indexOf(".") > -1) time += '⠀';
+                    time = String(Math.floor(t * 10) / 10 + "h").padEnd(5, '⠀');;
+                if (time.indexOf(".") > -1) time += '⠀';
                 dropDown.push({
                     label: String(time + awayTimers[xa].what).replace(/<:(\w+):\d+>/g, "$1"),
                     value: String(xa + ".") + String(awayTimers[xa].lifeTime) //added the xa+"." to prevent the odd time that two messages have the same lifeTime and cause a bot crash.
@@ -294,8 +295,13 @@ module.exports = async (client, interaction) => {
                 };
             };
             const lifeTime = Math.floor((Date.now() / 1000) + button.time - ((menuCache[interaction.message.id].hours * 3600) + (menuCache[interaction.message.id].minutes * 60)));
-            await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?')
+            const prepareCheck = await awayBoard.db.prepare('SELECT 1 FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ? LIMIT 1');
+            const checkExists = await prepareCheck.get(interaction.guildId, wsRole.mRoleId, what, who);
+            if (checkExists != undefined)
+                await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?')
                 .run(interaction.guildId, wsRole.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one technically.
+            else
+                awayBoard.db.prepare('UPDATE whitestar SET ' + button.name + ' = ' + button.name + ' + 1 WHERE guild = ? AND mRoleId = ?').run(interaction.guildId, wsRole.mRoleId);
             await awayBoard.db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromwho) VALUES(?,?,?,?,?,?)').run(interaction.guildId, wsRole.mRoleId, lifeTime, what, who, interaction.user.id);
             interaction.update({
                 content: "OK.",
@@ -355,13 +361,13 @@ module.exports = async (client, interaction) => {
                         .setStyle(1), //1 is bluef
                     )
                     bCount++;
-                    if (bCount > 14) {//counting starts at zero, max (14)15 due to rules of 5 per row and 5 rows max. buttonbar takes up 2 rows. 3 rows for people.
+                    if (bCount > 14) { //counting starts at zero, max (14)15 due to rules of 5 per row and 5 rows max. buttonbar takes up 2 rows. 3 rows for people.
                         break;
                     };
                 };
             };
             menuButtons = timeButtons.concat(menuButtons); //Put the drop down menus first.
-            const message = await interaction.reply({//add try catch later
+            const message = await interaction.reply({ //add try catch later
                 ephemeral: true,
                 fetchReply: true,
                 components: menuButtons
