@@ -39,12 +39,12 @@ client.once('ready', (server) => {
               ])) { //broken if the permissions are removed anyway
               await awayBoard.delExpiredChans(guild);
               await awayBoard.postAFKs(guild);
-              awayBoard.removeDeadAFKs();
           }
       });
   };
   setTimeout(checkTimers, 500);
   setInterval(checkTimers, 60 * 1000); //every minute
+  awayBoard.removeDeadAFKs();//gets it on restart
   console.log('Ready!');
 });
 
