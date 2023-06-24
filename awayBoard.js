@@ -201,6 +201,7 @@ async function postAFKs(guild) {
                         posted = true;
                         let msgNotice = '';
                         let pingable = ['users', 'roles'];
+                        if(wsAFK.novaDone == 2) pingable = [];//No pings after whitestar mission is over.
                         let per = "";
                         switch (awayTimer.who) {
                             case '0':
