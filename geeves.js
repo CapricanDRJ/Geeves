@@ -92,9 +92,21 @@ const rest = new REST({
   }
 })();
 
-client.on('error', (error) => {
-  console.error('An error occurred:', error);
-  // Attempt to reconnect
-  client.login(Config.Token);
+
+// Error handler to catch unhandled errors
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1); // Exit with code 1 on error
 });
+
+// Error handler to handle Discord API errors
+client.on('error', (error) => {
+  if (error.message.includes('Service Unavailable')) {
+    console.error('Discord API is currently down. Exiting bot...');
+    process.exit(1); // Exit with code 1 on Discord API errors
+  } else {
+    console.error('Discord.js error:', error);
+  }
+});
+
 client.login(Config.Token).catch(console.error);
