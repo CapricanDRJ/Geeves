@@ -418,7 +418,7 @@ module.exports = async(client, interaction) => {
             } else {
                 posted = true
                 await interaction.channel.send({
-                    content: " <@" + interaction.user.id + "> " + checkEntry.what + " " + button.past,
+                    content: " <@" + interaction.user.id + "> " + checkEntry.what + " " + button.past+" <t:"+Math.floor(Date.now() / 1000)+":R>",
                     allowedMentions: {
                         parse: ['users', 'roles']
                     },

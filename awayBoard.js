@@ -196,7 +196,6 @@ async function postAFKs(guild) {
                 const afkTimers = await db.prepare('SELECT * FROM awayTimers WHERE mRoleId = ? AND guild = ? AND lifeTime < ? ORDER BY lifeTime ASC').all(wsAFK.mRoleId, guild.id, curTime);
                 if (afkTimers.length > 0) {
                     for (const awayTimer of afkTimers) {
-                    //for (n in afkTimers) {
                         const afkChan = await guild.channels.cache.get(wsAFK.awayChId);
                         posted = true;
                         let msgNotice = '';
@@ -220,6 +219,7 @@ async function postAFKs(guild) {
                                 msgNotice += '  <@' + awayTimer.who + '>  ' + awayTimer.what;
                                 if (!!awayTimer.fromWho && awayTimer.fromWho != awayTimer.who) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
                         };
+                        msgNotice += " <t:"+awayTimer.lifeTime+":R>";
                         if (per == "")
                             await afkChan.send({
                                 content: msgNotice,
@@ -332,7 +332,7 @@ async function makeAwayBoard(guild, mRoleId, posted) {
         msg += "**";
         curLine = "";
         switch (awayTimer.who) {
-            case "0":
+            case "0": //enemy notice
                 msg += "" + myEmojis.E.inline + "`nemy`⠀⠀";
                 break;
             case "10": //role notice
@@ -348,7 +348,7 @@ async function makeAwayBoard(guild, mRoleId, posted) {
         msg += awayTimer.what;
         if (awayTimer.fromWho)
             if (awayTimer.who != '0' && awayTimer.fromWho != awayTimer.who) msg += "⠀⠀-" + await getDisplayName(guild, awayTimer.fromWho);
-        msg += "\n";
+        msg += "<t:"+awayTimer.lifeTime +":t>\n";
         if (msg.length > 1800 || ((msg.length > 800) && (msgArray.length > 0))) {
             msgArray.push(msg);
             msg = "";
