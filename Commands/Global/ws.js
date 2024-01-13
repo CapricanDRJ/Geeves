@@ -148,11 +148,6 @@ module.exports = {
             .addUserOption(option => option.setName('user8').setDescription('Select user'))
             .addUserOption(option => option.setName('user9').setDescription('Select user'))
             .addUserOption(option => option.setName('user10').setDescription('Select user'))
-            .addUserOption(option => option.setName('user11').setDescription('Select user'))
-            .addUserOption(option => option.setName('user12').setDescription('Select user'))
-            .addUserOption(option => option.setName('user13').setDescription('Select user'))
-            .addUserOption(option => option.setName('user14').setDescription('Select user'))
-            .addUserOption(option => option.setName('user15').setDescription('Select user'))
         )
         .addSubcommandGroup((group) =>
             group
@@ -357,11 +352,6 @@ module.exports = {
             .addStringOption(option => option.setName('opponent8').setDescription('Eighth opponent.'))
             .addStringOption(option => option.setName('opponent9').setDescription('Ninth opponent.'))
             .addStringOption(option => option.setName('opponent10').setDescription('Tenth opponent.'))
-            .addStringOption(option => option.setName('opponent11').setDescription('Eleventh opponent.'))
-            .addStringOption(option => option.setName('opponent12').setDescription('Twelfth opponent.'))
-            .addStringOption(option => option.setName('opponent13').setDescription('Thirteenth opponent.'))
-            .addStringOption(option => option.setName('opponent14').setDescription('Fourteenth opponent.'))
-            .addStringOption(option => option.setName('opponent15').setDescription('Fifteenth opponent.'))
         ),
     async execute(interaction) {
         if(!interaction.channel.isTextBased()) return;
