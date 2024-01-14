@@ -172,7 +172,6 @@ async function postAFKs(guild) {
     const whiteStar = await db.prepare('SELECT * from whiteStar WHERE guild = ?').all(guild.id);
     if (!whiteStar) return;
     for (const wsAFK of whiteStar) {
-    //for (i in whiteStar) { //iterate through multiple whitestars on the same server
         if (wsAFK && wsAFK?.mRoleId) { //for a weird bug that can happen on other servers where permissions have been played with.
             //if it's just for edit do <Client | Guild>.channels.cache.get(channelId).messages.edit(messageId, { content })
             const afkChan = await guild.channels.cache.get(wsAFK.awayChId);
@@ -194,6 +193,7 @@ async function postAFKs(guild) {
             const mRole = await guild.roles.cache.get(wsAFK.mRoleId);
             if (mRole) { //if this does not exist, we don't continue here.
                 const afkTimers = await db.prepare('SELECT * FROM awayTimers WHERE mRoleId = ? AND guild = ? AND lifeTime < ? ORDER BY lifeTime ASC').all(wsAFK.mRoleId, guild.id, curTime);
+                db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND lifeTime < ?').run(guild.id, mRole.id, curTime); //delete here, due to wait delay, it's possible to overrun if it was later.
                 if (afkTimers.length > 0) {
                     for (const awayTimer of afkTimers) {
                         const afkChan = await guild.channels.cache.get(wsAFK.awayChId);
@@ -238,7 +238,6 @@ async function postAFKs(guild) {
                             }));
                         await wait(10000); //in case there is more than one message at the same time so we don't flood.
                     };
-                    await db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND lifeTime < ?').run(guild.id, mRole.id, curTime); //if there were any above, delete them now. 
                 };
                 await makeAwayBoard(guild, mRole.id, posted); //after posting all the messages, we update the away list.
             }
@@ -438,18 +437,18 @@ function removeDeadAFKs() {
 async function delExpiredChans(guild) {
     const curTime = Math.floor(Date.now() / 1000);
     const timeCheck = curTime - 12 * 3600; //12 hours after timestamp, we expire
-    const expired = await db.prepare('SELECT * FROM whiteStar WHERE guild = ? AND lifeTime < ?').get(guild.id, timeCheck);
+    const expired = await db.prepare('SELECT * FROM whiteStar WHERE guild = ? AND lifeTime < ?').get(guild.id, timeCheck);//cType
     if (expired) {
-        const expiredChan = await db.prepare('SELECT * FROM channels WHERE guild = ? AND mRoleId = ?').all(guild.id, expired.mRoleId);
+        const expiredChan = await db.prepare('SELECT * FROM channels WHERE guild = ? AND mRoleId = ? ORDER BY CASE cType WHEN 0 THEN 10 ELSE cType END ASC').all(guild.id, expired.mRoleId);
         const delRole = await guild.roles.cache.get(expiredChan[0].mRoleId); //anyone should have the same value
         const delRoleLead = await guild.roles.cache.get(expiredChan[0].lRoleId);
         if (delRole) await delRole.delete('Time expired').catch((err) => console.log('error deleting role: ' + err.message));
         if (delRoleLead) await delRoleLead.delete('Time expired').catch((err) => console.log('error deleting leader role: ' + err.message));
         for (const theChan of expiredChan) {
-            await wait(5000);//wait 20 seconds to avoid flooding
             const channel = await guild.channels.cache.get(theChan.channelId);
             if (channel) await channel.delete('time expired').catch((err) => console.log('error deleting message: ' + err.message));
             db.prepare('DELETE FROM channels WHERE guild = ? AND mRoleId = ? AND channelId = ?').run(guild.id, theChan.mRoleId, theChan.channelId);
+            await wait(5000);//wait 20 seconds to avoid flooding
         };
         db.prepare('DELETE from awayTimers WHERE guild = ? AND mRoleId = ?').run(guild.id, expired.mRoleId);
         db.prepare('DELETE FROM whiteStar WHERE guild = ? AND mRoleId = ?').run(guild.id, expired.mRoleId);
