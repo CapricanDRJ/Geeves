@@ -20,6 +20,7 @@ const chanProperties = { // type: [name, leader, restricted]
     4: ["afk", false, false]
 };
 const awayBoard = require('../../awayBoard.js');
+let wsnewThrottle = 0;//limit the usage to once every x minutes for /ws
 
 async function checkTemplate(guildId) {
     let template = await db.prepare('SELECT * FROM template WHERE guild = ? ORDER BY type ASC').all(guildId);
@@ -936,9 +937,22 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                         return newColour[Math.floor(Math.random() * newColour.length)]
                     };
                     const rColour = await getColour();
+                    console.log("cache size is"+interaction.guild.channels.cache.size);
+                    if (interaction.guild.channels.cache.size + 50 > 500) {
+                        interaction.reply("Error: Discord channel safety limit reached. Your discord has "+interaction.guild.channels.cache.size+" channels");
+                        return;
+                    };
                     if (interaction.member.permissions.has([PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles], true)) {
+                        const currentTime = Date.now();
+                        const COOLDOWN_PERIOD = 5 * 60 * 1000; // 5 minutes in milliseconds
+                        if (wsnewThrottle && currentTime - wsnewThrottle < COOLDOWN_PERIOD) {
+                            const remainingTime = Math.round((COOLDOWN_PERIOD - (currentTime - wsnewThrottle)) / 1000); // in seconds
+                            interaction.reply(`Please wait ${remainingTime} more seconds before using this command again.`);
+                            return;
+                        };
+                        wsnewThrottle = currentTime;
                         async function findnextWS() {
-                            let num = -1;
+                            let num = 0;//start at 1
                             let nextWS = '';
                             do {
                                 num++;
@@ -1069,6 +1083,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                         for (q in template) {
                             if (template[q].type == 0) continue; //skip category
                             let chan = await createchan(nextWS + '_' + template[q].name, wsCat.id, mRoleId, lRoleId, template[q].type);
+                            await wait(5000);//wait 5 seconds to ensure no flooding and all channels create properly.
                             if (chan) {
                                 chanList.push(chan);
                                 if (template[q].type == 4) awayChId = chan;
