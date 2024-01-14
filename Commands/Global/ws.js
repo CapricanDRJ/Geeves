@@ -921,7 +921,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                             })
                         });
                     } else {
-                        interaction.reply({
+                        interaction.editReply({
                             content: "Sorry, that did not make sense to me",
                             ephemeral: true
                         })
@@ -939,7 +939,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                     const rColour = await getColour();
                     console.log("cache size is"+interaction.guild.channels.cache.size);
                     if (interaction.guild.channels.cache.size + 50 > 500) {
-                        interaction.reply("Error: Discord channel safety limit reached. Your discord has "+interaction.guild.channels.cache.size+" channels");
+                        interaction.editReply("Error: Discord channel safety limit reached. Your discord has "+interaction.guild.channels.cache.size+" channels");
                         return;
                     };
                     if (interaction.member.permissions.has([PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles], true)) {
@@ -947,7 +947,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                         const COOLDOWN_PERIOD = 5 * 60 * 1000; // 5 minutes in milliseconds
                         if (wsnewThrottle && currentTime - wsnewThrottle < COOLDOWN_PERIOD) {
                             const remainingTime = Math.round((COOLDOWN_PERIOD - (currentTime - wsnewThrottle)) / 1000); // in seconds
-                            interaction.reply(`Please wait ${remainingTime} more seconds before using this command again.`);
+                            interaction.editReply(`Please wait ${remainingTime} more seconds before using this command again.`);
                             return;
                         };
                         wsnewThrottle = currentTime;
