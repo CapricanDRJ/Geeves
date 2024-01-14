@@ -437,7 +437,7 @@ function removeDeadAFKs() {
 async function delExpiredChans(guild) {
     const curTime = Math.floor(Date.now() / 1000);
     const timeCheck = curTime - 12 * 3600; //12 hours after timestamp, we expire
-    const expired = await db.prepare('SELECT * FROM whiteStar WHERE guild = ? AND lifeTime < ?').get(guild.id, timeCheck);//cType
+    const expired = await db.prepare('SELECT * FROM whiteStar WHERE guild = ? AND lifeTime < ?').get(guild.id, timeCheck);
     if (expired) {
         const expiredChan = await db.prepare('SELECT * FROM channels WHERE guild = ? AND mRoleId = ? ORDER BY CASE cType WHEN 0 THEN 10 ELSE cType END ASC').all(guild.id, expired.mRoleId);
         const delRole = await guild.roles.cache.get(expiredChan[0].mRoleId); //anyone should have the same value
@@ -448,7 +448,7 @@ async function delExpiredChans(guild) {
             const channel = await guild.channels.cache.get(theChan.channelId);
             if (channel) await channel.delete('time expired').catch((err) => console.log('error deleting message: ' + err.message));
             db.prepare('DELETE FROM channels WHERE guild = ? AND mRoleId = ? AND channelId = ?').run(guild.id, theChan.mRoleId, theChan.channelId);
-            await wait(5000);//wait 20 seconds to avoid flooding
+            await wait(5000);//wait 5 seconds to avoid flooding
         };
         db.prepare('DELETE from awayTimers WHERE guild = ? AND mRoleId = ?').run(guild.id, expired.mRoleId);
         db.prepare('DELETE FROM whiteStar WHERE guild = ? AND mRoleId = ?').run(guild.id, expired.mRoleId);
