@@ -118,7 +118,7 @@ const myEmojis = {
         button: false
     }
 };
-
+const wait = require('node:timers/promises').setTimeout;//added wait so we don't set off flood limits.
 function setupButtons() {
     const external = new RegExp(/\d+/);
     let bCount = 0;
@@ -219,7 +219,7 @@ async function postAFKs(guild) {
                                 msgNotice += '  <@' + awayTimer.who + '>  ' + awayTimer.what;
                                 if (!!awayTimer.fromWho && awayTimer.fromWho != awayTimer.who) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
                         };
-                        msgNotice += " <t:"+awayTimer.lifeTime+":R>";
+                        msgNotice += " <t:"+awayTimer.lifeTime+":R> ";
                         if (per == "")
                             await afkChan.send({
                                 content: msgNotice,
@@ -236,6 +236,7 @@ async function postAFKs(guild) {
                             }).then((sentMessage) => sentMessage.edit({
                                 content: msgNotice + per
                             }));
+                        await wait(10000); //in case there is more than one message at the same time so we don't flood.
                     };
                     await db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND lifeTime < ?').run(guild.id, mRole.id, curTime); //if there were any above, delete them now. 
                 };
@@ -445,6 +446,7 @@ async function delExpiredChans(guild) {
         if (delRole) await delRole.delete('Time expired').catch((err) => console.log('error deleting role: ' + err.message));
         if (delRoleLead) await delRoleLead.delete('Time expired').catch((err) => console.log('error deleting leader role: ' + err.message));
         for (const theChan of expiredChan) {
+            await wait(20000);//wait 20 seconds to avoid flooding
             const channel = await guild.channels.cache.get(theChan.channelId);
             if (channel) await channel.delete('time expired').catch((err) => console.log('error deleting message: ' + err.message));
             db.prepare('DELETE FROM channels WHERE guild = ? AND mRoleId = ? AND channelId = ?').run(guild.id, theChan.mRoleId, theChan.channelId);
