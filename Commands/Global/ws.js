@@ -946,8 +946,8 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                         const currentTime = Date.now();
                         const COOLDOWN_PERIOD = 5 * 60 * 1000; // 5 minutes in milliseconds
                         if (wsnewThrottle && currentTime - wsnewThrottle < COOLDOWN_PERIOD) {
-                            const remainingTime = Math.round((COOLDOWN_PERIOD - (currentTime - wsnewThrottle)) / 1000); // in seconds
-                            interaction.editReply(`Please wait ${remainingTime} more seconds before using this command again.`);
+                            const remainingTime = ((COOLDOWN_PERIOD - (currentTime - wsnewThrottle)) / 60000).toFixed(2); // in minutes, to two decimal places
+                            interaction.editReply(`Please wait ${remainingTime} minutes before using this command again.`);
                             return;
                         };
                         wsnewThrottle = currentTime;
