@@ -24,8 +24,6 @@ let wsnewThrottle = 0;//limit the usage to once every x minutes for /ws
 
 async function checkTemplate(guildId) {
     let template = await db.prepare('SELECT * FROM template WHERE guild = ? ORDER BY type ASC').all(guildId);
-    console.log(template);
-    if (template.length == 0) console.log("yes");
     if (!template || template?.length == 0) { //install template if it does not exist, then requery the results.
         template = [{
             guild: guildId,
@@ -557,6 +555,14 @@ module.exports = {
                                     replyTemplate();
                                     break;
                                 case 'add':
+                                    let templateCount = await db.prepare('SELECT COUNT(*) AS count FROM template WHERE guild = ?').get(interaction.guildId).count;
+                                    if(templateCount > 8) {
+                                        interaction.editReply({
+                                            content: "Too many channels, delete one first.",
+                                            ephemeral: true
+                                        });
+                                        return;
+                                    };
                                     let type = chanTypes.indexOf(String(interaction.options.get("type").value).toLowerCase());
                                     let addName = String(interaction.options.get("name").value).replace(/[\[\]\{\}\(\)\+\;\$\\]/gm).substring(0, 20);
                                     if (type == -1 || addName.length < 1) {
