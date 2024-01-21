@@ -729,6 +729,7 @@ module.exports = {
 
                 async function nova() {
                     const roleIds = await checkPermissions(2); //2=leader
+                    if(!roleIds)return;
                     const inputTime = String(interaction.options.getString('time')).replace(/\s/g, "");
                     if (inputTime == "expire") {
                         db.prepare('UPDATE whitestar SET lifeTime = ? WHERE guild = ? AND mRoleId = ?').run('0', interaction.guildId, roleIds[0]);
