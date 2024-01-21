@@ -397,20 +397,31 @@ module.exports = {
             //<GuildMember>.roles.highest.position will return a number that you can compare with other role positions
             if (interaction.commandName === 'ws') {
                 //check if bot has permission
-                if (!interaction.guild.members.me.permissions.has([
-                    PermissionFlagsBits.ManageRoles,
-                    PermissionFlagsBits.ManageChannels,
-                    PermissionFlagsBits.ManageMessages,
-                    PermissionFlagsBits.EmbedLinks,
-                    PermissionFlagsBits.AttachFiles,
-                    PermissionFlagsBits.UseExternalEmojis
-                ])) {
-                    interaction.reply({
-                        content: "Sorry, I am missing permissions.",
-                        ephemeral: true
-                    });
-                    return;
-                };
+    const requiredPermissions = [
+      PermissionFlagsBits.ManageRoles,
+      PermissionFlagsBits.ManageChannels,
+      PermissionFlagsBits.ManageMessages,
+      PermissionFlagsBits.EmbedLinks,
+      PermissionFlagsBits.AttachFiles,
+      PermissionFlagsBits.UseExternalEmojis,
+    ];
+
+    const missingPermissions = requiredPermissions.filter(permission => !interaction.guild.members.me.permissions.has(permission));
+
+    if (missingPermissions.length > 0) {
+      // Correctly mapping permission bits to human-readable strings
+      const missingPermissionsNames = missingPermissions.map(permission => {
+        return Object.keys(PermissionFlagsBits).find(key => PermissionFlagsBits[key] === permission);
+      });
+      console.log(`Guild: ${interaction.guild.name} (ID: ${interaction.guild.id}), Missing permissions: ${missingPermissionsNames.join(', ')}`);
+      // Sending an ephemeral reply to inform the user about the missing permissions
+      await interaction.reply({
+        content: `The bot is missing the following permissions: ${missingPermissionsNames.join(', ')}.`,
+        ephemeral: true
+      });
+
+      return; // Stop execution if there are missing permissions
+    }
                 await interaction.deferReply(); // Do this at the top, and all below will be editReply. Otherwise error crashes the btoa.
                 let subCommand = await interaction.options.getSubcommand();
                 let subCommandGroup = await interaction.options.getSubcommandGroup();
