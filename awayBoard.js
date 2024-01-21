@@ -448,7 +448,7 @@ async function delExpiredChans(guild) {
             const channel = await guild.channels.cache.get(theChan.channelId);
             if (channel) await channel.delete('time expired').catch((err) => console.log('error deleting message: ' + err.message));
             db.prepare('DELETE FROM channels WHERE guild = ? AND mRoleId = ? AND channelId = ?').run(guild.id, theChan.mRoleId, theChan.channelId);
-            await wait(5000);//wait 5 seconds to avoid flooding
+            await wait(1500);//wait 1.5 seconds to avoid flooding
         };
         db.prepare('DELETE from awayTimers WHERE guild = ? AND mRoleId = ?').run(guild.id, expired.mRoleId);
         db.prepare('DELETE FROM whiteStar WHERE guild = ? AND mRoleId = ?').run(guild.id, expired.mRoleId);
