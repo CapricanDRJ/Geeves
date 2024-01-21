@@ -134,14 +134,15 @@ module.exports = async(client, interaction) => {
         interaction.deferUpdate();
         return;
     };
-
-    const requiredPermissions = [
-      PermissionFlagsBits.ManageRoles,
-      PermissionFlagsBits.ManageChannels,
-      PermissionFlagsBits.ManageMessages,
-      PermissionFlagsBits.EmbedLinks,
-      PermissionFlagsBits.AttachFiles,
-      PermissionFlagsBits.UseExternalEmojis,
+   const requiredPermissions = [
+        PermissionFlagsBits.ManageRoles,
+        PermissionFlagsBits.ManageChannels,
+        PermissionFlagsBits.ManageMessages,
+        PermissionFlagsBits.EmbedLinks,
+        PermissionFlagsBits.AttachFiles,
+        PermissionFlagsBits.UseExternalEmojis,
+        PermissionFlagsBits.ViewChannel,
+        PermissionFlagsBits.SendMessages
     ];
 
     const missingPermissions = requiredPermissions.filter(permission => !interaction.guild.members.me.permissions.has(permission));
