@@ -154,7 +154,7 @@ module.exports = async(client, interaction) => {
       console.log(`Guild: ${interaction.guild.name} (ID: ${interaction.guild.id}), Missing permissions: ${missingPermissionsNames.join(', ')}`);
       // Sending an ephemeral reply to inform the user about the missing permissions
       await interaction.reply({
-        content: `The bot is missing the following permissions to execute this command: ${missingPermissionsNames.join(', ')}.`,
+        content: `The bot is missing the following permissions: ${missingPermissionsNames.join(', ')}.`,
         ephemeral: true
       });
 
