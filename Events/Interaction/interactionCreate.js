@@ -134,14 +134,34 @@ module.exports = async(client, interaction) => {
         interaction.deferUpdate();
         return;
     };
-    if (!interaction.guild.members.me.permissions.has([
-            PermissionFlagsBits.ManageRoles,
-            PermissionFlagsBits.ManageChannels,
-            PermissionFlagsBits.ManageMessages,
-            PermissionFlagsBits.EmbedLinks,
-            PermissionFlagsBits.AttachFiles,
-            PermissionFlagsBits.UseExternalEmojis
-        ])) return; //permissions missing, lets not make errors
+
+    const requiredPermissions = [
+      PermissionFlagsBits.ManageRoles,
+      PermissionFlagsBits.ManageChannels,
+      PermissionFlagsBits.ManageMessages,
+      PermissionFlagsBits.EmbedLinks,
+      PermissionFlagsBits.AttachFiles,
+      PermissionFlagsBits.UseExternalEmojis,
+    ];
+
+    const missingPermissions = requiredPermissions.filter(permission => !interaction.guild.members.me.permissions.has(permission));
+
+    if (missingPermissions.length > 0) {
+      // Correctly mapping permission bits to human-readable strings
+      const missingPermissionsNames = missingPermissions.map(permission => {
+        return Object.keys(PermissionFlagsBits).find(key => PermissionFlagsBits[key] === permission);
+      });
+      console.log(`Guild: ${interaction.guild.name} (ID: ${interaction.guild.id}), Missing permissions: ${missingPermissionsNames.join(', ')}`);
+      // Sending an ephemeral reply to inform the user about the missing permissions
+      await interaction.reply({
+        content: `The bot is missing the following permissions to execute this command: ${missingPermissionsNames.join(', ')}.`,
+        ephemeral: true
+      });
+
+      return; // Stop execution if there are missing permissions
+    }
+
+
     if (interaction.isButton()) {
         let afkId = interaction.customId;
         if (menuCache[interaction.message.id] && menuCache[interaction.message.id].hasOwnProperty('ship')) afkId = menuCache[interaction.message.id].ship; //if this is the second time around, we have a cache.
