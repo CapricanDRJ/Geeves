@@ -157,8 +157,6 @@ const afkContent = [
     "`Empty`"
 ]; //move to constants file later
 
-var displayName = {};
-
 function displayTime(seconds) {
     let timeString;
     let delTime = (seconds / 3600);
@@ -245,32 +243,6 @@ async function postAFKs(guild) {
     };
 };
 
-async function getDisplayName(guild, id, maxlength) {
-    if (displayName[id]) return displayName[id];
-    let member = await guild.members.cache.get(id);
-    if (!member)
-        memberr = await guild.members.fetch(id, {
-            force: true,
-            withPresences: false
-        }).catch(console.log);
-    if (!member) {
-        member = await guild.members.cache.get(id);
-        console.log("did member cache work the second time? " + member); //Usually it does
-    }
-    if (!member)
-        return "🤷(Left the server)"; //Empty handle
-    else {
-        let Handle;
-        if (member.nickname) Handle = member.nickname;
-        else Handle = member.user.username;
-        if (maxlength) {
-            if (Handle.length > maxlength)
-                Handle = Handle.slice(0, maxlength);
-        };
-        displayName[id] = Handle;
-        return Handle;
-    };
-};
 async function cacheNames(guild) {
     let members = await guild.members.fetch({
         force: true,
