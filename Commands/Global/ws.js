@@ -1089,7 +1089,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                         for (q in template) {
                             if (template[q].type == 0) continue; //skip category
                             let chan = await createchan(nextWS + '_' + template[q].name, wsCat.id, mRoleId, lRoleId, template[q].type);
-                            await wait(5000);//wait 5 seconds to ensure no flooding and all channels create properly.
+                            await wait(1500);//wait 1.5 seconds to ensure no flooding and all channels create properly.
                             if (chan) {
                                 chanList.push(chan);
                                 if (template[q].type == 4) awayChId = chan;
