@@ -340,14 +340,14 @@ async function makeAwayBoard(guild, mRoleId, posted) {
                 break;
             default:
                 curLine += '`';
-                curLine += await getDisplayName(guild, awayTimer.who);
+                curLine += await guild.members.cache.get(awayTimer.who)?.displayName || 'Unknown User';
                 curLine += '` ⠀⠀';
                 break;
         };
         msg += curLine;
         msg += awayTimer.what;
         if (awayTimer.fromWho)
-            if (awayTimer.who != '0' && awayTimer.fromWho != awayTimer.who) msg += "⠀⠀-" + await getDisplayName(guild, awayTimer.fromWho);
+            if (awayTimer.who != '0' && awayTimer.fromWho != awayTimer.who) msg += "⠀⠀-" + await guild.members.cache.get(awayTimer.fromWho)?.displayName || 'Unknown User';
         msg += "<t:"+awayTimer.lifeTime +":t>\n";
         if (msg.length > 1800 || ((msg.length > 800) && (msgArray.length > 0))) {
             msgArray.push(msg);
