@@ -795,7 +795,7 @@ module.exports = {
                     }
                 };
                 async function opponent() {
-                    const roleIds = await checkPermissions(2); //2=leader
+                    const roleIds = await checkPermissions(2); //2=leader//error reply is handled here if it doesn't exist.
                     if (roleIds) {
                         const opponents = [];
                         for (i = 1; i < 16; i++) {
@@ -810,11 +810,7 @@ module.exports = {
                             content: "OK.",
                             ephemeral: true
                         });
-                    } else
-                        interaction.editReply({
-                            content: "Syntax error, I did not understand that.",
-                            ephemeral: true
-                        });
+                    }
                 };
                 async function afk(mType) {
                     const checkRoles = await db.prepare('SELECT * FROM channels WHERE guild = ? AND channelId = ?').get(interaction.guildId, interaction.channelId);
