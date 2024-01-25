@@ -8,7 +8,7 @@ const {
 
 const myEmojis = {
     Work: {
-        id: '☕',
+        id: '1199956524626362419',
         time: 4 * 3600,
         past: "has returned!",
         post: "Should be present for a HS break",
@@ -51,10 +51,10 @@ const myEmojis = {
         post: "is due to return",
         button: true
     },
-    RelicDrone: {
-        id: '1029781633198456893',
-        past: "drone ready!",
-        post: "drone ready!",
+    CheckIn: {
+        id: '👀',
+        past: "check in!",
+        post: "check in!",
         time: 2 * 3600,
         button: true
     },
@@ -153,7 +153,7 @@ const afkContent = [
     "AWAY LIST ",
     0x8b0000,
     "Time⠀⠀User / Reason\n",
-    "/ws afk /ws allied /ws enemy\n⠀",
+    "/ws afk /ws allied /ws enemy\n",
     "`Empty`"
 ]; //move to constants file later
 

@@ -186,7 +186,7 @@ module.exports = async(client, interaction) => {
             case 'Flagship':
                 flagship();
                 break;
-            case 'RelicDrone':
+            case 'CheckIn':
                 afkBreak();
                 break;
             case 'EnemyBattleship':
