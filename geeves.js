@@ -108,5 +108,26 @@ client.on('error', (error) => {
     console.error('Discord.js error:', error);
   }
 });
+const gracefulShutdown = () => {
+  console.log('Bot is being terminated. Closing database connection...');
+  awayBoard.db.close(); // Close the database connection
+  console.log('Database connection closed.');
+  process.exit(0); // Exit the process after the DB connection is closed
+};
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGHUP', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
+
+// For the Discord client events
+client.on('reconnecting', () => {
+  console.log('Bot is attempting to reconnect...');
+  gracefulShutdown(); // Using gracefulShutdown for reconnecting event
+});
+
+client.on('disconnect', event => {
+  console.log(`Bot disconnected: ${event.reason}`);
+  gracefulShutdown(); // Using gracefulShutdown for disconnect event
+});
 
 client.login(Config.Token).catch(console.error);
