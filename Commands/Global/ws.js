@@ -569,7 +569,7 @@ module.exports = {
                                     break;
                                 case 'add':
                                     let templateCount = await db.prepare('SELECT COUNT(*) AS count FROM template WHERE guild = ?').get(interaction.guildId).count;
-                                    if(templateCount > 8) {
+                                    if(templateCount > 11) {
                                         interaction.editReply({
                                             content: "Too many channels, delete one first.",
                                             ephemeral: true
