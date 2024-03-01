@@ -88,7 +88,8 @@ const rest = new REST({
       );
       console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
-      console.error(error);
+        console.error(error);
+	process.exit(0);
   }
 })();
 
