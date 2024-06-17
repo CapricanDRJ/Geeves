@@ -16,6 +16,8 @@ const {
     PermissionFlagsBits,
     StringSelectMenuBuilder
 } = require('discord.js');
+const wait = require('node:timers/promises').setTimeout;
+const cs = require('../../roster.js');
 const timeButtons = [];
 timeButtons[0] = new ActionRowBuilder()
     .addComponents(
@@ -164,6 +166,105 @@ module.exports = async(client, interaction) => {
 
 
     if (interaction.isButton()) {
+
+        const buttonPushed = cs.emojis.map(object => object.name).indexOf(interaction.customId);
+        if (buttonPushed > -1) { //if it is not on my list, we ignore. (for signup)
+            const checkExists = await cs.db.prepare('SELECT messageId FROM roster WHERE serverId = ? AND messageId = ?');
+            const checkResults = checkExists.get(interaction.guildId, interaction.message.id);
+            if (checkResults == undefined) {
+                interaction.message.edit({
+                        components: []
+                    })
+                    .then(() => console.log('Buttons removed from the message.'))
+                    .catch(console.error);
+            } else {
+                const finduser = await cs.db.prepare('SELECT userId FROM roster WHERE serverId = ? AND messageId = ? AND userId = ?').get(interaction.guildId, interaction.message.id, interaction.user.id);
+                if (finduser == undefined) await cs.db.prepare('INSERT INTO roster (serverId, channelId, messageId, userId) VALUES(?,?,?,?)').run(interaction.guildId, interaction.channel.id, interaction.message.id, interaction.user.id);
+                let embed = new EmbedBuilder()
+                    .setTitle("White Star Signup!")
+                    .setColor(0xf2f2e9)
+                    .setDescription(cs.signupMsg);
+                if (buttonPushed == undefined) {
+                    interaction.reply({
+                        content: `Error: Absolute weirdness, it is like I fell into a black hole where I can hear colors!`,
+                        ephemeral: true
+                    });
+                    return;
+                };
+                //last button of the group is always the close/open signup button
+
+
+                const checkclosed = await cs.db.prepare('SELECT closed FROM roster WHERE serverId = ? and messageId = ?').get(interaction.guildId, interaction.message.id);
+                let closed = checkclosed.closed;
+                if ((cs.emojis.length - 1) == buttonPushed) { //last emoji in the mix is always the completion emoji.
+                    if (interaction.member.roles.cache.has(cs.Officer.tsl)) {
+                        if (!closed) embed.setTitle("**Signup Closed**");
+                        closed = !closed;
+                        cs.db.prepare("UPDATE roster SET closed = ?,created_at = strftime('%s', 'now') WHERE serverId = ? AND messageId = ?").run(Number(closed), interaction.guildId, interaction.message.id); //does not matter who it is, we'll just grab one record later to check.
+                    } else {
+                        await interaction.reply({ // And you inform the users that you have found an error.
+                            content: `Not Authorized!`,
+                            ephemeral: true
+                        });
+                        return; //stop here, they hit an unauthorized button.
+                    };
+                } else if (closed) {
+                    //do reply here.
+                    interaction.reply({ // And you inform the users that signups are closed.
+                        content: `Sorry, signups are now closed.`,
+                        ephemeral: true
+                    })
+                    return;
+                };
+                let limited = "";
+                if (cs.emojis[buttonPushed].limited)
+                    for (z in cs.emojis) {
+                        if (cs.emojis[z].limited && z != buttonPushed)
+                            limited += ",n" + z + " = 0";
+                    }
+
+                //toggle boolean, really just 1,0
+                await cs.db.prepare('UPDATE roster SET n' + buttonPushed + ' = ((n' + buttonPushed + ' | 1) - (n' + buttonPushed + ' & 1))' + limited + ' WHERE  serverId = ? AND messageId = ? AND userId = ?').run(interaction.guildId, interaction.message.id, interaction.user.id);
+
+                let lists = [];
+                let clist = [];
+                for (i = 0; i < cs.emojis.length - 1; i++) {
+                    lists[i] = "";
+                    const category = "n" + i;
+                    const eUsers = await cs.db.prepare('SELECT userId FROM roster WHERE serverId = ? AND messageId = ? AND ' + category + ' = 1').all(interaction.guildId, interaction.message.id);
+                    clist.push(Object.keys(eUsers).length);
+                    for (y in eUsers) {
+                        let Handle = interaction.guild.members.cache.get(eUsers[y].userId)?.displayName || 'Unknown User';
+                        lists[i] += "" + Handle + "\n";
+                    };
+                    if (lists[i] == "") lists[i] = "Empty";
+
+                    embed.addFields({
+                        name: "<:" + cs.emojis[i].name + ":" + cs.emojis[i].id + ">  " + clist[i],
+                        value: lists[i],
+                        inline: true
+                    })
+                };
+                await wait(500);
+                await interaction.deferUpdate();
+                interaction.editReply({
+                    content: cs.headerContent,
+                    ephemeral: false,
+                    embeds: [embed],
+                    allowedMentions: {
+                        parse: ["roles"]
+                    },
+                    components: cs.defButtons
+                });
+            };
+	 return;
+        };
+
+
+
+
+
+
         let afkId = interaction.customId;
         if (menuCache[interaction.message.id] && menuCache[interaction.message.id].hasOwnProperty('ship')) afkId = menuCache[interaction.message.id].ship; //if this is the second time around, we have a cache.
         const button = awayBoard.myEmojis[afkId];
