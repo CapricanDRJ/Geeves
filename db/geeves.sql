@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
 "lifeTime"INTEGER NOT NULL,
 "what"TEXT NOT NULL,
 "who"TEXT NOT NULL,
-"fromWho" TEXT);
+"fromWho" TEXT, personal INTEGER DEFAULT 0);
 CREATE TABLE IF NOT EXISTS 'management' (
 "guild" TEXT NOT NULL,
 "extraRoles" TEXT DEFAULT "[]");
