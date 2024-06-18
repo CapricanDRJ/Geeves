@@ -296,6 +296,11 @@ const myEmojis = {
 };
 const pAfkButtons = ['Drone', 'Combat', 'Shield', 'Econ'];
 const wait = require('node:timers/promises').setTimeout;//added wait so we don't set off flood limits.
+function formatTime(curLine){
+    const padding = curLine.indexOf(".") == -1 ? 9 : 10;
+    return curLine.padEnd(padding, '⠀');
+}
+
 function setupButtons() {
     const external = new RegExp(/\d+/);
     let bCount = 0;
@@ -339,7 +344,7 @@ const db = require('better-sqlite3')('db/geeves.db', {
 const afkContent = [
     "AWAY LIST ",
     0x8b0000,
-    "Time⠀⠀User / Reason\n",
+    "Time⠀⠀⠀⠀⠀⠀⠀⠀⠀User / Reason\n",
     "/ws afk /ws allied /ws enemy\n",
     "`Empty`"
 ]; //move to constants file later
@@ -455,59 +460,41 @@ async function makeAwayBoard(guild, mRoleId, posted) {
     if (!afkChan) return;
     let wsRole = await guild.roles.cache.get(whiteStar.mRoleId);
     if (!wsRole) return;
-    let novaTime = ((whiteStar.lifeTime - curTime) / 3600);
-    let days, hours, minutes, neg = "";
-    if (novaTime < 0) neg = "-";
-
-    if (novaTime < 0) {
-        novaTime = (curTime - whiteStar.lifeTime) / 3600;
-        neg = '-';
-    };
-    let novaMsg = "" + myEmojis.Nova.inline + neg + "**"
-    days = Math.floor(novaTime / 24);
-    novaMsg += days ? days + "d" : "";
-    hours = Math.floor(novaTime) - (days * 24);
-    novaMsg += hours ? hours + "h" : "";
-    minutes = Math.floor((novaTime * 60) - (days * 24 * 60) - (hours * 60));
-    novaMsg += minutes + "m**\n";
+    let novaTime = (Math.abs(whiteStar.lifeTime - curTime) / 3600);
+    const neg = whiteStar.lifeTime - curTime < 0 ? "-" : "";
+    let novaMsg = `${myEmojis.Nova.inline} ${neg}**`
+    const days = Math.floor(novaTime / 24);
+    const hours = Math.floor(novaTime) - (days * 24);
+    const minutes = Math.floor((novaTime * 60) - (days * 24 * 60) - (hours * 60));
+    novaMsg += days ? `${days}d` : ``;
+    novaMsg += hours ? `${hours}h` : ``;
+    novaMsg += `${minutes}m**`;
     let msg = "";
-    if (whiteStar.novaDone == 0) msg += '**0m**⠀⠀' + myEmojis.Whitestar.inline + '`/ws nova` has not been set.\n';
+    if (whiteStar.novaDone == 0) msg += `**0m**⠀⠀⠀⠀⠀⠀⠀⠀${myEmojis.Whitestar.inline} \`/ws nova\` has not been set.\n`;
     if (whiteStar.novaDone == 2) {
-        let delTime = (((whiteStar.lifeTime + 12 * 3600) - curTime) / 3600);
-        if (delTime < 1) msg += "**" + Math.floor(delTime * 60) + "m";
-        else msg += "**" + Math.floor(delTime * 10) / 10 + "h";
-        msg += '**⠀⠀' + myEmojis.Whitestar.inline + '<@&' + whiteStar.mRoleId + '> Deletion, or **/ws nova expire** to expedite\n';
+        const delUnix = whiteStar.lifeTime + 12 * 3600;
+        let delTime = ((delUnix - curTime) / 3600);
+        msg += delTime < 1 ? `**${Math.floor(delTime * 60)}m**` : `**${Math.floor(delTime * 10) / 10}h**`;
+        msg += `<t:${whiteStar.lifeTime + 12 * 3600}:t> ${myEmojis.Whitestar.inline} <@&${whiteStar.mRoleId}> Deletion, or **/ws nova expire** to expedite\n`;
     };
     for (const awayTimer of afkTimers) {
-        let curLine = "";
-        let t = ((awayTimer.lifeTime - curTime) / 3600);
-        if (t < 1)
-            curLine += "**" + Math.floor(t * 60) + "m";
-        else
-            curLine += "**" + Math.floor(t * 10) / 10 + "h";
-        let padding = 8;
-        if (curLine.indexOf(".") == -1) padding = padding - 1;
-        msg += curLine.padEnd(padding, '⠀'); //'⠀');
-        msg += "**";
-        curLine = "";
+        const t = ((awayTimer.lifeTime - curTime) / 3600);
+        const tValue = t < 1 ? `**${Math.floor(t * 60)}m**` : `**${Math.floor(t * 10) / 10}h**`;
+        msg += `${formatTime(tValue)}@<t:${awayTimer.lifeTime}:t>`;
         switch (awayTimer.who) {
             case "0": //enemy notice
-                msg += "" + myEmojis.E.inline + "`nemy`⠀⠀";
+                msg += `${myEmojis.E.inline}\`nemy\` `;
                 break;
             case "10": //role notice
-                msg += "" + myEmojis.Whitestar.inline;
+                msg += myEmojis.Whitestar.inline;
                 break;
             default:
-                curLine += '`';
-                curLine += await guild.members.cache.get(awayTimer.who)?.displayName || 'Unknown User';
-                curLine += '` ⠀⠀';
+                msg += `\`${String(await guild.members.cache.get(awayTimer.who)?.displayName || 'Unknown')}\``;
                 break;
         };
-        msg += curLine;
-        msg += awayTimer.what;
+        msg += `${awayTimer.what}\n`;
         //if (awayTimer.fromWho)
         //    if (awayTimer.who != '0' && awayTimer.fromWho != awayTimer.who) msg += "⠀⠀-" + await guild.members.cache.get(awayTimer.fromWho)?.displayName || 'Unknown User';
-        msg += "<t:"+awayTimer.lifeTime +":t>\n";
         if (msg.length > 1800 || ((msg.length > 800) && (msgArray.length > 0))) {
             msgArray.push(msg);
             msg = "";
