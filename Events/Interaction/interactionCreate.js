@@ -14,11 +14,53 @@ const {
     ButtonStyle,
     EmbedBuilder,
     PermissionFlagsBits,
-    StringSelectMenuBuilder
+    StringSelectMenuBuilder,
+    PermissionsBitField
 } = require('discord.js');
 const wait = require('node:timers/promises').setTimeout;
 const cs = require('../../roster.js');
+const pAfkKeys = ['Drone', 'Combat', 'Shield', 'Econ'];
+const personalAfkIds = pAfkKeys.flatMap(category => {
+        if (awayBoard.myEmojis[category]) {
+            const categoryId = awayBoard.myEmojis[category].id;
+            const subModuleIds = Object.values(awayBoard.myEmojis[category])
+                .filter(subModule => typeof subModule === 'object' && subModule !== null && subModule.hasOwnProperty('id'))
+                .map(subModule => subModule.id);
+            return [categoryId, ...subModuleIds];
+        }
+        return [];
+    });
 const timeButtons = [];
+const personalButtonCache = {};
+// Function to create action rows for a category
+function createPersonalButtonCache(category) {
+    const menuButtons = [];
+    const subModules = Object.keys(awayBoard.myEmojis[category]).filter(subKey => {
+        const subModule = awayBoard.myEmojis[category][subKey];
+        return typeof subModule === 'object' && subModule !== null && subModule.hasOwnProperty('id');
+    });
+
+    let actionRow = new ActionRowBuilder();
+    for (let i = 0; i < subModules.length; i++) {
+        const module = subModules[i];
+        const subModule = awayBoard.myEmojis[category][module];
+        actionRow.addComponents(
+            new ButtonBuilder()
+                .setCustomId(subModule.id)
+                .setEmoji(subModule.id)
+                .setStyle(2) // 2 is grey
+        );
+
+        // Add the action row to the menuButtons and create a new one after every 5 buttons
+        if ((i + 1) % 5 === 0 || i === subModules.length - 1) {
+            menuButtons.push(actionRow);
+            actionRow = new ActionRowBuilder();
+        }
+    }
+
+    menuButtons.unshift(...timeButtons); // Add timeButtons at the beginning
+    return menuButtons;
+}
 timeButtons[0] = new ActionRowBuilder()
     .addComponents(
         new StringSelectMenuBuilder()
@@ -197,7 +239,7 @@ module.exports = async(client, interaction) => {
                 const checkclosed = await cs.db.prepare('SELECT closed FROM roster WHERE serverId = ? and messageId = ?').get(interaction.guildId, interaction.message.id);
                 let closed = checkclosed.closed;
                 if ((cs.emojis.length - 1) == buttonPushed) { //last emoji in the mix is always the completion emoji.
-                    if (interaction.member.roles.cache.has(cs.Officer.tsl)) {
+                    if (interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles) && interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
                         if (!closed) embed.setTitle("**Signup Closed**");
                         closed = !closed;
                         cs.db.prepare("UPDATE roster SET closed = ?,created_at = strftime('%s', 'now') WHERE serverId = ? AND messageId = ?").run(Number(closed), interaction.guildId, interaction.message.id); //does not matter who it is, we'll just grab one record later to check.
@@ -260,11 +302,6 @@ module.exports = async(client, interaction) => {
 	 return;
         };
 
-
-
-
-
-
         let afkId = interaction.customId;
         if (menuCache[interaction.message.id] && menuCache[interaction.message.id].hasOwnProperty('ship')) afkId = menuCache[interaction.message.id].ship; //if this is the second time around, we have a cache.
         const button = awayBoard.myEmojis[afkId];
@@ -308,10 +345,91 @@ module.exports = async(client, interaction) => {
             case 'Delete':
                 ackTimers();
                 break;
-            default: //figure out if it is opponent or ally
-                whichShip();
+            case 'List':
+                personalBoard(true);
+                break;
+            default:
+                if (personalAfkIds.indexOf(interaction.customId) !== -1) personalAfk();
+                else whichShip();
                 break;
         };
+
+        async function personalBoard(reply) {
+            const afkTimers = await awayBoard.db.prepare('SELECT * FROM awayTimers WHERE mRoleId = ? AND guild = ? AND who = ? AND personal = 1 ORDER BY lifeTime ASC').all(wsRole.mRoleId, interaction.guildId, interaction.user.id);
+            let description = ``;
+            if (afkTimers.length > 0) {
+                for (const awayTimer of afkTimers) {
+                    description += `${awayTimer.what} <t:${awayTimer.lifeTime}:R> <t:${awayTimer.lifeTime}:f>\n`;
+                }
+            } else description = "All modules available";
+            const embed = new EmbedBuilder()
+                .setTitle('Personal Module Timers')
+                .setColor(whiteStar.colour)
+                .setDescription(description);
+            if(reply) {
+                interaction.reply({
+                    embeds: [embed],
+                    ephemeral: true
+                });
+            } else return embed;
+        }
+
+//const personalButtonCache = {};
+// Function to create action rows for a category
+//function createPersonalButtonCache(category) {
+        async function personalAfk() {
+            const category = pAfkKeys.find(key => awayBoard.myEmojis[key].id === interaction.customId);
+            if (category !== undefined) {
+                if (!personalButtonCache[category]) {
+                    personalButtonCache[category] = createPersonalButtonCache(category);
+                }
+       
+                const message = await interaction.reply({
+                    ephemeral: true,
+                    fetchReply: true,
+                    components: personalButtonCache[category]
+                });
+                menuCache[message.id] = {
+                    hours: 0,
+                    minutes: 0,
+                    timeStamp: Math.floor(Date.now() / 1000),
+                    ship: interaction.customId,
+                };
+            } else {
+                let foundObject = null;
+
+                for (const key of pAfkKeys) {
+                    const subKeys = Object.keys(awayBoard.myEmojis[key]);
+                    
+                    for (const subKey of subKeys) {
+                        const subCategory = awayBoard.myEmojis[key][subKey];
+                        if (typeof subCategory === 'object' && subCategory !== null && subCategory.id === interaction.customId) {
+                            foundObject = subCategory;
+                            break;
+                        }
+                    }
+                    if (foundObject) {
+                        break;
+                    }
+                };
+                if(foundObject !== null) {
+                    const { hours, minutes } = menuCache[interaction.message.id] || { hours: 0, minutes: 0 };
+                    const lifeTime = Math.floor((Date.now() / 1000) + foundObject.time - ((hours * 3600) + (minutes * 60)));
+                    await awayBoard.db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, personal) VALUES(?,?,?,?,?,?)').run(interaction.guildId, wsRole.mRoleId, lifeTime, foundObject.inline, interaction.user.id,1);
+                    const embed = await personalBoard();
+                    interaction.update({
+                        embeds: [embed],
+                        components: []
+                    });
+                } else {
+                    interaction.update({
+                        content: 'An error occured',
+                        components: []
+                    });
+                }
+            }
+        }
+        
         async function ackTimers(cancelled) {
             if (cancelled) {
                 interaction.update({
@@ -407,6 +525,8 @@ module.exports = async(client, interaction) => {
                     what = "<@&" + wsRole.mRoleId + ">⠀⠀" + button.inline;
                 }
             } else {
+                console.log(interaction.customId);
+                console.log("here");
                 const opponents = await JSON.parse(whiteStar.opponents);
                 if (!!opponents[Number(interaction.customId)]) {
                     who = '0';

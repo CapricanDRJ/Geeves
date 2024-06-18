@@ -93,6 +93,182 @@ const myEmojis = {
         id: '🗑',
         button: true
     },
+    List: {
+        id: '1252441091492282409',
+        button: true
+    },
+    Econ: {
+        id: '1252436610017132706',
+        button: true,
+        Stealth: {
+            id: '1252331956566491287',
+            time: 129600
+        },
+        RelicDrone: {
+            id: '1252332525636816999',
+            time: 432000
+        },
+        Dispatch: {
+            id: '1252331987776311458',
+            time: 432000
+        },
+        CargoRocket: {
+            id: '1252446511376105562',
+            time: 36000
+        },
+        CargoRepair: {
+            id: '1252446510423998484',
+            time: 36000
+        },
+        MiningBoost: {
+            id: '1252331973767069768',
+            time: 43200
+        },
+        RemoteMining: {
+            id: '1252332833746452642',
+            time: 43200
+        },
+        Genesis: {
+            id: '1252332832400080946',
+            time: 432000
+        },
+        Enrich: {
+            id: '1252333014596325517',
+            time: 432000
+        },
+        Crunch: {
+            id: '1252331998601805925',
+            time: 172800
+        },
+        HydroUpload: {
+            id: '1252352621763887185',
+            time: 57600
+        },
+        HydroRocket: {
+            id: '1252352544919916594',
+            time: 36000
+        },
+        BlastDrone: {
+            id: '1252332690578084030',
+            time: 57600
+        }
+    },
+    Shield: {
+        id: '1252333446529814559',
+        button: true,
+        AlphaShield: {
+            id: '1252331957636038656',
+            time: 72000
+        },
+        ImpulseShield: {
+            id: '1252331959850504212',
+            time: 72000
+        },
+        OmegaShield: {
+            id: '1252331958873362472',
+            time: 72000
+        },
+        BlastShield: {
+            id: '1252332001793413251',
+            time: 72000
+        },
+        MirrorShield: {
+            id: '1252331969925353615',
+            time: 72000
+        },
+        AreaShield: {
+            id: '1252332005262364732',
+            time: 72000
+        }
+    },
+    Combat: {
+        id: '1252332012153602201',
+        button: true,
+        Emp: {
+            id: '1252331984244707328',
+            time: 129600
+        },
+        Fortify: {
+            id: '1252331980738269225',
+            time: 129600
+        },
+        Teleport: {
+            id: '1252331955601674291',
+            time: 129600
+        },
+        DamageAmplifier: {
+            id: '1252333193248641235',
+            time: 129600
+        },
+        Destiny: {
+            id: '1252333012461424680',
+            time: 172800
+        },
+        Barrier: {
+            id: '1252333335917891654',
+            time: 129600
+        },
+        Vengeance: {
+            id: '1252331952346890361',
+            time: 129600
+        },
+        DeltaRocket: {
+            id: '1252331991274356828',
+            time: 129600
+        },
+        Leap: {
+            id: '1252331977277968555',
+            time: 129600
+        },
+        Bond: {
+            id: '1252333192078168155',
+            time: 172800
+        },
+        Suspend: {
+            id: '1252331954385322098',
+            time: 129600
+        },
+        OmegaRocket: {
+            id: '1252332622277775410',
+            time: 172800
+        },
+        RemoteBomb: {
+            id: '1252331963252080730',
+            time: 172800
+        }
+    },
+    Drone: {
+        id: '1252333445632233552',
+        button: true,
+        DecoyDrone: {
+            id: '1252331995749552199',
+            time: 129600
+        },
+        RepairDrone: {
+            id: '1252332366379352115',
+            time: 129600
+        },
+        RocketDrone: {
+            id: '1252449670408572958',
+            time: 129600
+        },
+        LaserTurret: {
+            id: '1252331953365979146',
+            time: 172800
+        },
+        ChainRayTurret: {
+            id: '1252332008827392000',
+            time: 129600
+        },
+        DeltaDrones: {
+            id: '1252333194557001821',
+            time: 180000
+        },
+        DroneSquad: {
+            id: '1252333013367263283',
+            time: 172800
+        }
+    },
     E: {
         id: '1028931983293808690',
         button: false
@@ -118,6 +294,7 @@ const myEmojis = {
         button: false
     }
 };
+const pAfkButtons = ['Drone', 'Combat', 'Shield', 'Econ'];
 const wait = require('node:timers/promises').setTimeout;//added wait so we don't set off flood limits.
 function setupButtons() {
     const external = new RegExp(/\d+/);
@@ -125,9 +302,19 @@ function setupButtons() {
     const row = [];
     for (key in myEmojis) {
         myEmojis[key].name = key;
-        if (external.test(myEmojis[key].id)) //iterating the loop anyway, so we setup inline here.
-            myEmojis[key].inline = '<:' + key + ':' + myEmojis[key].id + '>';
-        else myEmojis[key].inline = myEmojis[key].id;
+        if(pAfkButtons.indexOf(key) !== -1) {
+            for (i in myEmojis[key]) {
+                const subModule = myEmojis[key][i];
+                if(typeof subModule === 'object' && subModule !== null && subModule.hasOwnProperty('id'))
+                    subModule.inline = '<:' + i + ':' + subModule.id + '>';
+            };
+            myEmojis[key].byId = true;
+        } else {
+            myEmojis[key].byId = false;
+            if (external.test(myEmojis[key].id))
+                myEmojis[key].inline = '<:' + key + ':' + myEmojis[key].id + '>';
+            else myEmojis[key].inline = myEmojis[key].id;
+        }
         if (myEmojis[key].button && bCount < 15) {
             const r = Math.floor(bCount / 5);
             bCount++;
@@ -136,7 +323,7 @@ function setupButtons() {
             }
             row[r].addComponents(
                 new ButtonBuilder()
-                .setCustomId(key)
+                .setCustomId(myEmojis[key].byId ? myEmojis[key].id : key)
                 .setEmoji(myEmojis[key].id)
                 .setStyle(ButtonStyle.Secondary),
             );
@@ -207,16 +394,17 @@ async function postAFKs(guild) {
                                 break;
                             case '10':
                                 msgNotice += awayTimer.what;
-                                if (awayTimer.fromWho) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
+                                //if (awayTimer.fromWho) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
                                 break;
                             case '20':
                                 msgNotice += '  <@&' + wsAFK.mRoleId + '>  ' + awayTimer.what;
-                                if (!!awayTimer.fromWho) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
+                                //if (awayTimer.fromWho) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
                                 break;
                             default:
                                 msgNotice += '  <@' + awayTimer.who + '>  ' + awayTimer.what;
-                                if (!!awayTimer.fromWho && awayTimer.fromWho != awayTimer.who) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
+                                //if (!!awayTimer.fromWho && awayTimer.fromWho != awayTimer.who) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
                         };
+                        if(awayTimer.personal) pingable = [];
                         msgNotice += " <t:"+awayTimer.lifeTime+":R> ";
                         if (per == "")
                             await afkChan.send({
@@ -258,10 +446,9 @@ async function cacheNames(guild) {
 
 async function makeAwayBoard(guild, mRoleId, posted) {
     const curTime = Math.floor(Date.now() / 1000);
-    const afkTimers = await db.prepare('SELECT * FROM awayTimers WHERE mRoleId = ? AND guild = ? ORDER BY lifeTime ASC').all(mRoleId, guild.id);
+    const afkTimers = await db.prepare('SELECT * FROM awayTimers WHERE mRoleId = ? AND guild = ? AND personal = 0 ORDER BY lifeTime ASC').all(mRoleId, guild.id);
     const whiteStar = await db.prepare('SELECT * FROM whiteStar WHERE guild = ? AND mRoleId = ?').get(guild.id, mRoleId);
     let msgArray = [];
-    let enemyList = [];
     if (!whiteStar) return; //no idea where stuff is, but no where to post.
     if (!whiteStar.awayChId) return;
     let afkChan = await guild.channels.cache.get(whiteStar.awayChId);
@@ -318,8 +505,8 @@ async function makeAwayBoard(guild, mRoleId, posted) {
         };
         msg += curLine;
         msg += awayTimer.what;
-        if (awayTimer.fromWho)
-            if (awayTimer.who != '0' && awayTimer.fromWho != awayTimer.who) msg += "⠀⠀-" + await guild.members.cache.get(awayTimer.fromWho)?.displayName || 'Unknown User';
+        //if (awayTimer.fromWho)
+        //    if (awayTimer.who != '0' && awayTimer.fromWho != awayTimer.who) msg += "⠀⠀-" + await guild.members.cache.get(awayTimer.fromWho)?.displayName || 'Unknown User';
         msg += "<t:"+awayTimer.lifeTime +":t>\n";
         if (msg.length > 1800 || ((msg.length > 800) && (msgArray.length > 0))) {
             msgArray.push(msg);
@@ -392,7 +579,7 @@ async function makeAwayBoard(guild, mRoleId, posted) {
             embeds: [embed],
             components: defButtons
         }).catch(error => {
-            console.log("deletion detected"); //weird caatch, sometimes happens.
+            console.log("deletion detected"); //weird catch, sometimes happens.
             afkChan.send({
                 embeds: [embed],
                 components: defButtons

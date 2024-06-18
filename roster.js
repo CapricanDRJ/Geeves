@@ -35,7 +35,7 @@ const emojis = [{
     desc: "**Prefer Not to Run**\n",
     limited: true
 }, {
-    name: 'Suspend',
+    name: 'Close',
     id: '1242296723129237654',
     desc: false,
     limited: false
