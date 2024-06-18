@@ -373,10 +373,6 @@ module.exports = async(client, interaction) => {
                 });
             } else return embed;
         }
-
-//const personalButtonCache = {};
-// Function to create action rows for a category
-//function createPersonalButtonCache(category) {
         async function personalAfk() {
             const category = pAfkKeys.find(key => awayBoard.myEmojis[key].id === interaction.customId);
             if (category !== undefined) {
@@ -385,6 +381,7 @@ module.exports = async(client, interaction) => {
                 }
        
                 const message = await interaction.reply({
+                    content: "**Note:** Timers do not include effect duration.",
                     ephemeral: true,
                     fetchReply: true,
                     components: personalButtonCache[category]
