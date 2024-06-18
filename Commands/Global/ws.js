@@ -1135,9 +1135,13 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                             message += '<#' + chanList[y] + '> ';
                         };
                         message += 'and Roles: <@&' + mRoleId + '> and <@&' + lRoleId + '>';
-                        await interaction.editReply({
-                            content: message,
-                        });
+                        try{
+                            await interaction.editReply({
+                                content: message,
+                            });
+                        } catch (error) {
+                            console.log("message post error, generally ignore "+error);
+                        }
                         interaction.guild.channels.cache.get(chanList[0]).send({
                             content: message,
                             allowedMentions: {
