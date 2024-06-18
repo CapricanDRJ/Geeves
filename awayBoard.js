@@ -47,7 +47,7 @@ const myEmojis = {
     },
     Flagship: {
         id: '1028931978172579870',
-        time: 16 * 3600,
+        time: 72 * 3600,
         post: "is due to return",
         button: true
     },
