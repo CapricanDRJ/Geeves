@@ -342,7 +342,7 @@ const db = require('better-sqlite3')('db/geeves.db', {
     verbose: console.log
 });
 const afkContent = [
-    "AWAY LIST ",
+    "TIMERS ",
     0x8b0000,
     "Time⠀⠀⠀⠀⠀⠀⠀⠀⠀User / Reason\n",
     "/ws afk /ws allied /ws enemy\n",
