@@ -1011,143 +1011,151 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                         let newPosition = 0;
                         let inputChan = interaction.guild.channels.cache.get(interaction.channelId);
                         if (inputChan?.parent)
-                            newPosition = inputChan.parent.position;
-                        else newPosition = inputChan.position;
-                        console.log("NP>>>.. " + newPosition);
+                            newPosition = inputChan.parent.position+1;
+                        else newPosition = inputChan.position+1;
                         const wsCat = await interaction.guild.channels.create({
                             name: "" + nextWS + "_" + template[0].name,
                             type: ChannelType.GuildCategory,
                             position: newPosition,
                         }).catch(console.log);
-                        db.prepare('INSERT INTO channels (guild, channelId, mRoleId, lRoleId, cType) VALUES(?,?,?,?,?)').run(interaction.guildId, wsCat.id, mRoleId, lRoleId, '0');
-                        chanList.push(wsCat.id);
-                        //end create category
+                        if(wsCat) {
+                            await wsCat.setPosition(newPosition).catch(console.log);
+                            db.prepare('INSERT INTO channels (guild, channelId, mRoleId, lRoleId, cType) VALUES(?,?,?,?,?)').run(interaction.guildId, wsCat.id, mRoleId, lRoleId, '0');
+                            chanList.push(wsCat.id);
+                            //end create category
 
-                        async function createchan(chname, cat, mRoleId, lRoleId, cType) {
-                            const leader = chanProperties[cType][1];
-                            const restricted = chanProperties[cType][2];
-                            const eRoles = await db.prepare('SELECT extraRoles FROM management WHERE guild = ?').get(interaction.guildId);
-                            const extraRoles = eRoles ? JSON.parse(eRoles.extraRoles) : []; //collection of roles to add to new channels, ideal for other bots
-                            let permissions = [{
-                                id: interaction.guildId,
-                                allow: [PermissionFlagsBits.AttachFiles, PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.AddReactions, PermissionFlagsBits.ReadMessageHistory],
-                                deny: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages],
-                            }, {
-                                id: mRoleId,
-                                allow: leader ? [] : restricted ? [PermissionFlagsBits.ViewChannel] : [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]
-                            }, {
-                                id: lRoleId,
-                                allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages],
-                            }, {
-                                id: interaction.client.user.id,
-                                allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory, PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.UseExternalEmojis, PermissionFlagsBits.AttachFiles, PermissionFlagsBits.AddReactions],
-                            }];
-                            for (i in extraRoles) {
-                                const extraRole = await interaction.guild.roles.cache.get(extraRoles[i]);
-                                if (!!extraRole)
-                                    permissions.push({
-                                        id: extraRoles[i],
-                                        allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]
-                                    })
+                            async function createchan(chname, cat, mRoleId, lRoleId, cType) {
+                                const leader = chanProperties[cType][1];
+                                const restricted = chanProperties[cType][2];
+                                const eRoles = await db.prepare('SELECT extraRoles FROM management WHERE guild = ?').get(interaction.guildId);
+                                const extraRoles = eRoles ? JSON.parse(eRoles.extraRoles) : []; //collection of roles to add to new channels, ideal for other bots
+                                let permissions = [{
+                                    id: interaction.guildId,
+                                    allow: [PermissionFlagsBits.AttachFiles, PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.AddReactions, PermissionFlagsBits.ReadMessageHistory],
+                                    deny: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages],
+                                }, {
+                                    id: mRoleId,
+                                    allow: leader ? [] : restricted ? [PermissionFlagsBits.ViewChannel] : [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]
+                                }, {
+                                    id: lRoleId,
+                                    allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages],
+                                }, {
+                                    id: interaction.client.user.id,
+                                    allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory, PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.UseExternalEmojis, PermissionFlagsBits.AttachFiles, PermissionFlagsBits.AddReactions],
+                                }];
+                                for (i in extraRoles) {
+                                    const extraRole = await interaction.guild.roles.cache.get(extraRoles[i]);
+                                    if (!!extraRole)
+                                        permissions.push({
+                                            id: extraRoles[i],
+                                            allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]
+                                        })
+                                };
+                                try {
+                                    const channel = await interaction.guild.channels.create({
+                                        name: chname,
+                                        type: ChannelType.GuildText,
+                                        parent: cat,
+                                        permissionOverwrites: permissions,
+                                        reason: 'To be deleted in a few days by Geeves',
+                                    }).catch(console.log);
+                                    if (channel) {
+                                        db.prepare('INSERT INTO channels (guild, channelId, mRoleId, lRoleId, cType) VALUES(?,?,?,?,?)').run(interaction.guildId, channel.id, mRoleId, lRoleId, cType);
+                                        console.log(channel.id);
+                                        return channel.id;
+                                    } else return null;
+                                } catch (error) {
+                                    console.log(error);
+                                    return null;
+                                }
                             };
-                            try {
-                                const channel = await interaction.guild.channels.create({
-                                    name: chname,
-                                    type: ChannelType.GuildText,
-                                    parent: cat,
-                                    permissionOverwrites: permissions,
-                                    reason: 'To be deleted in a few days by Geeves',
-                                }).catch(console.log);
-                                if (channel) {
-                                    db.prepare('INSERT INTO channels (guild, channelId, mRoleId, lRoleId, cType) VALUES(?,?,?,?,?)').run(interaction.guildId, channel.id, mRoleId, lRoleId, cType);
-                                    console.log(channel.id);
-                                    return channel.id;
-                                } else return null;
-                            } catch (error) {
-                                console.log(error);
-                                return null;
-                            }
-                        };
-                        async function uploadimage(chId, imageId) {
-                            try {
-                                const channel = await interaction.client.channels.resolve(chId);
-                                const msg = await channel.send({
-                                    files: [
-                                        './files/' + imageId + '.png',
-                                    ],
-                                });
-                                msg.pin();
-                            } catch (e) {
-                                // report error to user?
-                                console.log(e);
-                            }
-                        };
-                        async function sendHelp(chId) {
-                            try {
-                                const channel = await interaction.client.channels.resolve(chId);
-                                const msg = await channel.send({
-                                    content: "```The following commands are required for proper function:\n\/ws opponents\n\/ws nova\n\nTo change default channel names and default roles added such as additional bots, server Admins may use\n/ws template```"
-                                });
-                                msg.pin();
-                            } catch (e) {
-                                // report error to user?
-                                console.log(e);
-                            }
-                        };
+                            async function uploadimage(chId, imageId) {
+                                try {
+                                    const channel = await interaction.client.channels.resolve(chId);
+                                    const msg = await channel.send({
+                                        files: [
+                                            './files/' + imageId + '.png',
+                                        ],
+                                    });
+                                    msg.pin();
+                                } catch (e) {
+                                    // report error to user?
+                                    console.log(e);
+                                }
+                            };
+                            async function sendHelp(chId) {
+                                try {
+                                    const channel = await interaction.client.channels.resolve(chId);
+                                    const msg = await channel.send({
+                                        content: "```The following commands are required for proper function:\n\/ws opponents\n\/ws nova\n\nTo change default channel names and default roles added such as additional bots, server Admins may use\n/ws template```"
+                                    });
+                                    msg.pin();
+                                } catch (e) {
+                                    // report error to user?
+                                    console.log(e);
+                                }
+                            };
 
-                        let awayChId = "";
-                        for (q in template) {
-                            if (template[q].type == 0) continue; //skip category
-                            let chan = await createchan(nextWS + '_' + template[q].name, wsCat.id, mRoleId, lRoleId, template[q].type);
-                            await wait(1500);//wait 1.5 seconds to ensure no flooding and all channels create properly.
-                            if (chan) {
-                                chanList.push(chan);
-                                if (template[q].type == 4) awayChId = chan;
-                                if (template[q].type == 2) await uploadimage(chan, 'whitestar');
-                                if (template[q].type == 3) await sendHelp(chan);
+                            let awayChId = "";
+                            for (q in template) {
+                                if (template[q].type == 0) continue; //skip category
+                                let chan = await createchan(nextWS + '_' + template[q].name, wsCat.id, mRoleId, lRoleId, template[q].type);
+                                await wait(1500);//wait 1.5 seconds to ensure no flooding and all channels create properly.
+                                if (chan) {
+                                    chanList.push(chan);
+                                    if (template[q].type == 4) awayChId = chan;
+                                    if (template[q].type == 2) await uploadimage(chan, 'whitestar');
+                                    if (template[q].type == 3) await sendHelp(chan);
+                                }
+                            };
+                            if (chanList.length == 0) {
+                                await interaction.guild.roles.cache.find((r) => r.name == nextWS).delete();
+                                await interaction.guild.roles.cache.find((r) => r.name == nextWS + 'lead').delete();
+                                interaction.editReply({
+                                    content: "I am broken",
+                                    ephemeral: true
+                                });
+                                return;
+                            };
+                            await db.prepare('INSERT INTO whiteStar (guild, mRoleId, lifeTime, awayChId, colour) VALUES(?,?,?,?,?)').run(interaction.guildId, mRoleId, Math.floor((Date.now() / 1000) + end_of_life), awayChId, rColour);
+                            //await db.prepare('INSERT INTO whiteStar (guild, mRoleId, lifeTime, awayChId) VALUES(?,?,?,?)').run(interaction.guildId, mRoleId, Math.floor((Date.now() / 1000)), awayChId);
+
+                            await interaction.member.roles.add(mRoleId).catch(console.log);
+                            wait(1000);
+                            await interaction.member.roles.add(lRoleId).catch(console.log);
+                            wait(1000);
+                            for (i = 1; i < 16; i++) {
+                                const theUser = await interaction.options.getMember('user' + i);
+                                if (theUser) {
+                                    await theUser.roles.add(mRoleId).catch(console.log);
+                                    wait(1000)
+                                };
+                            };
+                            let message = 'created Category <#' + chanList.shift() + '> with Channels ';
+                            for (y in chanList) {
+                                message += '<#' + chanList[y] + '> ';
+                            };
+                            message += 'and Roles: <@&' + mRoleId + '> and <@&' + lRoleId + '>';
+                            try{
+                                await interaction.editReply({
+                                    content: message,
+                                });
+                            } catch (error) {
+                                console.log("message post error, generally ignore "+error);
                             }
-                        };
-                        if (chanList.length == 0) {
-                            await interaction.guild.roles.cache.find((r) => r.name == nextWS).delete();
-                            await interaction.guild.roles.cache.find((r) => r.name == nextWS + 'lead').delete();
+                            interaction.guild.channels.cache.get(chanList[0]).send({
+                                content: message,
+                                allowedMentions: {
+                                    parse: ["roles"]
+                                },
+                            });
+
+                        } else {
                             interaction.editReply({
-                                content: "I am broken",
+                                content: "An unknown error occured, cancelling",
                                 ephemeral: true
                             });
-                            return;
-                        };
-                        await db.prepare('INSERT INTO whiteStar (guild, mRoleId, lifeTime, awayChId, colour) VALUES(?,?,?,?,?)').run(interaction.guildId, mRoleId, Math.floor((Date.now() / 1000) + end_of_life), awayChId, rColour);
-                        //await db.prepare('INSERT INTO whiteStar (guild, mRoleId, lifeTime, awayChId) VALUES(?,?,?,?)').run(interaction.guildId, mRoleId, Math.floor((Date.now() / 1000)), awayChId);
-
-                        await interaction.member.roles.add(mRoleId).catch(console.log);
-                        wait(1000);
-                        await interaction.member.roles.add(lRoleId).catch(console.log);
-                        wait(1000);
-                        for (i = 1; i < 16; i++) {
-                            const theUser = await interaction.options.getMember('user' + i);
-                            if (theUser) {
-                                await theUser.roles.add(mRoleId).catch(console.log);
-                                wait(1000)
-                            };
-                        };
-                        let message = 'created Category <#' + chanList.shift() + '> with Channels ';
-                        for (y in chanList) {
-                            message += '<#' + chanList[y] + '> ';
-                        };
-                        message += 'and Roles: <@&' + mRoleId + '> and <@&' + lRoleId + '>';
-                        try{
-                            await interaction.editReply({
-                                content: message,
-                            });
-                        } catch (error) {
-                            console.log("message post error, generally ignore "+error);
                         }
-                        interaction.guild.channels.cache.get(chanList[0]).send({
-                            content: message,
-                            allowedMentions: {
-                                parse: ["roles"]
-                            },
-                        });
                     } else {
                         interaction.editReply({
                             content: "You must have the \"Manage Channels\" and \"Manage Roles\" permissions to use this command.",
