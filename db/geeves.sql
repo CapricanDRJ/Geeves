@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
 "fromWho" TEXT, personal INTEGER DEFAULT 0);
 CREATE TABLE IF NOT EXISTS 'management' (
 "guild" TEXT NOT NULL,
-"extraRoles" TEXT DEFAULT "[]");
+"extraRoles" TEXT DEFAULT "[]",
+"officer" TEXT DEFAULT NULL);
 CREATE TABLE IF NOT EXISTS "channels" (
 "guild" TEXT NOT NULL,
 "channelId" TEXT NOT NULL,

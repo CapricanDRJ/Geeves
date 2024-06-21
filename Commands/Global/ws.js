@@ -210,6 +210,12 @@ module.exports = {
                 .addRoleOption(option => option.setName('role4').setDescription('Additional role to add to every new whitestar.'))
                 .addRoleOption(option => option.setName('role5').setDescription('Additional role to add to every new whitestar.'))
             )
+            .addSubcommand((subcommand) =>
+                subcommand
+                .setName('officer')
+                .setDescription('Tell me what your officer role is for using /ws new')
+                .addRoleOption(option => option.setName('role').setDescription('Officer role to use /ws new').setRequired(true))
+            )
         )
         .addSubcommandGroup((group) =>
             group
@@ -482,7 +488,9 @@ module.exports = {
                     //who for has member
                     //opponent for has leader
                     //nova for has leader
-                    const isOfficer = interaction.member.permissions.has([PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles], true);
+                    //const isOfficer = interaction.member.permissions.has([PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles], true);
+                    const officerRole = db.prepare('SELECT officer FROM management WHERE guild = ?').get(interaction.guildId)?.officer;
+                    const isOfficer = interaction.member.permissions.has([PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles], true) || (officerRole && interaction.member.roles.cache.has(officerRole));
                     const checkRoles = await db.prepare('SELECT * FROM channels WHERE guild = ? AND channelId = ?').get(interaction.guildId, interaction.channelId);
                     if (!!checkRoles) { //if it doesn't exist, lets return false.
                         const mRoleId = await interaction.guild.roles.cache.get(checkRoles.mRoleId);
@@ -542,7 +550,7 @@ module.exports = {
                 };
 
                 async function template() {
-                    if (interaction.member.permissions.has([PermissionFlagsBits.ManageGuild], true)) {
+                    if (interaction.member.permissions.has([PermissionFlagsBits.Administrator], true)) {
                         const chanTypes = ['category', 'private', 'restricted', 'leader', 'afk'];
                         async function replyTemplate() {
                             let template = await checkTemplate(interaction.guildId);
@@ -556,13 +564,6 @@ module.exports = {
                                 ephemeral: true
                             });
                         };
-                        const isOfficer = interaction.member.permissions.has([PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles], true);
-                        if (!isOfficer) {
-                            interaction.editReply({
-                                content: "This is intended for officers only. I identify an officer by those who can manage channels and roles.",
-                                ephemeral: true
-                            });
-                        } else
                             switch (subCommand) {
                                 case 'list':
                                     replyTemplate();
@@ -603,6 +604,29 @@ module.exports = {
                                         db.prepare('DELETE FROM template WHERE guild = ? AND name = ?').run(interaction.guildId, delName);
                                     replyTemplate();
                                     break;
+                                case 'officer':
+                                    const officerRole = interaction.options.get("role")?.role;
+                                    if (!officerRole || !officerRole.id) {
+                                        interaction.editReply({
+                                            content: "Sorry, I did not receive a valid role.",
+                                            ephemeral: true
+                                        });
+                                        return;
+                                    }
+                                    
+                                    // Update the database with the officer role ID
+                                    db.prepare(`
+                                        INSERT INTO management (guild, officer) 
+                                        VALUES (?, ?) 
+                                        ON CONFLICT(guild) 
+                                        DO UPDATE SET officer = excluded.officer
+                                    `).run(interaction.guildId, officerRole.id);                                    
+                                
+                                    interaction.editReply({
+                                        content: `Officer role has been successfully set to: ${officerRole.name}`,
+                                        ephemeral: true
+                                    });
+                                    break;
                                 case 'roles':
                                     let newRoles = [];
                                     for (i = 1; i < 6; i++) {
@@ -612,8 +636,12 @@ module.exports = {
                                         }
                                     };
                                     newRoles = [...new Set(newRoles)]; //remove any duplicates
-                                    db.prepare('DELETE FROM management WHERE guild = ?').run(interaction.guildId); //rather than update, lets remove. Maybe change later if we need more information in management.
-                                    db.prepare('INSERT INTO management (guild, extraRoles) VALUES(?,?)').run(interaction.guildId, JSON.stringify(newRoles));
+                                    db.prepare(`
+                                        INSERT INTO management (guild, extraRoles) 
+                                        VALUES (?, ?) 
+                                        ON CONFLICT(guild) 
+                                        DO UPDATE SET extraRoles = excluded.extraRoles
+                                    `).run(interaction.guildId, JSON.stringify(newRoles));
                                     let msg = "";
                                     for (i in newRoles) {
                                         msg += "<@&" + newRoles[i] + ">";
@@ -775,9 +803,9 @@ module.exports = {
                             (hour * 60 * 60) +
                             (minute * 60) +
                         Math.floor(Date.now() / 1000);
+                        const WwiteStarMsg = "<@&" + roleIds[0] + "> Preparation period ends.";
+                        db.prepare('Delete FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?').run(interaction.guildId, roleIds[0], WwiteStarMsg, '10');
                         if ((endTime - 388800) > (Date.now() / 1000)) {
-                            const WwiteStarMsg = "<@&" + roleIds[0] + ">⠀⠀Preparation period ends.";
-                            db.prepare('Delete FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?').run(interaction.guildId, roleIds[0], WwiteStarMsg, '10');
                             db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who) VALUES(?,?,?,?,?)').run(interaction.guildId, roleIds[0], (endTime - 388800), WwiteStarMsg, '10');
                             //388800 = 4.5 days, the exact time of the whitestar. So we can calculate when it goes live.
                         };
@@ -821,15 +849,6 @@ module.exports = {
                         let hTime = 0;
                         if (minutes) mTime = Number(minutes) * 60;
                         if (hours) hTime = Number(hours) * 3600;
-                        /**
-CREATE TABLE IF NOT EXISTS "awayTimers" (
-"guild"TEXT NOT NULL,
-"mRoleId"TEXT NOT NULL,
-"lifeTime"INTEGER NOT NULL,
-"what"TEXT NOT NULL,
-"who"TEXT NOT NULL,
-"fromWho" TEXT);
- */
                         let who;
                         let what = "";
                         let msg = "**" + awayBoard.displayTime(hTime+mTime) + "** ";
@@ -958,7 +977,13 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                         interaction.editReply("Error: Discord channel safety limit reached. Your discord has "+interaction.guild.channels.cache.size+" channels");
                         return;
                     };
-                    if (interaction.member.permissions.has([PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles], true)) {
+                    const officerRole = db.prepare('SELECT officer FROM management WHERE guild = ?').get(interaction.guildId)?.officer;
+                    const isOfficer = interaction.member.permissions.has(PermissionFlagsBits.Administrator) ||
+                        interaction.member.permissions.has([PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles]) ||
+                        (officerRole && interaction.member.roles.cache.has(officerRole));
+                        console.log(officerRole);
+                        console.log(interaction.member.roles.cache.has(officerRole));
+                    if (isOfficer) {
                         const currentTime = Date.now();
                         const COOLDOWN_PERIOD = 5 * 60 * 1000; // 5 minutes in milliseconds
                         if (wsnewThrottle && currentTime - wsnewThrottle < COOLDOWN_PERIOD) {
@@ -1158,7 +1183,7 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
                         }
                     } else {
                         interaction.editReply({
-                            content: "You must have the \"Manage Channels\" and \"Manage Roles\" permissions to use this command.",
+                            content: "You must have the \"Manage Channels\" and \"Manage Roles\", Administrator, or Officer role to use this command.",
                             ephemeral: true
                         });
                         return false;

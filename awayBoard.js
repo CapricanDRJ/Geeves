@@ -47,7 +47,7 @@ const myEmojis = {
     },
     Flagship: {
         id: '1028931978172579870',
-        time: 72 * 3600,
+        time: 48 * 3600,
         post: "is due to return",
         button: true
     },
@@ -84,7 +84,7 @@ const myEmojis = {
     },
     EnemyFlagship: {
         id: '1028931973563027456',
-        time: 16 * 3600,
+        time: 48 * 3600,
         past: "set the enemy battleship as returned",
         post: "is due to return",
         button: true
