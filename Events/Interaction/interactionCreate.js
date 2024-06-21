@@ -540,7 +540,7 @@ module.exports = async(client, interaction) => {
                     what = button.inline;
                 } else {
                     who = '10'
-                    what = "<@&" + wsRole.mRoleId + ">⠀⠀" + button.inline;
+                    what = "<@&" + wsRole.mRoleId + "> " + button.inline;
                 }
             } else {
                 console.log(interaction.customId);
