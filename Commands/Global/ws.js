@@ -550,7 +550,8 @@ module.exports = {
                 };
 
                 async function template() {
-                    if (interaction.member.permissions.has([PermissionFlagsBits.Administrator], true)) {
+                    const officerRole = db.prepare('SELECT officer FROM management WHERE guild = ?').get(interaction.guildId)?.officer;
+                    if (interaction.member.permissions.has([PermissionFlagsBits.Administrator], true) || (officerRole && interaction.member.roles.cache.has(officerRole))) {
                         const chanTypes = ['category', 'private', 'restricted', 'leader', 'afk'];
                         async function replyTemplate() {
                             let template = await checkTemplate(interaction.guildId);
@@ -1046,7 +1047,7 @@ module.exports = {
                         if(wsCat) {
                             await wsCat.setPosition(newPosition).catch(console.log);
                             db.prepare('INSERT INTO channels (guild, channelId, mRoleId, lRoleId, cType) VALUES(?,?,?,?,?)').run(interaction.guildId, wsCat.id, mRoleId, lRoleId, '0');
-                            chanList.push(wsCat.id);
+                            //chanList.push(wsCat.id); remove to not push category into the list.
                             //end create category
 
                             async function createchan(chname, cat, mRoleId, lRoleId, cType) {
@@ -1156,11 +1157,11 @@ module.exports = {
                                     wait(1000)
                                 };
                             };
-                            let message = 'created Category <#' + chanList.shift() + '> with Channels ';
+                            let message = `created Category ${wsCat.name} with Channels `;
                             for (y in chanList) {
-                                message += '<#' + chanList[y] + '> ';
+                                message += `<#${chanList[y]}> `;
                             };
-                            message += 'and Roles: <@&' + mRoleId + '> and <@&' + lRoleId + '>';
+                            message += `and Roles: <@&${mRoleId}> and <@&${lRoleId}>`;
                             try{
                                 await interaction.editReply({
                                     content: message,
@@ -1198,3 +1199,4 @@ module.exports = {
         };
     }
 }
+
