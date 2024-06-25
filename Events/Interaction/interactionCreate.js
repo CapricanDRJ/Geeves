@@ -402,7 +402,7 @@ module.exports = async(client, interaction) => {
                 }
        
                 const message = await interaction.reply({
-                    content: "**Note:** Timers do not include effect duration.",
+                    content: "**Note:** Timers start when module is activated.",
                     ephemeral: true,
                     fetchReply: true,
                     components: personalButtonCache[category]
@@ -433,7 +433,7 @@ module.exports = async(client, interaction) => {
                 if(foundObject !== null) {
                     const { hours, minutes } = menuCache[interaction.message.id] || { hours: 0, minutes: 0 };
                     const lifeTime = Math.floor((Date.now() / 1000) + foundObject.time - ((hours * 3600) + (minutes * 60)));
-                    await awayBoard.db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, personal) VALUES(?,?,?,?,?,?)').run(interaction.guildId, wsRole.mRoleId, lifeTime, foundObject.inline, interaction.user.id,1);
+                    await awayBoard.db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromwho, personal) VALUES(?,?,?,?,?,?,?)').run(interaction.guildId, wsRole.mRoleId, lifeTime, foundObject.inline, interaction.user.id, interaction.user.id, 1);
                     const embed = await personalBoard();
                     interaction.update({
                         embeds: [embed],
@@ -543,8 +543,6 @@ module.exports = async(client, interaction) => {
                     what = "<@&" + wsRole.mRoleId + "> " + button.inline;
                 }
             } else {
-                console.log(interaction.customId);
-                console.log("here");
                 const opponents = await JSON.parse(whiteStar.opponents);
                 if (!!opponents[Number(interaction.customId)]) {
                     who = '0';
