@@ -480,7 +480,7 @@ async function makeAwayBoard(guild, mRoleId, posted) {
     for (const awayTimer of afkTimers) {
         const t = ((awayTimer.lifeTime - curTime) / 3600);
         const tValue = t < 1 ? `**${Math.floor(t * 60)}m**` : `**${Math.floor(t * 10) / 10}h**`;
-        msg += `${formatTime(tValue)}@<t:${awayTimer.lifeTime}:t>`;
+        msg += `${formatTime(tValue)}@<t:${awayTimer.lifeTime}:t> `;
         switch (awayTimer.who) {
             case "0": //enemy notice
                 msg += `${myEmojis.E.inline}\`nemy\` `;
