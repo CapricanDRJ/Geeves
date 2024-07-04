@@ -512,7 +512,8 @@ async function makeAwayBoard(guild, mRoleId, posted) {
         .setFooter({
             text: afkContent[3]
         })
-        .setThumbnail(guild.iconURL());
+        .setAuthor({ name: guild.name, iconURL: guild.iconURL() })
+//        .setThumbnail(guild.iconURL());
     let xx = 1;
     if (msgArray[xx]) {
         do {
