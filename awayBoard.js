@@ -448,7 +448,6 @@ async function cacheNames(guild) {
         displayName[member.id] = Handle;
     });
 };
-
 async function makeAwayBoard(guild, mRoleId, posted) {
     const curTime = Math.floor(Date.now() / 1000);
     const afkTimers = await db.prepare('SELECT * FROM awayTimers WHERE mRoleId = ? AND guild = ? AND personal = 0 ORDER BY lifeTime ASC').all(mRoleId, guild.id);
@@ -481,6 +480,7 @@ async function makeAwayBoard(guild, mRoleId, posted) {
         const t = ((awayTimer.lifeTime - curTime) / 3600);
         const tValue = t < 1 ? `**${Math.floor(t * 60)}m**` : `**${Math.floor(t * 10) / 10}h**`;
         msg += `${formatTime(tValue)}@<t:${awayTimer.lifeTime}:t> `;
+        msg += awayTimer.emoji;
         switch (awayTimer.who) {
             case "0": //enemy notice
                 msg += `${myEmojis.E.inline}\`nemy\` `;

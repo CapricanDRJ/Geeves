@@ -3,9 +3,11 @@ CREATE TABLE IF NOT EXISTS "awayTimers" (
 "guild"TEXT NOT NULL,
 "mRoleId"TEXT NOT NULL,
 "lifeTime"INTEGER NOT NULL,
-"what"TEXT NOT NULL,
+"what"TEXT DEFAULT "" NOT NULL,
 "who"TEXT NOT NULL,
-"fromWho" TEXT, personal INTEGER DEFAULT 0);
+"fromWho" TEXT,
+"personal" INTEGER DEFAULT 0,
+"emoji" TEXT DEFAULT "" NOT NULL);
 CREATE TABLE IF NOT EXISTS 'management' (
 "guild" TEXT NOT NULL,
 "extraRoles" TEXT DEFAULT "[]",

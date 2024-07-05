@@ -456,6 +456,46 @@ module.exports = async(client, interaction) => {
                 }).catch(console.log);
             } else {
                 if (menuCache[interaction.message.id] != undefined) {
+                    const emojiCheck = await awayBoard.db.prepare('SELECT * FROM awayTimers WHERE guild = ? AND mRoleId = ? AND lifeTime = ? AND fromWho = ? LIMIT 1')
+                    .get(interaction.guildId, wsRole.mRoleId, String(menuCache[interaction.message.id].afkMessage).split('.')[1], interaction.user.id);
+                    if(emojiCheck && emojiCheck.emoji) {
+                        let uncountShip;
+                        switch(emojiCheck.emoji) {
+                            case awayBoard.myEmojis["Battleship"].inline:
+                                uncountShip = "Battleship";
+                                break;
+                            case awayBoard.myEmojis["Squishie"].inline:
+                                uncountShip = "Squishie";
+                                break;
+                            case awayBoard.myEmojis["Miner"].inline:
+                                uncountShip = "Squishie";
+                                break;
+                            case awayBoard.myEmojis["Transport"].inline:
+                                uncountShip = "Squishie";
+                                break;
+                            case awayBoard.myEmojis["Flagship"].inline:
+                                uncountShip = "Flagship";
+                                break;
+                            case awayBoard.myEmojis["EnemyBattleship"].inline:
+                                uncountShip = "EnemyBattleship";
+                                break;
+                            case awayBoard.myEmojis["EnemySquishie"].inline:
+                                uncountShip = "EnemySquishie";
+                                break;
+                            case awayBoard.myEmojis["EnemyTransport"].inline:
+                                uncountShip = "EnemySquishie";
+                                break;
+                            case awayBoard.myEmojis["EnemyMiner"].inline:
+                                uncountShip = "EnemySquishie";
+                                break;
+                            case awayBoard.myEmojis["EnemyFlagship"].inline:
+                                uncountShip = "EnemyFlagship";
+                                break;
+                            default:
+                                uncountShip = null;
+                        }
+                        if(uncountShip) awayBoard.db.prepare(`UPDATE whitestar SET ${uncountShip} = ${uncountShip} - 1 WHERE guild = ? AND mRoleId = ?`).run(interaction.guildId, wsRole.mRoleId);
+                    }
                     await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND lifeTime = ? AND fromWho = ?')
                         .run(interaction.guildId, wsRole.mRoleId, String(menuCache[interaction.message.id].afkMessage).split('.')[1], interaction.user.id);
                     awayBoard.makeAwayBoard(interaction.guild, wsRole.mRoleId, posted);
@@ -474,7 +514,7 @@ module.exports = async(client, interaction) => {
         };
 
         async function printTimers() {
-            const awayTimers = await awayBoard.db.prepare('SELECT what,lifeTime FROM awayTimers WHERE guild = ? AND mRoleId = ? AND (who = ? OR fromWho = ?)').all(interaction.guildId, wsRole.mRoleId, interaction.user.id, interaction.user.id);
+            const awayTimers = await awayBoard.db.prepare('SELECT what,lifeTime,emoji FROM awayTimers WHERE guild = ? AND mRoleId = ? AND (who = ? OR fromWho = ?) LIMIT 25').all(interaction.guildId, wsRole.mRoleId, interaction.user.id, interaction.user.id);
             // console.log(awayTimers); //figure out what empty looks like
             if (awayTimers.length < 1) {
                 interaction.reply({
@@ -493,10 +533,17 @@ module.exports = async(client, interaction) => {
                 else
                     time = String(Math.floor(t * 10) / 10 + "h").padEnd(5, '⠀');;
                 if (time.indexOf(".") > -1) time += '⠀';
-                dropDown.push({
+                const option = {
                     label: String(time + awayTimers[xa].what).replace(/<:(\w+):\d+>/g, "$1"),
-                    value: String(xa + ".") + String(awayTimers[xa].lifeTime) //added the xa+"." to prevent the odd time that two messages have the same lifeTime and cause a bot crash.
-                })
+                    value: String(xa + ".") + String(awayTimers[xa].lifeTime), //added the xa+"." to prevent the odd time that two messages have the same lifeTime and cause a bot crash.
+                };
+                if(awayTimers[xa].emoji) {
+                    const emojiName = awayTimers[xa].emoji.replace(/<:(\w+):\d+>/, "$1");
+                    if(emojiName && awayBoard.myEmojis[emojiName]) {
+                        option.emoji = awayBoard.myEmojis[emojiName].id
+                    }
+                }
+                dropDown.push(option);
             };
             let selectMenu = [];
             selectMenu[0] = new ActionRowBuilder()
@@ -537,30 +584,30 @@ module.exports = async(client, interaction) => {
             if (interaction.customId == 'OK') {
                 if (button.id == awayBoard.myEmojis.EnemyFlagship.id) {
                     who = '0'
-                    what = button.inline;
+                    what = "";
                 } else {
                     who = '10'
-                    what = "<@&" + wsRole.mRoleId + "> " + button.inline;
+                    what = "<@&" + wsRole.mRoleId + "> ";
                 }
             } else {
                 const opponents = await JSON.parse(whiteStar.opponents);
                 if (!!opponents[Number(interaction.customId)]) {
                     who = '0';
-                    what = button.inline + " " + opponents[interaction.customId];
+                    what = opponents[interaction.customId];
                 } else { //otherwise friendly *** add an extra check here for later to ensure userid.
                     who = interaction.customId;
-                    what = button.inline;
+                    what = "";
                 };
             };
             const lifeTime = Math.floor((Date.now() / 1000) + button.time - ((menuCache[interaction.message.id].hours * 3600) + (menuCache[interaction.message.id].minutes * 60)));
-            const prepareCheck = await awayBoard.db.prepare('SELECT 1 FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ? LIMIT 1');
-            const checkExists = await prepareCheck.get(interaction.guildId, wsRole.mRoleId, what, who);
+            const prepareCheck = await awayBoard.db.prepare('SELECT 1 FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND emoji = ? AND who = ? LIMIT 1');
+            const checkExists = await prepareCheck.get(interaction.guildId, wsRole.mRoleId, what, button.inline, who);
             if (checkExists != undefined)
-                await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?')
-                .run(interaction.guildId, wsRole.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one technically.
+                await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND emoji = ? AND who = ?')
+                .run(interaction.guildId, wsRole.mRoleId, what, button.inline, who); //remove previous versions if they exist, we overwrite with the new one technically.
             else
                 awayBoard.db.prepare('UPDATE whitestar SET ' + button.name + ' = ' + button.name + ' + 1 WHERE guild = ? AND mRoleId = ?').run(interaction.guildId, wsRole.mRoleId);
-            await awayBoard.db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromwho) VALUES(?,?,?,?,?,?)').run(interaction.guildId, wsRole.mRoleId, lifeTime, what, who, interaction.user.id);
+            await awayBoard.db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromwho, emoji) VALUES(?,?,?,?,?,?,?)').run(interaction.guildId, wsRole.mRoleId, lifeTime, what, who, interaction.user.id, button.inline);
             interaction.update({
                 content: "OK.",
                 components: []
@@ -668,11 +715,11 @@ module.exports = async(client, interaction) => {
             };
         };
         async function afkBreak() {
-            const checkEntry = await awayBoard.db.prepare('SELECT * FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?').get(interaction.guildId, wsRole.mRoleId, button.inline, interaction.user.id);
+            const checkEntry = await awayBoard.db.prepare('SELECT * FROM awayTimers WHERE guild = ? AND mRoleId = ? AND emoji = ? AND who = ?').get(interaction.guildId, wsRole.mRoleId, button.inline, interaction.user.id);
             if (!checkEntry) {
                 interaction.deferUpdate();
-                await awayBoard.db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromWho) VALUES(?,?,?,?,?,?)')
-                    .run(interaction.guildId, wsRole.mRoleId, Math.floor(Date.now() / 1000 + button.time), button.inline, interaction.user.id, interaction.user.id);
+                await awayBoard.db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromWho, emoji) VALUES(?,?,?,?,?,?,?)')
+                    .run(interaction.guildId, wsRole.mRoleId, Math.floor(Date.now() / 1000 + button.time), "", interaction.user.id, interaction.user.id, button.inline);
             } else {
                 posted = true
                 await interaction.channel.send({
@@ -682,7 +729,7 @@ module.exports = async(client, interaction) => {
                     },
                     ephemeral: false
                 });
-                await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ? AND fromWho = ?')
+                await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND emoji = ? AND who = ? AND fromWho = ?')
                     .run(interaction.guildId, wsRole.mRoleId, button.inline, interaction.user.id, interaction.user.id);
             };
             awayBoard.makeAwayBoard(interaction.guild, wsRole.mRoleId, posted);

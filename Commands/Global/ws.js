@@ -854,38 +854,46 @@ module.exports = {
                         let what = "";
                         let msg = "**" + awayBoard.displayTime(hTime+mTime) + "** ";
                         let noticeTime;
+                        let emoji = "";
                         switch (mType) {
                             case 'allied':
                                 const aShip = interaction.options.getString('ship');
-                                console.log(aShip);
                                 const aWho = interaction.options.getUser('who');
+                                const aShipType = (aShip === "Transport" || aShip === "Miner") ? "Squishie" : aShip;
                                 if (aWho && aShip != 'FS') {
                                     who = aWho.id;
                                     msg += "<@" + aWho.id + "> ";
                                 } else who = interaction.user.id;
                                 if (aShip == 'FS') {
-                                    what = "<@&" + checkRoles.mRoleId + ">⠀⠀" + awayBoard.myEmojis[aShip].inline;
+                                    what = "<@&" + checkRoles.mRoleId + ">";
                                     who = '10';
-                                    msg = what;
-                                } else what = awayBoard.myEmojis[aShip].inline;
+                                };
+                                emoji = awayBoard.myEmojis[aShip].inline;
                                 msg += what;
                                 noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis[aShip].time - (hTime + mTime));
-                                await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?')
-                                    .run(interaction.guildId, checkRoles.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one, technically. 
+                                const existingRecord = await db.prepare('SELECT 1 FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ? AND emoji = ?')
+                                    .get(interaction.guildId, checkRoles.mRoleId, what, who, emoji);
+                                if (existingRecord) await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ? AND emoji = ?')
+                                    .run(interaction.guildId, checkRoles.mRoleId, what, who, emoji)
+                                else
+                                    await awayBoard.db.prepare('UPDATE whitestar SET ' + aShipType + ' = ' + aShipType + ' + 1 WHERE guild = ? AND mRoleId = ?').run(interaction.guildId, checkRoles.mRoleId);
                                 break;
                             case 'enemy':
                                 const eShip = interaction.options.getString('ship');
                                 const eWho = interaction.options.getString('who');
-                                console.log(awayBoard.myEmojis[eShip]);
-                                what = awayBoard.myEmojis['Enemy'+eShip].inline;
+                                const eShipType = (eShip === "Transport" || eShip === "Miner") ? "Squishie" : eShip;
+                                emoji = awayBoard.myEmojis['Enemy'+eShip].inline;
                                 who = '0';
-                                console.log(eShip);
-                                if (eWho && eShip != 'Flagship') what += " " + eWho;
-                                msg = what;
+                                if (eWho && eShip != 'Flagship') what += eWho;
+                                msg += what;
                                 noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis['Enemy'+eShip].time - (hTime + mTime));
-                                await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?')
-                                    .run(interaction.guildId, checkRoles.mRoleId, what, who); //remove previous versions if they exist, we overwrite with the new one, technically. 
-                                break;
+                                const existingERecord = await db.prepare('SELECT 1 FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ? AND emoji = ?')
+                                .get(interaction.guildId, checkRoles.mRoleId, what, who, emoji);
+                                if (existingERecord) await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND emoji = ? AND who = ?')
+                                    .run(interaction.guildId, checkRoles.mRoleId, what, emoji, who);
+                                else
+                                    await awayBoard.db.prepare('UPDATE whitestar SET Enemy' + eShipType + ' = Enemy' + eShipType + ' + 1 WHERE guild = ? AND mRoleId = ?').run(interaction.guildId, checkRoles.mRoleId);
+                                 break;
                             case 'afk':
                                 const gWho = interaction.options.getMentionable('who');
                                 const gNotice = interaction.options.getString('message');
@@ -899,7 +907,7 @@ module.exports = {
                                     msg += "<@" + interaction.user.id + "> ";
                                 };
                                 if (gNotice) what += addEmojis(gNotice);
-                                if(what.length == 0) what = awayBoard.myEmojis.Away.inline;
+                                if(what.length == 0) emoji = awayBoard.myEmojis.Away.inline;
                                 msg += what;
                                 noticeTime = Math.floor((Date.now() / 1000) + (hTime + mTime));
                                 break;
@@ -914,7 +922,7 @@ module.exports = {
                             };
                             return;
                             };
-                        await db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromwho) VALUES(?,?,?,?,?,?)').run(interaction.guildId, checkRoles.mRoleId, noticeTime, what, who, interaction.user.id);
+                        await db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromwho, emoji) VALUES(?,?,?,?,?,?,?)').run(interaction.guildId, checkRoles.mRoleId, noticeTime, what, who, interaction.user.id, emoji);
                         try {
                             interaction.editReply({
                                 content: "/ws " + mType + " \n" + msg,
