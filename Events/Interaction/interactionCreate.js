@@ -380,7 +380,7 @@ module.exports = async(client, interaction) => {
             let description = ``;
             if (afkTimers.length > 0) {
                 for (const awayTimer of afkTimers) {
-                    description += `${awayTimer.what} <t:${awayTimer.lifeTime}:R> <t:${awayTimer.lifeTime}:f>\n`;
+                    description += `${awayTimer.emoji} <t:${awayTimer.lifeTime}:R> <t:${awayTimer.lifeTime}:f>\n`;
                 }
             } else description = "All modules available";
             const embed = new EmbedBuilder()
@@ -433,7 +433,7 @@ module.exports = async(client, interaction) => {
                 if(foundObject !== null) {
                     const { hours, minutes } = menuCache[interaction.message.id] || { hours: 0, minutes: 0 };
                     const lifeTime = Math.floor((Date.now() / 1000) + foundObject.time - ((hours * 3600) + (minutes * 60)));
-                    await awayBoard.db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromwho, personal) VALUES(?,?,?,?,?,?,?)').run(interaction.guildId, wsRole.mRoleId, lifeTime, foundObject.inline, interaction.user.id, interaction.user.id, 1);
+                    await awayBoard.db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, emoji, what, who, fromwho, personal) VALUES(?,?,?,?,?,?,?,?)').run(interaction.guildId, wsRole.mRoleId, lifeTime, foundObject.inline, "", interaction.user.id, interaction.user.id, 1);
                     const embed = await personalBoard();
                     interaction.update({
                         embeds: [embed],
@@ -537,12 +537,8 @@ module.exports = async(client, interaction) => {
                     label: String(time + awayTimers[xa].what).replace(/<:(\w+):\d+>/g, "$1"),
                     value: String(xa + ".") + String(awayTimers[xa].lifeTime), //added the xa+"." to prevent the odd time that two messages have the same lifeTime and cause a bot crash.
                 };
-                if(awayTimers[xa].emoji) {
-                    const emojiName = awayTimers[xa].emoji.replace(/<:(\w+):\d+>/, "$1");
-                    if(emojiName && awayBoard.myEmojis[emojiName]) {
-                        option.emoji = awayBoard.myEmojis[emojiName].id
-                    }
-                }
+                if(awayBoard.myEmojisInline.includes(awayTimers[xa].emoji)) 
+                    option.emoji = awayTimers[xa].emoji;
                 dropDown.push(option);
             };
             let selectMenu = [];

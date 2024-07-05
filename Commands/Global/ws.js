@@ -125,7 +125,7 @@ function addEmojis (args) {
             msg[0] = awayBoard.myEmojis.Away.inline;
             break;
     };
-    return msg.join(' ');
+    return msg;
 };
 
 module.exports = {
@@ -906,8 +906,13 @@ module.exports = {
                                     who = interaction.user.id;
                                     msg += "<@" + interaction.user.id + "> ";
                                 };
-                                if (gNotice) what += addEmojis(gNotice);
-                                if(what.length == 0) emoji = awayBoard.myEmojis.Away.inline;
+                                if (gNotice) {
+                                    let aemoji = addEmojis(gNotice);
+                                    if(awayBoard.myEmojisInline.includes(aemoji[0])) 
+                                        emoji = aemoji.shift();
+                                    what += aemoji.join(' ');
+                                };
+                                if(what.length == 0 && emoji == "") emoji = awayBoard.myEmojis.Away.inline;
                                 msg += what;
                                 noticeTime = Math.floor((Date.now() / 1000) + (hTime + mTime));
                                 break;

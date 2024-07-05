@@ -294,6 +294,7 @@ const myEmojis = {
         button: false
     }
 };
+const myEmojisInline = [];
 const pAfkButtons = ['Drone', 'Combat', 'Shield', 'Econ'];
 const wait = require('node:timers/promises').setTimeout;//added wait so we don't set off flood limits.
 function formatTime(curLine){
@@ -310,8 +311,10 @@ function setupButtons() {
         if(pAfkButtons.indexOf(key) !== -1) {
             for (i in myEmojis[key]) {
                 const subModule = myEmojis[key][i];
-                if(typeof subModule === 'object' && subModule !== null && subModule.hasOwnProperty('id'))
+                if(typeof subModule === 'object' && subModule !== null && subModule.hasOwnProperty('id')) {
                     subModule.inline = '<:' + i + ':' + subModule.id + '>';
+                    myEmojisInline.push(subModule.inline);
+                }
             };
             myEmojis[key].byId = true;
         } else {
@@ -319,6 +322,7 @@ function setupButtons() {
             if (external.test(myEmojis[key].id))
                 myEmojis[key].inline = '<:' + key + ':' + myEmojis[key].id + '>';
             else myEmojis[key].inline = myEmojis[key].id;
+            myEmojisInline.push(myEmojis[key].inline);
         }
         if (myEmojis[key].button && bCount < 15) {
             const r = Math.floor(bCount / 5);
@@ -337,7 +341,6 @@ function setupButtons() {
     return row;
 };
 const defButtons = setupButtons();
-
 const db = require('better-sqlite3')('db/geeves.db', {
     verbose: console.log
 });
@@ -612,5 +615,6 @@ module.exports = {
     removeDeadAFKs,
     delExpiredChans,
     myEmojis,
+    myEmojisInline,
     displayTime
 }
