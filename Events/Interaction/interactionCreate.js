@@ -456,8 +456,8 @@ module.exports = async(client, interaction) => {
                 }).catch(console.log);
             } else {
                 if (menuCache[interaction.message.id] != undefined) {
-                    const emojiCheck = await awayBoard.db.prepare('SELECT * FROM awayTimers WHERE guild = ? AND mRoleId = ? AND lifeTime = ? AND fromWho = ? LIMIT 1')
-                    .get(interaction.guildId, wsRole.mRoleId, String(menuCache[interaction.message.id].afkMessage).split('.')[1], interaction.user.id);
+                    const emojiCheck = await awayBoard.db.prepare('SELECT * FROM awayTimers WHERE guild = ? AND mRoleId = ? AND lifeTime = ? AND (who = ? OR fromWho = ?) LIMIT 1')
+                    .get(interaction.guildId, wsRole.mRoleId, String(menuCache[interaction.message.id].afkMessage).split('.')[1], interaction.user.id, interaction.user.id);
                     if(emojiCheck && emojiCheck.emoji) {
                         let uncountShip;
                         switch(emojiCheck.emoji) {
@@ -496,8 +496,8 @@ module.exports = async(client, interaction) => {
                         }
                         if(uncountShip) awayBoard.db.prepare(`UPDATE whitestar SET ${uncountShip} = ${uncountShip} - 1 WHERE guild = ? AND mRoleId = ?`).run(interaction.guildId, wsRole.mRoleId);
                     }
-                    await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND lifeTime = ? AND fromWho = ?')
-                        .run(interaction.guildId, wsRole.mRoleId, String(menuCache[interaction.message.id].afkMessage).split('.')[1], interaction.user.id);
+                    await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND lifeTime = ? AND (who = ? OR fromWho = ?) LIMIT 1')
+                        .run(interaction.guildId, wsRole.mRoleId, String(menuCache[interaction.message.id].afkMessage).split('.')[1], interaction.user.id, interaction.user.id);
                     awayBoard.makeAwayBoard(interaction.guild, wsRole.mRoleId, posted);
                     interaction.update({
                         content: "OK.",
