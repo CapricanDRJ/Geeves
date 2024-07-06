@@ -397,19 +397,19 @@ async function postAFKs(guild) {
                         let per = "";
                         switch (awayTimer.who) {
                             case '0':
-                                msgNotice += myEmojis.E.inline + '`nemy` ' + awayTimer.what;
+                                msgNotice += myEmojis.E.inline + '`nemy` ' + awayTimer.emoji + awayTimer.what;
                                 pingable = [];
                                 break;
                             case '10':
-                                msgNotice += awayTimer.what;
+                                msgNotice += awayTimer.emoji + awayTimer.what;
                                 //if (awayTimer.fromWho) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
                                 break;
                             case '20':
-                                msgNotice += '  <@&' + wsAFK.mRoleId + '>  ' + awayTimer.what;
+                                msgNotice += '  <@&' + wsAFK.mRoleId + '>  ' + awayTimer.emoji + awayTimer.what;
                                 //if (awayTimer.fromWho) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
                                 break;
                             default:
-                                msgNotice += '  <@' + awayTimer.who + '>  ' + awayTimer.what;
+                                msgNotice += '  <@' + awayTimer.who + '>  ' + awayTimer.emoji + awayTimer.what;
                                 //if (!!awayTimer.fromWho && awayTimer.fromWho != awayTimer.who) per = '⠀⠀Per: <@' + awayTimer.fromWho + '>';
                         };
                         if(awayTimer.personal) pingable = [];
