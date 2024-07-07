@@ -2,7 +2,7 @@ const {
     SlashCommandBuilder,
     AttachmentBuilder,
     PermissionFlagsBits
-} = require("discord.js");
+} = require("discord.js")
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -14,14 +14,14 @@ module.exports = {
             .setDescription("Crop an image of the whitestar to the edge of the actual whitestar borders then upload.")),
     async execute(interaction) {
         console.log('overlay');
-        if (!interaction.channel.viewable) {
+        if(!interaction.channel.viewable) {
             await interaction.reply({
                 content: 'I have no access to this channel',
                 ephemeral: true
             });
             return;
         }
-        if (!interaction.guild.members.me.permissionsIn(interaction.channel.id).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
+        if(!interaction.guild.members.me.permissionsIn(interaction.channel.id).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
             await interaction.reply({
                 content: 'Sorry, I am missing permission to post here.',
                 ephemeral: true
@@ -30,9 +30,7 @@ module.exports = {
         }
         if (interaction.commandName === 'overlay') {
             const Jimp = require('jimp');
-            const fname = 'c' + Math.floor(Math.random() * 10000) + '.png';
-            const attachment = interaction.options.getAttachment("image");
-
+            const attachment = await interaction.options.getAttachment("image");
             // Ensure attachment exists and check file size (less than 20MB)
             if (!attachment) {
                 await interaction.reply({
@@ -41,7 +39,7 @@ module.exports = {
                 });
                 return;
             }
-
+            
             if (attachment.size > 20 * 1024 * 1024) {
                 await interaction.reply({
                     content: "The file is too large. Please upload an image smaller than 20MB.",
@@ -49,22 +47,32 @@ module.exports = {
                 });
                 return;
             }
-
-            // Attempt to verify and process the image
             try {
-                const baseImage = await Jimp.read(attachment.url);
-                const overlayImage = await Jimp.read('./wsOverlay.png');
+                if (attachment.hasOwnProperty('url') && attachment.hasOwnProperty('name')) {
+                    const WSimages = [];
+                    WSimages.push(Jimp.read(attachment.url));
+                    WSimages.push(Jimp.read('./files/wsOverlay.png'));
+                    await Promise.all(WSimages).then(function(data) {
+                        return Promise.all(WSimages);
+                    }).then(async function(data) {
+                        await data[1].resize(attachment.width, attachment.height);
+                        await data[0].composite(data[1], 0, 0);
+                        let att = await new AttachmentBuilder()
+                            .setFile(await data[0].getBufferAsync(Jimp.MIME_PNG))
+                            .setName("Whitestar.png")
+                            .setDescription("Overlay of Whitestar");
 
-                await overlayImage.resize(baseImage.bitmap.width, baseImage.bitmap.height);
-                await baseImage.composite(overlayImage, 0, 0);
-
-                const buffer = await baseImage.getBufferAsync(Jimp.MIME_PNG);
-                const att = new AttachmentBuilder(buffer, { name: fname });
-
-                await interaction.reply({
-                    files: [att],
-                    ephemeral: false
-                });
+                        interaction.reply({
+                            files: [att],
+                            ephemeral: false
+                        })
+                    });
+                } else {
+                    interaction.reply({
+                        content: "Sorry, that did not make sense to me",
+                        ephemeral: true
+                    })
+                };
             } catch (error) {
                 console.error(error);
                 await interaction.reply({
@@ -72,6 +80,7 @@ module.exports = {
                     ephemeral: true
                 });
             }
+
         }
     }
-};
+}
