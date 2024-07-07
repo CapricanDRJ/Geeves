@@ -131,7 +131,7 @@ function addEmojis (args) {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('ws') // The name of the slash command
-        .setDescription("Manage roles and users in bulk") // A short description about the slash command.
+        .setDescription("WS channel, role, and timer management") // A short description about the slash command.
         .setDMPermission(false)
         .addSubcommand(subcommand =>
             subcommand
@@ -945,37 +945,54 @@ module.exports = {
                         return false;
                     }
                 };
-
                 async function overlay() {
                     const Jimp = require('jimp');
                     const fname = 'Whitestar' + Math.floor(Math.random() * 10000) + '.png';
-                    const attachment = await interaction.options.getAttachment("image");
-                    if (attachment.hasOwnProperty('url') && attachment.hasOwnProperty('name')) {
-                        const WSimages = [];
-                        WSimages.push(Jimp.read(attachment.url));
-                        WSimages.push(Jimp.read('./files/wsOverlay.png'));
-                        await Promise.all(WSimages).then(function(data) {
-                            return Promise.all(WSimages);
-                        }).then(async function(data) {
-                            await data[1].resize(attachment.width, attachment.height);
-                            await data[0].composite(data[1], 0, 0);
-                            let att = await new AttachmentBuilder()
-                                .setFile(await data[0].getBufferAsync(Jimp.MIME_PNG))
-                                .setName(fname)
-                                .setDescription("Overlay of Whitestar");
-
-                            interaction.editReply({
-                                files: [att],
-                                ephemeral: false
-                            })
-                        });
-                    } else {
-                        interaction.editReply({
-                            content: "Sorry, that did not make sense to me",
+                    const attachment = interaction.options.getAttachment("image");
+                
+                    // Ensure attachment exists
+                    if (!attachment) {
+                        await interaction.editReply({
+                            content: "Please upload a valid image file.",
                             ephemeral: true
-                        })
-                    };
+                        });
+                        return;
+                    }
+                
+                    // Check file size (less than 20MB)
+                    if (attachment.size > 20 * 1024 * 1024) {
+                        await interaction.editReply({
+                            content: "The file is too large. Please upload an image smaller.",
+                            ephemeral: true
+                        });
+                        return;
+                    }
+                
+                    // Attempt to verify and process the image
+                    try {
+                        // Read the base image
+                        const baseImage = await Jimp.read(attachment.url);
+                        const overlayImage = await Jimp.read('./files/wsOverlay.png');
+                
+                        // Resize and composite the overlay
+                        await overlayImage.resize(baseImage.bitmap.width, baseImage.bitmap.height);
+                        await baseImage.composite(overlayImage, 0, 0);
+                
+                        // Get the buffer and create attachment
+                        const buffer = await baseImage.getBufferAsync(Jimp.MIME_PNG);
+                        const att = new AttachmentBuilder(buffer, { name: fname });
+                
+                        // Send the reply with the image attachment
+                        await interaction.editReply({ files: [att] });
+                    } catch (error) {
+                        console.error(error);
+                        await interaction.editReply({
+                            content: "There was an error processing the image. Please make sure you uploaded a valid image file.",
+                            ephemeral: true
+                        });
+                    }
                 }
+                
 
                 async function startWS() {
                     async function getColour() {
