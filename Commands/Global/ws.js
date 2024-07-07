@@ -1049,10 +1049,16 @@ module.exports = {
                         //create category
                         let newPosition = 0;
                         let inputChan = interaction.guild.channels.cache.get(interaction.channelId);
-                        if(inputChan?.isThread()) inputChan = inputChan.parent; 
-                        if (inputChan?.parent)
-                            newPosition = inputChan.parent.position+1;
-                        else newPosition = inputChan.position+1;
+                        // Exit if inputChan is null
+                        if (!inputChan) {
+                            console.log('Input channel not found.');
+                            return;
+                        }
+                        // Traverse up the hierarchy until we find the top-level channel or category
+                        while (inputChan?.parent) {
+                            inputChan = inputChan.parent;
+                        }
+                        newPosition = inputChan.position+1;
                         const wsCat = await interaction.guild.channels.create({
                             name: "" + nextWS + "_" + template[0].name,
                             type: ChannelType.GuildCategory,
@@ -1213,3 +1219,4 @@ module.exports = {
         };
     }
 }
+
