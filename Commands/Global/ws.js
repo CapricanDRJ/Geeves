@@ -286,15 +286,6 @@ module.exports = {
         )
         .addSubcommand((subcommand) =>
             subcommand
-            .setName('overlay')
-            .setDescription('Creates overlay of whitestar with coordinates')
-            .addAttachmentOption((option) => option
-                .setRequired(true)
-                .setName("image")
-                .setDescription("Crop an screenshot of the whitestar to the edge of the actual whitestar borders, then upload."))
-        )
-        .addSubcommand((subcommand) =>
-            subcommand
             .setName('afk')
             .setDescription('General afk')
             .addNumberOption(option => option.setName('hours').setDescription('Can be any of the following: 1.3, 6, 0, 0.2'))
@@ -456,9 +447,6 @@ module.exports = {
                                 break;
                             case 'enemy':
                                 afk('enemy');
-                                break;
-                            case 'overlay':
-                                overlay();
                                 break;
                             default:
                                 // code block
@@ -945,55 +933,6 @@ module.exports = {
                         return false;
                     }
                 };
-                async function overlay() {
-                    const Jimp = require('jimp');
-                    const fname = 'Whitestar' + Math.floor(Math.random() * 10000) + '.png';
-                    const attachment = interaction.options.getAttachment("image");
-                
-                    // Ensure attachment exists
-                    if (!attachment) {
-                        await interaction.editReply({
-                            content: "Please upload a valid image file.",
-                            ephemeral: true
-                        });
-                        return;
-                    }
-                
-                    // Check file size (less than 20MB)
-                    if (attachment.size > 20 * 1024 * 1024) {
-                        await interaction.editReply({
-                            content: "The file is too large. Please upload an image smaller.",
-                            ephemeral: true
-                        });
-                        return;
-                    }
-                
-                    // Attempt to verify and process the image
-                    try {
-                        // Read the base image
-                        const baseImage = await Jimp.read(attachment.url);
-                        const overlayImage = await Jimp.read('./files/wsOverlay.png');
-                
-                        // Resize and composite the overlay
-                        await overlayImage.resize(baseImage.bitmap.width, baseImage.bitmap.height);
-                        await baseImage.composite(overlayImage, 0, 0);
-                
-                        // Get the buffer and create attachment
-                        const buffer = await baseImage.getBufferAsync(Jimp.MIME_PNG);
-                        const att = new AttachmentBuilder(buffer, { name: fname });
-                
-                        // Send the reply with the image attachment
-                        await interaction.editReply({ files: [att] });
-                    } catch (error) {
-                        console.error(error);
-                        await interaction.editReply({
-                            content: "There was an error processing the image. Please make sure you uploaded a valid image file.",
-                            ephemeral: true
-                        });
-                    }
-                }
-                
-
                 async function startWS() {
                     async function getColour() {
                         const colours = [0x00a455, 0x8877ee, 0xcc66dd, 0x50a210, 0x3f88fd, 0x6388c8, 0xf032c9, 0xdd6699, 0xf94965, 0x888888, 0x3399bb, 0x339988, 0xbc8519, 0x9988AA, 0xec5a74, 0xaa66ee, 0xf05d14, 0xaa8877, 0x998800, 0x779900, 0x78906c, 0x77958b, 0x5d98ab, 0x4790d8, 0x8888bb, 0xaa77aa, 0xcc66aa, 0xbb7788];
@@ -1236,4 +1175,3 @@ module.exports = {
         };
     }
 }
-
