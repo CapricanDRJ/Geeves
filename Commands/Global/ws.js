@@ -1049,6 +1049,7 @@ module.exports = {
                         //create category
                         let newPosition = 0;
                         let inputChan = interaction.guild.channels.cache.get(interaction.channelId);
+                        if(inputChan?.isThread()) inputChan = inputChan.parent; 
                         if (inputChan?.parent)
                             newPosition = inputChan.parent.position+1;
                         else newPosition = inputChan.position+1;
@@ -1212,4 +1213,3 @@ module.exports = {
         };
     }
 }
-
