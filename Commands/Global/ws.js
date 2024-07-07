@@ -20,7 +20,7 @@ const chanProperties = { // type: [name, leader, restricted]
     4: ["afk", false, false]
 };
 const awayBoard = require('../../awayBoard.js');
-let wsnewThrottle = 0;//limit the usage to once every x minutes for /ws
+let wsnewThrottle = 0; //limit the usage to once every x minutes for /ws
 
 async function checkTemplate(guildId) {
     let template = await db.prepare('SELECT * FROM template WHERE guild = ? ORDER BY type ASC').all(guildId);
@@ -73,7 +73,7 @@ const ships = [{
     value: 'Flagship'
 }];
 
-function addEmojis (args) {
+function addEmojis(args) {
     let msg = String(args).split(' ');
     switch (msg[0].toLowerCase()) {
         case 'work':
@@ -131,7 +131,7 @@ function addEmojis (args) {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('ws') // The name of the slash command
-        .setDescription("WS channel, role, and timer management") // A short description about the slash command.
+        .setDescription("WS channel role and timer management") // A short description about the slash command.
         .setDMPermission(false)
         .addSubcommand(subcommand =>
             subcommand
@@ -287,7 +287,7 @@ module.exports = {
         .addSubcommand((subcommand) =>
             subcommand
             .setName('afk')
-            .setDescription('General afk')
+            .setDescription('General timers')
             .addNumberOption(option => option.setName('hours').setDescription('Can be any of the following: 1.3, 6, 0, 0.2'))
             .addNumberOption(option => option.setName('minutes').setDescription('Minutes'))
             .addStringOption(option => option.setName('message').setDescription('Your message.'))
@@ -350,8 +350,8 @@ module.exports = {
             .addStringOption(option => option.setName('opponent10').setDescription('Tenth opponent.'))
         ),
     async execute(interaction) {
-        if(!interaction.channel.isTextBased()) return;
-        if(!interaction.guild.members.me.permissionsIn(interaction.channel.id).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
+        if (!interaction.channel.isTextBased()) return;
+        if (!interaction.guild.members.me.permissionsIn(interaction.channel.id).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
             await interaction.reply({
                 content: 'Sorry, I am missing permission to post here.(view channel/send messages)',
                 ephemeral: true
@@ -373,7 +373,6 @@ module.exports = {
             };
             if (interaction.options.getSubcommand() == 'enemy') {
                 const role = await db.prepare('SELECT mRoleId FROM channels WHERE guild = ? AND channelId = ?').get(interaction.guildId, interaction.channelId);
-                console.log(role);
                 if (!!role) {
                     const opponents = await db.prepare('SELECT opponents FROM whiteStar WHERE guild = ? AND mRoleId = ?').get(interaction.guildId, role.mRoleId);
                     const enemies = await JSON.parse(opponents.opponents);
@@ -392,35 +391,37 @@ module.exports = {
             }
         } else {
             //<GuildMember>.roles.highest.position will return a number that you can compare with other role positions
+            console.log(interaction.commandName);
+            console.log("here");
             if (interaction.commandName === 'ws') {
                 //check if bot has permission
-    const requiredPermissions = [
-        PermissionFlagsBits.ManageRoles,
-        PermissionFlagsBits.ManageChannels,
-        PermissionFlagsBits.ManageMessages,
-        PermissionFlagsBits.EmbedLinks,
-        PermissionFlagsBits.AttachFiles,
-        PermissionFlagsBits.UseExternalEmojis,
-        PermissionFlagsBits.ViewChannel,
-        PermissionFlagsBits.SendMessages
-    ];
+                const requiredPermissions = [
+                    PermissionFlagsBits.ManageRoles,
+                    PermissionFlagsBits.ManageChannels,
+                    PermissionFlagsBits.ManageMessages,
+                    PermissionFlagsBits.EmbedLinks,
+                    PermissionFlagsBits.AttachFiles,
+                    PermissionFlagsBits.UseExternalEmojis,
+                    PermissionFlagsBits.ViewChannel,
+                    PermissionFlagsBits.SendMessages
+                ];
 
-    const missingPermissions = requiredPermissions.filter(permission => !interaction.guild.members.me.permissions.has(permission));
+                const missingPermissions = requiredPermissions.filter(permission => !interaction.guild.members.me.permissions.has(permission));
 
-    if (missingPermissions.length > 0) {
-      // Correctly mapping permission bits to human-readable strings
-      const missingPermissionsNames = missingPermissions.map(permission => {
-        return Object.keys(PermissionFlagsBits).find(key => PermissionFlagsBits[key] === permission);
-      });
-      console.log(`Guild: ${interaction.guild.name} (ID: ${interaction.guild.id}), Missing permissions: ${missingPermissionsNames.join(', ')}`);
-      // Sending an ephemeral reply to inform the user about the missing permissions
-      await interaction.reply({
-        content: `The bot is missing the following permissions: ${missingPermissionsNames.join(', ')}.`,
-        ephemeral: true
-      });
+                if (missingPermissions.length > 0) {
+                    // Correctly mapping permission bits to human-readable strings
+                    const missingPermissionsNames = missingPermissions.map(permission => {
+                        return Object.keys(PermissionFlagsBits).find(key => PermissionFlagsBits[key] === permission);
+                    });
+                    console.log(`Guild: ${interaction.guild.name} (ID: ${interaction.guild.id}), Missing permissions: ${missingPermissionsNames.join(', ')}`);
+                    // Sending an ephemeral reply to inform the user about the missing permissions
+                    await interaction.reply({
+                        content: `The bot is missing the following permissions: ${missingPermissionsNames.join(', ')}.`,
+                        ephemeral: true
+                    });
 
-      return; // Stop execution if there are missing permissions
-    }
+                    return; // Stop execution if there are missing permissions
+                }
                 await interaction.deferReply(); // Do this at the top, and all below will be editReply. Otherwise error crashes the btoa.
                 let subCommand = await interaction.options.getSubcommand();
                 let subCommandGroup = await interaction.options.getSubcommandGroup();
@@ -553,96 +554,96 @@ module.exports = {
                                 ephemeral: true
                             });
                         };
-                            switch (subCommand) {
-                                case 'list':
+                        switch (subCommand) {
+                            case 'list':
+                                replyTemplate();
+                                break;
+                            case 'add':
+                                let templateCount = await db.prepare('SELECT COUNT(*) AS count FROM template WHERE guild = ?').get(interaction.guildId).count;
+                                if (templateCount > 11) {
+                                    interaction.editReply({
+                                        content: "Too many channels, delete one first.",
+                                        ephemeral: true
+                                    });
+                                    return;
+                                };
+                                let type = chanTypes.indexOf(String(interaction.options.get("type").value).toLowerCase());
+                                let addName = String(interaction.options.get("name").value).replace(/[\[\]\{\}\(\)\+\;\$\\]/gm).substring(0, 20);
+                                if (type == -1 || addName.length < 1) {
+                                    interaction.editReply({
+                                        content: "Sorry, I did not understand that.",
+                                        ephemeral: true
+                                    });
+                                    return;
+                                } else {
+                                    if (type == 4) db.prepare('DELETE FROM template WHERE guild = ? AND type = 4').run(interaction.guildId);
+                                    if (type == 0) db.prepare('DELETE FROM template WHERE guild = ? AND type = 0').run(interaction.guildId);
+                                    db.prepare('INSERT INTO template (guild, name, type) VALUES (?,?,?)').run(interaction.guildId, addName, type);
                                     replyTemplate();
-                                    break;
-                                case 'add':
-                                    let templateCount = await db.prepare('SELECT COUNT(*) AS count FROM template WHERE guild = ?').get(interaction.guildId).count;
-                                    if(templateCount > 11) {
-                                        interaction.editReply({
-                                            content: "Too many channels, delete one first.",
-                                            ephemeral: true
-                                        });
-                                        return;
-                                    };
-                                    let type = chanTypes.indexOf(String(interaction.options.get("type").value).toLowerCase());
-                                    let addName = String(interaction.options.get("name").value).replace(/[\[\]\{\}\(\)\+\;\$\\]/gm).substring(0, 20);
-                                    if (type == -1 || addName.length < 1) {
-                                        interaction.editReply({
-                                            content: "Sorry, I did not understand that.",
-                                            ephemeral: true
-                                        });
-                                        return;
-                                    } else {
-                                        if (type == 4) db.prepare('DELETE FROM template WHERE guild = ? AND type = 4').run(interaction.guildId);
-                                        if (type == 0) db.prepare('DELETE FROM template WHERE guild = ? AND type = 0').run(interaction.guildId);
-                                        db.prepare('INSERT INTO template (guild, name, type) VALUES (?,?,?)').run(interaction.guildId, addName, type);
-                                        replyTemplate();
-                                    };
-                                    break;
-                                case 'delete':
-                                    let delName = String(interaction.options.get("name").value).replace(/[\[\]\{\}\(\)\+\;\$\\]/gm).substring(0, 20);
-                                    if (delName.length < 1) {
-                                        interaction.editReply({
-                                            content: "Sorry, I did not understand that.",
-                                            ephemeral: true
-                                        });
-                                        return;
-                                    } else
-                                        db.prepare('DELETE FROM template WHERE guild = ? AND name = ?').run(interaction.guildId, delName);
-                                    replyTemplate();
-                                    break;
-                                case 'officer':
-                                    const officerRole = interaction.options.get("role")?.role;
-                                    if (!officerRole || !officerRole.id) {
-                                        interaction.editReply({
-                                            content: "Sorry, I did not receive a valid role.",
-                                            ephemeral: true
-                                        });
-                                        return;
-                                    }
-                                    
-                                    // Update the database with the officer role ID
-                                    db.prepare(`
+                                };
+                                break;
+                            case 'delete':
+                                let delName = String(interaction.options.get("name").value).replace(/[\[\]\{\}\(\)\+\;\$\\]/gm).substring(0, 20);
+                                if (delName.length < 1) {
+                                    interaction.editReply({
+                                        content: "Sorry, I did not understand that.",
+                                        ephemeral: true
+                                    });
+                                    return;
+                                } else
+                                    db.prepare('DELETE FROM template WHERE guild = ? AND name = ?').run(interaction.guildId, delName);
+                                replyTemplate();
+                                break;
+                            case 'officer':
+                                const officerRole = interaction.options.get("role")?.role;
+                                if (!officerRole || !officerRole.id) {
+                                    interaction.editReply({
+                                        content: "Sorry, I did not receive a valid role.",
+                                        ephemeral: true
+                                    });
+                                    return;
+                                }
+
+                                // Update the database with the officer role ID
+                                db.prepare(`
                                         INSERT INTO management (guild, officer) 
                                         VALUES (?, ?) 
                                         ON CONFLICT(guild) 
                                         DO UPDATE SET officer = excluded.officer
-                                    `).run(interaction.guildId, officerRole.id);                                    
-                                
-                                    interaction.editReply({
-                                        content: `Officer role has been successfully set to: ${officerRole.name}`,
-                                        ephemeral: true
-                                    });
-                                    break;
-                                case 'roles':
-                                    let newRoles = [];
-                                    for (i = 1; i < 6; i++) {
-                                        const theRole = interaction.options.getRole('role' + i);
-                                        if (!!theRole) {
-                                            newRoles.push(theRole.id);
-                                        }
-                                    };
-                                    newRoles = [...new Set(newRoles)]; //remove any duplicates
-                                    db.prepare(`
+                                    `).run(interaction.guildId, officerRole.id);
+
+                                interaction.editReply({
+                                    content: `Officer role has been successfully set to: ${officerRole.name}`,
+                                    ephemeral: true
+                                });
+                                break;
+                            case 'roles':
+                                let newRoles = [];
+                                for (i = 1; i < 6; i++) {
+                                    const theRole = interaction.options.getRole('role' + i);
+                                    if (!!theRole) {
+                                        newRoles.push(theRole.id);
+                                    }
+                                };
+                                newRoles = [...new Set(newRoles)]; //remove any duplicates
+                                db.prepare(`
                                         INSERT INTO management (guild, extraRoles) 
                                         VALUES (?, ?) 
                                         ON CONFLICT(guild) 
                                         DO UPDATE SET extraRoles = excluded.extraRoles
                                     `).run(interaction.guildId, JSON.stringify(newRoles));
-                                    let msg = "";
-                                    for (i in newRoles) {
-                                        msg += "<@&" + newRoles[i] + ">";
-                                    };
-                                    interaction.editReply({
-                                        content: "Added " + msg + " to default whitestar roles.",
-                                        ephemeral: true
-                                    });
-                                    break;
-                                default:
-                                    console.log("no idea");
-                            }
+                                let msg = "";
+                                for (i in newRoles) {
+                                    msg += "<@&" + newRoles[i] + ">";
+                                };
+                                interaction.editReply({
+                                    content: "Added " + msg + " to default whitestar roles.",
+                                    ephemeral: true
+                                });
+                                break;
+                            default:
+                                console.log("no idea");
+                        }
                     } else
                         interaction.editReply({
                             content: "Must have administrator permission to access templates.",
@@ -759,7 +760,7 @@ module.exports = {
 
                 async function nova() {
                     const roleIds = await checkPermissions(2); //2=leader
-                    if(!roleIds)return;
+                    if (!roleIds) return;
                     const inputTime = String(interaction.options.getString('time')).replace(/\s/g, "");
                     if (inputTime == "expire") {
                         db.prepare('UPDATE whitestar SET lifeTime = ? WHERE guild = ? AND mRoleId = ?').run('0', interaction.guildId, roleIds[0]);
@@ -791,7 +792,7 @@ module.exports = {
                         const endTime = (day * 24 * 60 * 60) +
                             (hour * 60 * 60) +
                             (minute * 60) +
-                        Math.floor(Date.now() / 1000);
+                            Math.floor(Date.now() / 1000);
                         const WwiteStarMsg = "<@&" + roleIds[0] + "> Preparation period ends.";
                         db.prepare('Delete FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ?').run(interaction.guildId, roleIds[0], WwiteStarMsg, '10');
                         if ((endTime - 388800) > (Date.now() / 1000)) {
@@ -840,7 +841,7 @@ module.exports = {
                         if (hours) hTime = Number(hours) * 3600;
                         let who;
                         let what = "";
-                        let msg = "**" + awayBoard.displayTime(hTime+mTime) + "** ";
+                        let msg = "**" + awayBoard.displayTime(hTime + mTime) + "** ";
                         let noticeTime;
                         let emoji = "";
                         switch (mType) {
@@ -870,18 +871,18 @@ module.exports = {
                                 const eShip = interaction.options.getString('ship');
                                 const eWho = interaction.options.getString('who');
                                 const eShipType = (eShip === "Transport" || eShip === "Miner") ? "Squishie" : eShip;
-                                emoji = awayBoard.myEmojis['Enemy'+eShip].inline;
+                                emoji = awayBoard.myEmojis['Enemy' + eShip].inline;
                                 who = '0';
                                 if (eWho && eShip != 'Flagship') what += eWho;
                                 msg += what;
-                                noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis['Enemy'+eShip].time - (hTime + mTime));
+                                noticeTime = Math.floor((Date.now() / 1000) + awayBoard.myEmojis['Enemy' + eShip].time - (hTime + mTime));
                                 const existingERecord = await db.prepare('SELECT 1 FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND who = ? AND emoji = ?')
-                                .get(interaction.guildId, checkRoles.mRoleId, what, who, emoji);
+                                    .get(interaction.guildId, checkRoles.mRoleId, what, who, emoji);
                                 if (existingERecord) await awayBoard.db.prepare('DELETE FROM awayTimers WHERE guild = ? AND mRoleId = ? AND what = ? AND emoji = ? AND who = ?')
                                     .run(interaction.guildId, checkRoles.mRoleId, what, emoji, who);
                                 else
                                     await awayBoard.db.prepare('UPDATE whitestar SET Enemy' + eShipType + ' = Enemy' + eShipType + ' + 1 WHERE guild = ? AND mRoleId = ?').run(interaction.guildId, checkRoles.mRoleId);
-                                 break;
+                                break;
                             case 'afk':
                                 const gWho = interaction.options.getMentionable('who');
                                 const gNotice = interaction.options.getString('message');
@@ -896,25 +897,25 @@ module.exports = {
                                 };
                                 if (gNotice) {
                                     let aemoji = addEmojis(gNotice);
-                                    if(awayBoard.myEmojisInline.includes(aemoji[0])) 
+                                    if (awayBoard.myEmojisInline.includes(aemoji[0]))
                                         emoji = aemoji.shift();
                                     what += aemoji.join(' ');
                                 };
-                                if(what.length == 0 && emoji == "") emoji = awayBoard.myEmojis.Away.inline;
+                                if (what.length == 0 && emoji == "") emoji = awayBoard.myEmojis.Away.inline;
                                 msg += what;
                                 noticeTime = Math.floor((Date.now() / 1000) + (hTime + mTime));
                                 break;
                             default:
-                            try {    
-                                interaction.editReply({
+                                try {
+                                    interaction.editReply({
                                         content: "This is a strange error that should never happen",
                                         ephemeral: true
                                     });
-                            } catch {
-                                console.log
-                            };
-                            return;
-                            };
+                                } catch {
+                                    console.log
+                                };
+                                return;
+                        };
                         await db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromwho, emoji) VALUES(?,?,?,?,?,?,?)').run(interaction.guildId, checkRoles.mRoleId, noticeTime, what, who, interaction.user.id, emoji);
                         try {
                             interaction.editReply({
@@ -942,17 +943,15 @@ module.exports = {
                         return newColour[Math.floor(Math.random() * newColour.length)]
                     };
                     const rColour = await getColour();
-                    console.log("cache size is"+interaction.guild.channels.cache.size);
+                    console.log("cache size is" + interaction.guild.channels.cache.size);
                     if (interaction.guild.channels.cache.size + 50 > 500) {
-                        interaction.editReply("Error: Discord channel safety limit reached. Your discord has "+interaction.guild.channels.cache.size+" channels");
+                        interaction.editReply("Error: Discord channel safety limit reached. Your discord has " + interaction.guild.channels.cache.size + " channels");
                         return;
                     };
                     const officerRole = db.prepare('SELECT officer FROM management WHERE guild = ?').get(interaction.guildId)?.officer;
                     const isOfficer = interaction.member.permissions.has(PermissionFlagsBits.Administrator) ||
                         interaction.member.permissions.has([PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles]) ||
                         (officerRole && interaction.member.roles.cache.has(officerRole));
-                        console.log(officerRole);
-                        console.log(interaction.member.roles.cache.has(officerRole));
                     if (isOfficer) {
                         const currentTime = Date.now();
                         const COOLDOWN_PERIOD = 5 * 60 * 1000; // 5 minutes in milliseconds
@@ -963,7 +962,7 @@ module.exports = {
                         };
                         wsnewThrottle = currentTime;
                         async function findnextWS() {
-                            let num = 0;//start at 1
+                            let num = 0; //start at 1
                             let nextWS = '';
                             do {
                                 num++;
@@ -1014,13 +1013,19 @@ module.exports = {
                         while (inputChan?.parent) {
                             inputChan = inputChan.parent;
                         }
-                        newPosition = inputChan.position+1;
+                        newPosition = inputChan.position + 1;
                         const wsCat = await interaction.guild.channels.create({
                             name: "" + nextWS + "_" + template[0].name,
                             type: ChannelType.GuildCategory,
                             position: newPosition,
+                            permissionOverwrites: [
+                                {
+                                    id: interaction.client.user.id,
+                                    allow: [PermissionFlagsBits.ViewChannel,PermissionFlagsBits.ManageChannels, PermissionFlagsBits.AddReactions]
+                                }
+                            ]
                         }).catch(console.log);
-                        if(wsCat) {
+                        if (wsCat) {
                             await wsCat.setPosition(newPosition).catch(console.log);
                             db.prepare('INSERT INTO channels (guild, channelId, mRoleId, lRoleId, cType) VALUES(?,?,?,?,?)').run(interaction.guildId, wsCat.id, mRoleId, lRoleId, '0');
                             //chanList.push(wsCat.id); remove to not push category into the list.
@@ -1102,7 +1107,7 @@ module.exports = {
                             for (q in template) {
                                 if (template[q].type == 0) continue; //skip category
                                 let chan = await createchan(nextWS + '_' + template[q].name, wsCat.id, mRoleId, lRoleId, template[q].type);
-                                await wait(1500);//wait 1.5 seconds to ensure no flooding and all channels create properly.
+                                await wait(1500); //wait 1.5 seconds to ensure no flooding and all channels create properly.
                                 if (chan) {
                                     chanList.push(chan);
                                     if (template[q].type == 4) awayChId = chan;
@@ -1111,8 +1116,8 @@ module.exports = {
                                 }
                             };
                             if (chanList.length == 0) {
-                                await interaction.guild.roles.cache.find((r) => r.name == nextWS).delete();
-                                await interaction.guild.roles.cache.find((r) => r.name == nextWS + 'lead').delete();
+                                await interaction.guild.roles.cache.find((r) => r.name == nextWS)?.delete();
+                                await interaction.guild.roles.cache.find((r) => r.name == nextWS + 'lead')?.delete();
                                 interaction.editReply({
                                     content: "I am broken",
                                     ephemeral: true
@@ -1138,12 +1143,12 @@ module.exports = {
                                 message += `<#${chanList[y]}> `;
                             };
                             message += `and Roles: <@&${mRoleId}> and <@&${lRoleId}>`;
-                            try{
+                            try {
                                 await interaction.editReply({
                                     content: message,
                                 });
                             } catch (error) {
-                                console.log("message post error, generally ignore "+error);
+                                console.log("message post error, generally ignore " + error);
                             }
                             interaction.guild.channels.cache.get(chanList[0]).send({
                                 content: message,
