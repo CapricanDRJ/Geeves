@@ -540,7 +540,8 @@ async function makeAwayBoard(guild, mRoleId, posted) {
     });
     afkChan.messages.fetch().then((messages) => {
         afkChan.bulkDelete(messages.filter((msg) => 
-            !msg.content.includes(myEmojis.E.inline) && 
+            !msg.content.includes(myEmojis.E.inline) &&
+            !msg.content.includes('\u200B') &&
             (
                 (((Number(msg.createdTimestamp) / 1000) + 43000) < curTime && msg.author.bot && msg.id != whiteStar.awayMsgId) ||
                 msg.author.id != guild.members.me.id ||
