@@ -32,6 +32,7 @@ const personalAfkIds = pAfkKeys.flatMap(category => {
     });
 const timeButtons = [];
 const personalButtonCache = {};
+const zeroWidthSpace = '\u200B';
 // Function to create action rows for a category
 function createPersonalButtonCache(category) {
     const menuButtons = [];
@@ -580,19 +581,19 @@ module.exports = async(client, interaction) => {
             if (interaction.customId == 'OK') {
                 if (button.id == awayBoard.myEmojis.EnemyFlagship.id) {
                     who = '0'
-                    what = "";
+                    what = '\u200B';
                 } else {
                     who = '10'
-                    what = "<@&" + wsRole.mRoleId + "> ";
+                    what = '\u200B'+"<@&" + wsRole.mRoleId + "> ";
                 }
             } else {
                 const opponents = await JSON.parse(whiteStar.opponents);
                 if (!!opponents[Number(interaction.customId)]) {
                     who = '0';
-                    what = opponents[interaction.customId];
+                    what = '\u200B'+opponents[interaction.customId];
                 } else { //otherwise friendly *** add an extra check here for later to ensure userid.
                     who = interaction.customId;
-                    what = "";
+                    what = '\u200B';
                 };
             };
             const lifeTime = Math.floor((Date.now() / 1000) + button.time - ((menuCache[interaction.message.id].hours * 3600) + (menuCache[interaction.message.id].minutes * 60)));

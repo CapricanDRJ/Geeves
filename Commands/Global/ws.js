@@ -319,7 +319,7 @@ module.exports = {
                 .addChoices(...ships)
                 .setRequired(true)
             )
-            .addUserOption(option => option.setName('who').setDescription('Who lost a ship?').setRequired(true))
+            .addUserOption(option => option.setName('who').setDescription('Who lost a ship?'))
             .addNumberOption(option => option.setName('hours').setDescription('How long ago? ex: 1.3, 6, 0'))
             .addNumberOption(option => option.setName('minutes').setDescription('How long ago? ex: 1, 60, 8'))
         )
@@ -846,6 +846,7 @@ module.exports = {
                         let emoji = "";
                         switch (mType) {
                             case 'allied':
+                                what = '\u200B';
                                 const aShip = interaction.options.getString('ship');
                                 const aWho = interaction.options.getUser('who');
                                 const aShipType = (aShip === "Transport" || aShip === "Miner") ? "Squishie" : aShip;
@@ -854,7 +855,7 @@ module.exports = {
                                     msg += "<@" + aWho.id + "> ";
                                 } else who = interaction.user.id;
                                 if (aShip == 'FS') {
-                                    what = "<@&" + checkRoles.mRoleId + ">";
+                                    what += "<@&" + checkRoles.mRoleId + ">";
                                     who = '10';
                                 };
                                 emoji = awayBoard.myEmojis[aShip].inline;
@@ -868,6 +869,7 @@ module.exports = {
                                     await awayBoard.db.prepare('UPDATE whitestar SET ' + aShipType + ' = ' + aShipType + ' + 1 WHERE guild = ? AND mRoleId = ?').run(interaction.guildId, checkRoles.mRoleId);
                                 break;
                             case 'enemy':
+                                what = '\u200B';
                                 const eShip = interaction.options.getString('ship');
                                 const eWho = interaction.options.getString('who');
                                 const eShipType = (eShip === "Transport" || eShip === "Miner") ? "Squishie" : eShip;
