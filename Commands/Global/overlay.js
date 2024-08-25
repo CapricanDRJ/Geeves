@@ -48,6 +48,7 @@ module.exports = {
                 return;
             }
             try {
+		await interaction.deferReply();
                 if (attachment.hasOwnProperty('url') && attachment.hasOwnProperty('name')) {
                     const WSimages = [];
                     WSimages.push(Jimp.read(attachment.url));
@@ -62,20 +63,20 @@ module.exports = {
                             .setName("Whitestar.png")
                             .setDescription("Overlay of Whitestar");
 
-                        interaction.reply({
+                        interaction.editReply({
                             files: [att],
                             ephemeral: false
                         })
                     });
                 } else {
-                    interaction.reply({
+                    interaction.editReply({
                         content: "Sorry, that did not make sense to me",
                         ephemeral: true
                     })
                 };
             } catch (error) {
                 console.error(error);
-                await interaction.reply({
+                await interaction.EditReply({
                     content: "There was an error processing the image. Please make sure you uploaded a valid image file.",
                     ephemeral: true
                 });
