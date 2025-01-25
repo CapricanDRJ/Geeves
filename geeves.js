@@ -18,11 +18,13 @@ const client = new Client({
   intents: [
       GatewayIntentBits.Guilds,
       GatewayIntentBits.GuildMembers,
-      GatewayIntentBits.GuildPresences
+      GatewayIntentBits.GuildPresences,
+      GatewayIntentBits.GuildMessages
   ],
 });
 const awayBoard = require('./awayBoard.js');
-
+const Database = require('better-sqlite3');
+const db = new Database('db/geeves.db');
 // Command Handling
 client.commands = new Collection();
 
@@ -108,6 +110,70 @@ client.on('error', (error) => {
     console.error('Discord.js error:', error);
   }
 });
+
+// Function to load channels data into a structured object
+let guildChannels = {};
+const loadGuildChannels = () => {
+  const stmt = db.prepare(
+    `SELECT guild, channelId, mRoleId, lRoleId, cType 
+     FROM channels 
+     WHERE cType < 4`
+  );
+  const rows = stmt.all();
+
+  const newGuildChannels = {};
+  rows.forEach(row => {
+    if (!newGuildChannels[row.guild]) {
+      newGuildChannels[row.guild] = {};
+    }
+    newGuildChannels[row.guild][row.channelId] = {
+      mRoleId: row.mRoleId,
+      lRoleId: row.lRoleId,
+      cType: row.cType
+    };
+  });
+
+  guildChannels = newGuildChannels; // Replace the old object with the new one
+  console.log('Guild channels refreshed');
+};
+
+// Initial load of guild channels
+loadGuildChannels();
+
+// Refresh guild channels every 10 minutes
+setInterval(loadGuildChannels, 10 * 60 * 1000);
+
+
+client.on('messageCreate', (message) => {
+    console.log("message");
+    if (message.author.bot || !message.guild || !message.channel) return;
+  
+    // Correctly reference guildChannels, which is updated by loadGuildChannels
+    const guildChannelsForGuild = guildChannels[message.guild.id]; 
+    if (!guildChannelsForGuild || !guildChannelsForGuild[message.channel.id]) return;
+  
+
+    if (message.mentions.members.size > 0) {
+        const stmt = db.prepare(
+          `SELECT emoji FROM awayTimers WHERE guild = ? AND who = ? AND emoji IN (?, ?, ?) ORDER BY CASE 
+            WHEN emoji = '💤' THEN 1
+            WHEN emoji = '<:Work:1199959521657888768>' THEN 2
+            WHEN emoji = '👀' THEN 3
+            END LIMIT 1`
+        );
+    
+        message.mentions.members.forEach(member => {
+          const row = stmt.get(message.guild.id, member.id, '💤', '<:Work:1199959521657888768>', '👀');
+    
+          if (row) {
+            message.react(row.emoji).catch(console.error);
+          }
+        });
+      }
+  });
+  
+
+
 const gracefulShutdown = () => {
   console.log('Bot is being terminated. Closing database connection...');
   awayBoard.db.close(); // Close the database connection
