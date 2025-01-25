@@ -143,17 +143,28 @@ loadGuildChannels();
 // Refresh guild channels every 10 minutes
 setInterval(loadGuildChannels, 10 * 60 * 1000);
 
+// Global object to track last reaction timestamps
+const lastReactionTime = {};
 
 client.on('messageCreate', (message) => {
-    console.log("message");
     if (message.author.bot || !message.guild || !message.channel) return;
   
     // Correctly reference guildChannels, which is updated by loadGuildChannels
     const guildChannelsForGuild = guildChannels[message.guild.id]; 
     if (!guildChannelsForGuild || !guildChannelsForGuild[message.channel.id]) return;
-  
 
     if (message.mentions.members.size > 0) {
+          // Ensure the guild/channel keys exist
+  if (!lastReactionTime[message.guild.id]) lastReactionTime[message.guild.id] = {};
+  if (!lastReactionTime[message.guild.id][message.channel.id]) lastReactionTime[message.guild.id][message.channel.id] = 0;
+
+  const now = Date.now();
+  // Check if less than 10 seconds have passed
+  if (now - lastReactionTime[message.guild.id][message.channel.id] < 10000) return;
+  
+  // Update timestamp
+  lastReactionTime[message.guild.id][message.channel.id] = now;
+
         const stmt = db.prepare(
           `SELECT emoji FROM awayTimers WHERE guild = ? AND who = ? AND emoji IN (?, ?, ?) ORDER BY CASE 
             WHEN emoji = '💤' THEN 1
