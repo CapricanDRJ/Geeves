@@ -166,15 +166,16 @@ client.on('messageCreate', (message) => {
   lastReactionTime[message.guild.id][message.channel.id] = now;
 
         const stmt = db.prepare(
-          `SELECT emoji FROM awayTimers WHERE guild = ? AND who = ? AND emoji IN (?, ?, ?) ORDER BY CASE 
+          `SELECT emoji FROM awayTimers WHERE guild = ? AND who = ? AND emoji IN (?, ?, ?, ?) ORDER BY CASE 
             WHEN emoji = '💤' THEN 1
-            WHEN emoji = '<:Work:1199959521657888768>' THEN 2
-            WHEN emoji = '👀' THEN 3
+            WHEN emoji = '🚗' THEN 2
+            WHEN emoji = '💼' THEN 3
+            WHEN emoji = '👁️' THEN 4
             END LIMIT 1`
         );
     
         message.mentions.members.forEach(member => {
-          const row = stmt.get(message.guild.id, member.id, '💤', '<:Work:1199959521657888768>', '👀');
+          const row = stmt.get(message.guild.id, member.id, '💤', '🚗', '💼', '👁️');
     
           if (row) {
             message.react(row.emoji).catch(console.error);
