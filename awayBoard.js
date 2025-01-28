@@ -8,7 +8,7 @@ const {
 
 const myEmojis = {
     Work: {
-        id: '1199959521657888768',
+        id: '💼',
         time: 4 * 3600,
         past: "has returned!",
         post: "Should be present for a HS break",
@@ -52,7 +52,7 @@ const myEmojis = {
         button: true
     },
     CheckIn: {
-        id: '👀',
+        id: '👁️',
         past: "check in!",
         post: "check in!",
         time: 2 * 3600,
@@ -274,7 +274,11 @@ const myEmojis = {
         button: false
     },
     Away: {
-        id: '🤷',
+        id: '⏰',
+        button: false
+    },
+    Driving: {
+        id: '🚗',
         button: false
     },
     Morning: {
