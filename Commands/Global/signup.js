@@ -1,11 +1,12 @@
 const {
     PermissionsBitField,
     EmbedBuilder,
-    ActivityType,
+    MessageFlagsBitField,
     PermissionFlagsBits,
     SlashCommandBuilder
 } = require('discord.js');
 const cs = require("../../roster.js");
+const MessageFlags = MessageFlagsBitField.Flags;
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -18,7 +19,7 @@ module.exports = {
         if(!interaction.guild.members.me.permissionsIn(interaction.channel.id).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
             await interaction.reply({
                 content: 'Sorry, I am missing permission to post here.(view channel/send messages)',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -36,16 +37,16 @@ if (interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles) &&
             };
             const message = await interaction.reply({
                 content: cs.headerContent,
-                ephemeral: false,
-                fetchReply: true,
+                withResponse: true,
                 embeds: [embed],
                  allowedMentions: { parse: ["roles"] },
                 components: cs.defButtons
             });
-            cs.db.prepare('INSERT INTO roster(serverId,channelId,messageId,userId) VALUES(?,?,?,?)').run(interaction.guildId, interaction.channel.id, message.id, interaction.user.id); 
+            const messageId = message.resource?.message?.id;
+            if(messageId) cs.db.prepare('INSERT INTO roster(serverId,channelId,messageId,userId) VALUES(?,?,?,?)').run(interaction.guildId, interaction.channel.id, messageId, interaction.user.id); 
         } else interaction.reply({
             content: "Not Authorized",
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         })
     }
 };

@@ -8,18 +8,18 @@ async function menuCacheClean() {
 };
 const awayBoard = require('../../awayBoard.js');
 const {
-    ActivityType,
     ActionRowBuilder,
     ButtonBuilder,
-    ButtonStyle,
     EmbedBuilder,
     PermissionFlagsBits,
     StringSelectMenuBuilder,
-    PermissionsBitField
+    PermissionsBitField,
+    MessageFlagsBitField
 } = require('discord.js');
 const wait = require('node:timers/promises').setTimeout;
 const cs = require('../../roster.js');
 const pAfkKeys = ['Drone', 'Combat', 'Shield', 'Econ'];
+const MessageFlags = MessageFlagsBitField.Flags;
 const personalAfkIds = pAfkKeys.flatMap(category => {
         if (awayBoard.myEmojis[category]) {
             const categoryId = awayBoard.myEmojis[category].id;
@@ -222,7 +222,7 @@ module.exports = async(client, interaction) => {
       // Sending an ephemeral reply to inform the user about the missing permissions
       await interaction.reply({
         content: `The bot is missing the following permissions: ${missingPermissionsNames.join(', ')}.`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
 
       return; // Stop execution if there are missing permissions
@@ -251,7 +251,7 @@ module.exports = async(client, interaction) => {
                 if (buttonPushed == undefined) {
                     interaction.reply({
                         content: `Error: Absolute weirdness, it is like I fell into a black hole where I can hear colors!`,
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     });
                     return;
                 };
@@ -268,7 +268,7 @@ module.exports = async(client, interaction) => {
                     } else {
                         await interaction.reply({ // And you inform the users that you have found an error.
                             content: `Not Authorized!`,
-                            ephemeral: true
+                            flags: MessageFlags.Ephemeral
                         });
                         return; //stop here, they hit an unauthorized button.
                     };
@@ -276,7 +276,7 @@ module.exports = async(client, interaction) => {
                     //do reply here.
                     interaction.reply({ // And you inform the users that signups are closed.
                         content: `Sorry, signups are now closed.`,
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
                     return;
                 };
@@ -391,7 +391,7 @@ module.exports = async(client, interaction) => {
             if(reply) {
                 interaction.reply({
                     embeds: [embed],
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             } else return embed;
         }
@@ -404,11 +404,12 @@ module.exports = async(client, interaction) => {
        
                 const message = await interaction.reply({
                     content: "**Note:** Timers start when module is activated.",
-                    ephemeral: true,
-                    fetchReply: true,
+                    flags: MessageFlags.Ephemeral,
+                    withResponse: true,
                     components: personalButtonCache[category]
                 });
-                menuCache[message.id] = {
+                const messageId = message.resource?.message?.id;
+                if(messageId) menuCache[messageId] = {
                     hours: 0,
                     minutes: 0,
                     timeStamp: Math.floor(Date.now() / 1000),
@@ -521,7 +522,7 @@ module.exports = async(client, interaction) => {
                 interaction.reply({
                     content: "No messages available.",
                     components: [],
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 }).catch(console.log);
             }
             const curTime = Math.floor(Date.now() / 1000);
@@ -564,7 +565,7 @@ module.exports = async(client, interaction) => {
                 );
             interaction.reply({
                 components: selectMenu,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             }).catch(console.log);
         };
 
@@ -573,7 +574,6 @@ module.exports = async(client, interaction) => {
             if (!menuCache[interaction.message.id]) {
                 interaction.update({
                     content: 'A strange error has occured.',
-                    ephemeral: true,
                     components: []
                 });
                 return; //catch
@@ -670,11 +670,12 @@ module.exports = async(client, interaction) => {
             };
             menuButtons = timeButtons.concat(menuButtons); //Put the drop down menus first.
             const message = await interaction.reply({ //add try catch later
-                ephemeral: true,
-                fetchReply: true,
+                flags: MessageFlags.Ephemeral,
+                withResponse: true,
                 components: menuButtons
             });
-            menuCache[message.id] = {
+            const messageId = message.resource?.message?.id;
+            if(messageId)menuCache[messageId] = {
                 hours: 0,
                 minutes: 0,
                 timeStamp: Math.floor(Date.now() / 1000),
@@ -700,11 +701,12 @@ module.exports = async(client, interaction) => {
             );
             menuButtons = timeButtons.concat(menuButtons); //Put the drop down menus first.
             const message = await interaction.reply({
-                ephemeral: true,
-                fetchReply: true,
+                flags: MessageFlags.Ephemeral,
+                withResponse: true,
                 components: menuButtons
             });
-            menuCache[message.id] = {
+            const messageId = message.resource?.message?.id;
+            if(messageId)menuCache[messageId] = {
                 hours: 0,
                 minutes: 0,
                 timeStamp: Math.floor(Date.now() / 1000),
@@ -741,7 +743,7 @@ module.exports = async(client, interaction) => {
             if (err) console.error(err) // If it fails, it returns an error.
             await interaction.reply({ // And you inform the users that you have found an error.
                 content: "You found an error!",
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             })
         }
     }

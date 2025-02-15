@@ -1,8 +1,9 @@
 const {
     SlashCommandBuilder,
     AttachmentBuilder,
-    PermissionFlagsBits
+    MessageFlagsBitField
 } = require("discord.js")
+const MessageFlags = MessageFlagsBitField.Flags;
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -21,7 +22,7 @@ module.exports = {
             if (!attachment) {
                 await interaction.reply({
                     content: "Please upload a valid image file.",
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
                 return;
             }
@@ -29,7 +30,7 @@ console.log("attachment size "+attachment.size);
             if (attachment.size > 20 * 1024 * 1024) {
                 await interaction.reply({
                     content: "The file is too large. Please upload an image smaller than 20MB.",
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
                 return;
             }
@@ -52,21 +53,20 @@ console.log("attachment size "+attachment.size);
                             .setDescription("Overlay of Whitestar");
 
                         interaction.editReply({
-                            files: [att],
-                            ephemeral: false
+                            files: [att]
                         })
                     });
                 } else {
                     interaction.editReply({
                         content: "Sorry, that did not make sense to me",
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
                 };
             } catch (error) {
                 console.error(error);
                 await interaction.editReply({
                     content: "There was an error processing the image. Please make sure you uploaded a valid image file.",
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 

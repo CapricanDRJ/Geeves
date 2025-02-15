@@ -2,8 +2,7 @@ const {
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
-    EmbedBuilder,
-    ActivityType
+    EmbedBuilder
 } = require('discord.js');
 
 const myEmojis = {

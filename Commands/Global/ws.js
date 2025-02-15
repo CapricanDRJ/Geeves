@@ -4,13 +4,13 @@ const {
 const {
     PermissionFlagsBits,
     ChannelType,
-    ActivityType,
-    AttachmentBuilder
+    MessageFlagsBitField
 } = require('discord.js');
 const wait = require('node:timers/promises').setTimeout;
 const db = require('better-sqlite3')('./db/geeves.db', {
     verbose: console.log
 });
+const MessageFlags = MessageFlagsBitField.Flags;
 const end_of_life = 10 * 24 * 3600; // //10*24*3600 = 10 days
 const chanProperties = { // type: [name, leader, restricted]
     0: ["category", false, false],
@@ -354,7 +354,7 @@ module.exports = {
         if (!interaction.guild.members.me.permissionsIn(interaction.channel.id).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
             await interaction.reply({
                 content: 'Sorry, I am missing permission to post here.(view channel/send messages)',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -416,8 +416,8 @@ module.exports = {
                     console.log(`Guild: ${interaction.guild.name} (ID: ${interaction.guild.id}), Missing permissions: ${missingPermissionsNames.join(', ')}`);
                     // Sending an ephemeral reply to inform the user about the missing permissions
                     await interaction.reply({
-                        content: `The bot is missing the following permissions: ${missingPermissionsNames.join(', ')}.`,
-                        ephemeral: true
+                        content: `I am missing the following permissions: ${missingPermissionsNames.join(', ')}.`,
+                        flags: MessageFlags.Ephemeral
                     });
 
                     return; // Stop execution if there are missing permissions
@@ -486,8 +486,7 @@ module.exports = {
                         const lRoleId = await interaction.guild.roles.cache.get(checkRoles.lRoleId);
                         if (!!!mRoleId || !!!lRoleId) { //Could not find the roles that were recorded
                             interaction.editReply({
-                                content: "Sorry, I do not understand why the roles I have recorded no longer exist. Potentially discord lag",
-                                ephemeral: true
+                                content: "Sorry, I do not understand why the roles I have recorded no longer exist. Potentially discord lag"
                             });
                             return false;
                         };
@@ -496,8 +495,7 @@ module.exports = {
                                 if (interaction.member.roles.cache.has(checkRoles.mRoleId) || isOfficer) return [checkRoles.mRoleId, checkRoles.lRoleId];
                                 else {
                                     interaction.editReply({
-                                        content: "This is above your permission levels.",
-                                        ephemeral: true
+                                        content: "This is above your permission levels."
                                     });
                                     return false;
                                 };
@@ -506,8 +504,7 @@ module.exports = {
                                 if (interaction.member.roles.cache.has(checkRoles.lRoleId) || isOfficer) return [checkRoles.mRoleId, checkRoles.lRoleId];
                                 else {
                                     interaction.editReply({
-                                        content: "This is above your permission levels.",
-                                        ephemeral: true
+                                        content: "This is above your permission levels."
                                     });
                                     return false;
                                 };
@@ -516,23 +513,20 @@ module.exports = {
                                 if (isOfficer) return [checkRoles.mRoleId, checkRoles.lRoleId];
                                 else {
                                     interaction.editReply({
-                                        content: "This is above your permission levels.",
-                                        ephemeral: true
+                                        content: "This is above your permission levels."
                                     });
                                     return false;
                                 };
                                 break;
                             default:
                                 interaction.editReply({
-                                    content: "Sorry, weird stuff is happening.",
-                                    ephemeral: true
+                                    content: "Sorry, weird stuff is happening."
                                 });
                                 return false;
                         }
                     } else {
                         interaction.editReply({
-                            content: "Sorry, I could not identify which whitestar this goes with. Potentially this command was used in a channel that is not related to a whitestar.",
-                            ephemeral: true
+                            content: "Sorry, I could not identify which whitestar this goes with. Potentially this command was used in a channel that is not related to a whitestar."
                         });
                         return false;
                     }
@@ -550,8 +544,7 @@ module.exports = {
                             };
                             msg += "```"
                             interaction.editReply({
-                                content: msg,
-                                ephemeral: true
+                                content: msg
                             });
                         };
                         switch (subCommand) {
@@ -562,8 +555,7 @@ module.exports = {
                                 let templateCount = await db.prepare('SELECT COUNT(*) AS count FROM template WHERE guild = ?').get(interaction.guildId).count;
                                 if (templateCount > 11) {
                                     interaction.editReply({
-                                        content: "Too many channels, delete one first.",
-                                        ephemeral: true
+                                        content: "Too many channels, delete one first."
                                     });
                                     return;
                                 };
@@ -571,8 +563,7 @@ module.exports = {
                                 let addName = String(interaction.options.get("name").value).replace(/[\[\]\{\}\(\)\+\;\$\\]/gm).substring(0, 20);
                                 if (type == -1 || addName.length < 1) {
                                     interaction.editReply({
-                                        content: "Sorry, I did not understand that.",
-                                        ephemeral: true
+                                        content: "Sorry, I did not understand that."
                                     });
                                     return;
                                 } else {
@@ -586,8 +577,7 @@ module.exports = {
                                 let delName = String(interaction.options.get("name").value).replace(/[\[\]\{\}\(\)\+\;\$\\]/gm).substring(0, 20);
                                 if (delName.length < 1) {
                                     interaction.editReply({
-                                        content: "Sorry, I did not understand that.",
-                                        ephemeral: true
+                                        content: "Sorry, I did not understand that."
                                     });
                                     return;
                                 } else
@@ -598,8 +588,7 @@ module.exports = {
                                 const officerRole = interaction.options.get("role")?.role;
                                 if (!officerRole || !officerRole.id) {
                                     interaction.editReply({
-                                        content: "Sorry, I did not receive a valid role.",
-                                        ephemeral: true
+                                        content: "Sorry, I did not receive a valid role."
                                     });
                                     return;
                                 }
@@ -613,8 +602,7 @@ module.exports = {
                                     `).run(interaction.guildId, officerRole.id);
 
                                 interaction.editReply({
-                                    content: `Officer role has been successfully set to: ${officerRole.name}`,
-                                    ephemeral: true
+                                    content: `Officer role has been successfully set to: ${officerRole.name}`
                                 });
                                 break;
                             case 'roles':
@@ -637,8 +625,7 @@ module.exports = {
                                     msg += "<@&" + newRoles[i] + ">";
                                 };
                                 interaction.editReply({
-                                    content: "Added " + msg + " to default whitestar roles.",
-                                    ephemeral: true
+                                    content: "Added " + msg + " to default whitestar roles."
                                 });
                                 break;
                             default:
@@ -646,8 +633,7 @@ module.exports = {
                         }
                     } else
                         interaction.editReply({
-                            content: "Must have administrator permission to access templates.",
-                            ephemeral: true
+                            content: "Must have administrator permission to access templates."
                         })
                 };
                 async function leader() {
@@ -722,8 +708,7 @@ module.exports = {
                             }
                         };
                         interaction.editReply({
-                            content: "OK",
-                            ephemeral: true
+                            content: "OK"
                         })
 
 
@@ -741,19 +726,16 @@ module.exports = {
                             let msg = '**' + leadusers.length + ' Leaders:**\n``` ' + leadusers.join(', ') + '```';
                             msg += '\n**' + roleusers.length + ' Members:**\n``` ' + roleusers.join(', ') + '```'
                             interaction.editReply({
-                                content: msg,
-                                ephemeral: false
+                                content: msg
                             })
                         } else {
                             interaction.editReply({
-                                content: "The roles associated with this channel appears to be missing.",
-                                ephemeral: false
+                                content: "The roles associated with this channel appears to be missing."
                             })
                         }
                     } else {
                         interaction.editReply({
-                            content: "Sorry, I could not identify which whitestar this goes with. Potentially this command was used in a channel that is not related to a whitestar.",
-                            ephemeral: false
+                            content: "Sorry, I could not identify which whitestar this goes with. Potentially this command was used in a channel that is not related to a whitestar."
                         })
                     }
                 }
@@ -765,8 +747,7 @@ module.exports = {
                     if (inputTime == "expire") {
                         db.prepare('UPDATE whitestar SET lifeTime = ? WHERE guild = ? AND mRoleId = ?').run('0', interaction.guildId, roleIds[0]);
                         interaction.editReply({
-                            content: 'Channels and role will expire shortly',
-                            ephemeral: true
+                            content: 'Channels and role will expire shortly'
                         });
                         return;
                     }
@@ -778,8 +759,7 @@ module.exports = {
                     minute = inputTime.match(/(\d+)[m]/i);
                     if (day == 0 && hour == 0 && minute == 0) {
                         interaction.editReply({
-                            content: "Syntax error, I did not understand the time.",
-                            ephemeral: true
+                            content: "Syntax error, I did not understand the time."
                         });
                     }
                     if (!day) day = 0;
@@ -801,14 +781,12 @@ module.exports = {
                         };
                         db.prepare('UPDATE whitestar SET lifeTime = ?, novaDone = 1 WHERE guild = ? AND mRoleId = ?').run(endTime, interaction.guildId, roleIds[0]);
                         interaction.editReply({
-                            content: 'Set Nova timer for: ' + day + 'd' + hour + 'h' + minute + 'm',
-                            ephemeral: true
+                            content: 'Set Nova timer for: ' + day + 'd' + hour + 'h' + minute + 'm'
                         });
                         awayBoard.makeAwayBoard(interaction.guild, roleIds[0], false);
                     } else {
                         interaction.editReply({
-                            content: "Syntax error, I did not understand the time.",
-                            ephemeral: true
+                            content: "Syntax error, I did not understand the time."
                         });
                     }
                 };
@@ -825,8 +803,7 @@ module.exports = {
                         };
                         if (opponents.length > 0) db.prepare('UPDATE whitestar SET opponents = ? WHERE guild = ? AND mRoleId = ?').run(JSON.stringify(opponents), interaction.guildId, roleIds[0]);
                         interaction.editReply({
-                            content: "OK.",
-                            ephemeral: true
+                            content: "OK."
                         });
                     }
                 };
@@ -910,8 +887,7 @@ module.exports = {
                             default:
                                 try {
                                     interaction.editReply({
-                                        content: "This is a strange error that should never happen",
-                                        ephemeral: true
+                                        content: "This is a strange error that should never happen"
                                     });
                                 } catch {
                                     console.log
@@ -921,8 +897,7 @@ module.exports = {
                         await db.prepare('INSERT INTO awayTimers (guild, mRoleId, lifeTime, what, who, fromwho, emoji) VALUES(?,?,?,?,?,?,?)').run(interaction.guildId, checkRoles.mRoleId, noticeTime, what, who, interaction.user.id, emoji);
                         try {
                             interaction.editReply({
-                                content: "/ws " + mType + " \n" + msg,
-                                ephemeral: false
+                                content: "/ws " + mType + " \n" + msg
                             });
                         } catch {
                             console.log
@@ -930,8 +905,7 @@ module.exports = {
                         awayBoard.makeAwayBoard(interaction.guild, checkRoles.mRoleId, false);
                     } else {
                         interaction.editReply({
-                            content: "Sorry, I could not identify which whitestar this goes with. Potentially this command was used in a channel that is not related to a whitestar.",
-                            ephemeral: true
+                            content: "Sorry, I could not identify which whitestar this goes with. Potentially this command was used in a channel that is not related to a whitestar."
                         });
                         return false;
                     }
@@ -985,15 +959,13 @@ module.exports = {
                         let template = await checkTemplate(interaction.guildId);
                         if (template[Number(template.length) - 1].type != 4) {
                             interaction.editReply({
-                                content: "Error: Missing afk channel from template. Please use **/ws template** to correct",
-                                ephemeral: true
+                                content: "Error: Missing afk channel from template. Please use **/ws template** to correct"
                             });
                             return;
                         };
                         if (template[0].type != 0) {
                             interaction.editReply({
-                                content: "Error: Missing category from template. Please use **/ws template** to correct",
-                                ephemeral: true
+                                content: "Error: Missing category from template. Please use **/ws template** to correct"
                             });
                             return;
                         };
@@ -1121,8 +1093,7 @@ module.exports = {
                                 await interaction.guild.roles.cache.find((r) => r.name == nextWS)?.delete();
                                 await interaction.guild.roles.cache.find((r) => r.name == nextWS + 'lead')?.delete();
                                 interaction.editReply({
-                                    content: "I am broken",
-                                    ephemeral: true
+                                    content: "I am broken"
                                 });
                                 return;
                             };
@@ -1161,14 +1132,12 @@ module.exports = {
 
                         } else {
                             interaction.editReply({
-                                content: "An unknown error occured, cancelling",
-                                ephemeral: true
+                                content: "An unknown error occured, cancelling"
                             });
                         }
                     } else {
                         interaction.editReply({
-                            content: "You must have the \"Manage Channels\" and \"Manage Roles\", Administrator, or Officer role to use this command.",
-                            ephemeral: true
+                            content: "You must have the \"Manage Channels\" and \"Manage Roles\", Administrator, or Officer role to use this command."
                         });
                         return false;
                     };
