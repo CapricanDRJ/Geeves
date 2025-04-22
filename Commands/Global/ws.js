@@ -721,8 +721,8 @@ module.exports = {
                         const mRoleId = await interaction.guild.roles.cache.get(checkRoles.mRoleId);
                         const lRoleId = await interaction.guild.roles.cache.get(checkRoles.lRoleId);
                         if (!!mRoleId || !!lRoleId) {
-                            const leadusers = lRoleId.members.map((member) => member.displayName);
-                            const roleusers = mRoleId.members.map((member) => member.displayName);
+                            const leadusers = lRoleId.members.map(m => m.nickname || m.user.globalName || m.user.username);
+                            const roleusers = mRoleId.members.map(m => m.nickname || m.user.globalName || m.user.username);                            
                             let msg = '**' + leadusers.length + ' Leaders:**\n``` ' + leadusers.join(', ') + '```';
                             msg += '\n**' + roleusers.length + ' Members:**\n``` ' + roleusers.join(', ') + '```'
                             interaction.editReply({
