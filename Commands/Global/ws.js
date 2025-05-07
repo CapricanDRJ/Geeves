@@ -380,13 +380,6 @@ module.exports = {
         ),
     async execute(interaction) {
         if (!interaction.channel.isTextBased()) return;
-        if (!interaction.guild.members.me.permissionsIn(interaction.channel.id).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
-            await interaction.reply({
-                content: 'Sorry, I am missing permission to post here.(view channel/send messages)',
-                flags: MessageFlags.Ephemeral
-            });
-            return;
-        }
         if (interaction.isAutocomplete()) {
             if (interaction.options.getSubcommand() === 'new' && interaction.options.getFocused(true)?.name === 'corp') {
                 const guildId = interaction.guildId;
@@ -439,9 +432,15 @@ module.exports = {
                 }
             }
         } else {
+            if (!interaction.guild.members.me.permissionsIn(interaction.channel.id).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
+                await interaction.reply({
+                    content: 'Sorry, I am missing permission to post here.(view channel/send messages)',
+                    flags: MessageFlags.Ephemeral
+                });
+                return;
+            }
             //<GuildMember>.roles.highest.position will return a number that you can compare with other role positions
             console.log(interaction.commandName);
-            console.log("here");
             if (interaction.commandName === 'ws') {
                 //check if bot has permission
                 const requiredPermissions = [
