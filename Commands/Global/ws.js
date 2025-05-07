@@ -7,9 +7,32 @@ const {
     MessageFlagsBitField
 } = require('discord.js');
 const wait = require('node:timers/promises').setTimeout;
-const db = require('better-sqlite3')('./db/geeves.db', {
+const betterSqlite3 = require('better-sqlite3');
+const db = betterSqlite3('./db/geeves.db', {
     verbose: console.log
 });
+const wsjsonDB = betterSqlite3('./db/wsjson.db', { readonly: true });
+const corpCacheMap = new Map(); // guildId => { data: [...], timer: Timeout }
+function loadCorpCacheForGuild(guildId) {
+    const rows = wsjsonDB.prepare(`
+        SELECT DISTINCT corpId, corpName FROM json_cache
+        WHERE guildid = ? AND corpId IS NOT NULL AND corpName IS NOT NULL
+    `).all(guildId);
+
+    const data = rows.flatMap(row => [
+        { name: `${row.corpName} Slot 1`, value: `${row.corpId}|1` },
+        { name: `${row.corpName} Slot 2`, value: `${row.corpId}|2` }
+    ]);
+
+    // Clear old timer if present
+    const old = corpCacheMap.get(guildId);
+    if (old?.timer) clearTimeout(old.timer);
+
+    // Store and schedule expiration
+    const timer = setTimeout(() => corpCacheMap.delete(guildId), 5 * 60 * 1000); // 5 min
+    corpCacheMap.set(guildId, { data, timer });
+}
+
 const MessageFlags = MessageFlagsBitField.Flags;
 const end_of_life = 10 * 24 * 3600; // //10*24*3600 = 10 days
 const chanProperties = { // type: [name, leader, restricted]
@@ -137,6 +160,12 @@ module.exports = {
             subcommand
             .setName('new')
             .setDescription('Create a set of whitestar channels for the following users')
+            .addStringOption(option =>
+                option.setName('corp')
+                    .setDescription('Corporation name')
+                    .setRequired(true)
+                    .setAutocomplete(true)
+            )            
             .addUserOption(option => option.setName('user1').setDescription('Select user').setRequired(true))
             .addUserOption(option => option.setName('user2').setDescription('Select user'))
             .addUserOption(option => option.setName('user3').setDescription('Select user'))
@@ -359,6 +388,26 @@ module.exports = {
             return;
         }
         if (interaction.isAutocomplete()) {
+            if (interaction.options.getSubcommand() === 'new' && interaction.options.getFocused(true)?.name === 'corp') {
+                const guildId = interaction.guildId;
+                if (!corpCacheMap.has(guildId)) {
+                    loadCorpCacheForGuild(guildId);
+                }
+            
+                const focused = interaction.options.getFocused().toLowerCase();
+                const entries = corpCacheMap.get(guildId)?.data || [];
+                const filtered = entries.filter(entry =>
+                    entry.name.toLowerCase().includes(focused)
+                ).slice(0, 25);
+                if (filtered.length === 0) {
+                    filtered = [{
+                        name: 'No matches found',
+                        value: 'placeholder|0'
+                    }];
+                }
+                interaction.respond(filtered).catch(console.error);
+            }
+            
             if (interaction.options.getSubcommandGroup() == 'template' && interaction.options.getSubcommand() == 'delete') { // ws template delete options
                 let template = await checkTemplate(interaction.guildId);
                 console.log(template);
@@ -911,6 +960,12 @@ module.exports = {
                     }
                 };
                 async function startWS() {
+                    const corpOption = interaction.options.getString('corp');
+                    if (corpOption) {
+                        const [corpId, slot] = corpOption.split('|');
+                        console.log(`corpId: ${corpId}, slot: ${slot}`);
+                    }
+
                     async function getColour() {
                         const colours = [0x00a455, 0x8877ee, 0xcc66dd, 0x50a210, 0x3f88fd, 0x6388c8, 0xf032c9, 0xdd6699, 0xf94965, 0x888888, 0x3399bb, 0x339988, 0xbc8519, 0x9988AA, 0xec5a74, 0xaa66ee, 0xf05d14, 0xaa8877, 0x998800, 0x779900, 0x78906c, 0x77958b, 0x5d98ab, 0x4790d8, 0x8888bb, 0xaa77aa, 0xcc66aa, 0xbb7788];
                         const used = await db.prepare('SELECT colour FROM whiteStar WHERE guild = ?').all(interaction.guildId);
