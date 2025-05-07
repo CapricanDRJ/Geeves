@@ -18,11 +18,13 @@ function loadCorpCacheForGuild(guildId) {
         SELECT DISTINCT corpId, corpName FROM json_cache
         WHERE guildid = ? AND corpId IS NOT NULL AND corpName IS NOT NULL
     `).all(guildId);
-
-    const data = rows.flatMap(row => [
-        { name: `${row.corpName} Slot 1`, value: `${row.corpId}|1` },
-        { name: `${row.corpName} Slot 2`, value: `${row.corpId}|2` }
-    ]);
+    const data = rows.flatMap(row => {
+        const base = row.corpName.slice(0, 90); // leave room for " Slot X"
+        return [
+            { name: `${base} Slot 1`, value: `${row.corpId}|1` },
+            { name: `${base} Slot 2`, value: `${row.corpId}|2` }
+        ];
+    });
 
     // Clear old timer if present
     const old = corpCacheMap.get(guildId);
