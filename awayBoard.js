@@ -448,10 +448,12 @@ async function cacheNames(guild) {
         withPresences: false
     });
     members.forEach((member) => {
-        let Handle;
-        if (member.nickname) Handle = member.nickname;
-        else Handle = member.user.username;
-        displayName[member.id] = Handle;
+        if (member.user.bot) return;
+         displayName[member.id] = (member?.nickname || member.user?.globalName || member.user.username)
+        .replace(/`/g, '')
+        .replace(/\[[^\]]*\]/g, '')
+        .trim()
+        .substring(0, 16);
     });
 };
 async function makeAwayBoard(guild, mRoleId, posted) {
