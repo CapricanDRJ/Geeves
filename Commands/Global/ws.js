@@ -21,8 +21,8 @@ function loadCorpCacheForGuild(guildId) {
     const data = rows.flatMap(row => {
         const base = row.corpName.slice(0, 90); // leave room for " Slot X"
         return [
-            { name: `${base} Slot 1`, value: `${row.corpId}|1` },
-            { name: `${base} Slot 2`, value: `${row.corpId}|2` }
+            { name: `${base} Slot 1`, value: `${row.corpId}|0` },
+            { name: `${base} Slot 2`, value: `${row.corpId}|1` }
         ];
     });
 
@@ -962,9 +962,15 @@ module.exports = {
                 };
                 async function startWS() {
                     const corpOption = interaction.options.getString('corp');
-                    if (corpOption) {
-                        const [corpId, slot] = corpOption.split('|');
-                        console.log(`corpId: ${corpId}, slot: ${slot}`);
+                    if (!corpOption) {
+                        interaction.editReply("Invalid input.");
+                        return;
+                    }
+                    const [corpId, slot] = corpOption.split('|');                    
+
+                    if (!(corpId && slot && /^[a-f0-9]{64}$/.test(corpId) && ['0', '1'].includes(slot))) {
+                        interaction.editReply("Invalid input.");
+                        return;
                     }
 
                     async function getColour() {
@@ -1153,8 +1159,20 @@ module.exports = {
                                 });
                                 return;
                             };
-                            await db.prepare('INSERT INTO whiteStar (guild, mRoleId, lifeTime, awayChId, colour) VALUES(?,?,?,?,?)').run(interaction.guildId, mRoleId, Math.floor((Date.now() / 1000) + end_of_life), awayChId, rColour);
-                            //await db.prepare('INSERT INTO whiteStar (guild, mRoleId, lifeTime, awayChId) VALUES(?,?,?,?)').run(interaction.guildId, mRoleId, Math.floor((Date.now() / 1000)), awayChId);
+                            await db.prepare(`INSERT INTO whiteStar 
+                                (guild, mRoleId, lifeTime, awayChId, colour, slot, corp) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?)`)
+                                .run(
+                                    interaction.guildId,
+                                    mRoleId,
+                                    Math.floor((Date.now() / 1000) + end_of_life),
+                                    awayChId,
+                                    rColour,
+                                    Number(slot),
+                                    corpId
+                                );
+                            
+                            //await db.prepare('INSERT INTO whiteStar (guild, mRoleId, lifeTime, awayChId, colour) VALUES(?,?,?,?,?)').run(interaction.guildId, mRoleId, Math.floor((Date.now() / 1000) + end_of_life), awayChId, rColour);
 
                             await interaction.member.roles.add(mRoleId).catch(console.log);
                             wait(1000);
