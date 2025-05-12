@@ -213,7 +213,7 @@ module.exports = async(client, interaction) => {
 
     const missingPermissions = requiredPermissions.filter(permission => !interaction.guild.members.me.permissions.has(permission));
 
-    if (missingPermissions.length > 0) {
+    if (missingPermissions.length > 0 && !interaction.isAutocomplete()) {
       // Correctly mapping permission bits to human-readable strings
       const missingPermissionsNames = missingPermissions.map(permission => {
         return Object.keys(PermissionFlagsBits).find(key => PermissionFlagsBits[key] === permission);
