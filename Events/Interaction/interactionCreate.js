@@ -587,7 +587,7 @@ module.exports = async(client, interaction) => {
                     what = '\u200B'+"<@&" + wsRole.mRoleId + "> ";
                 }
             } else {
-                const opponents = await JSON.parse(whiteStar.opponents);
+                const opponents = whiteStar.hsOpponents === '[]' ? JSON.parse(whiteStar.opponents) : JSON.parse(whiteStar.hsOpponents);
                 if (!!opponents[Number(interaction.customId)]) {
                     who = '0';
                     what = '\u200B'+opponents[interaction.customId];
@@ -616,7 +616,7 @@ module.exports = async(client, interaction) => {
         async function destroyedShip(enemy) {
             let menuButtons = [];
             if (enemy) {
-                const opponents = await JSON.parse(whiteStar.opponents);
+                const opponents = whiteStar.hsOpponents === '[]' ? JSON.parse(whiteStar.opponents) : JSON.parse(whiteStar.hsOpponents);
                 if (opponents.length < 1) { //do something if the opponents list is not populated yet. alert to it?
                     interaction.reply({
                         content: "Error, please setup the opponents first. **/ws opponents**",
@@ -635,7 +635,7 @@ module.exports = async(client, interaction) => {
                         menuButtons[r].addComponents(
                             new ButtonBuilder()
                             .setCustomId(String(bCount))
-                            .setLabel(String(opponents[bCount]).slice(0, 20))
+                            .setLabel('\u200B'+String(opponents[bCount]).slice(0, 20))
                             .setStyle(4), //4 is red
                         );
                     };

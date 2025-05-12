@@ -344,7 +344,11 @@ function setupButtons() {
     return row;
 };
 const defButtons = setupButtons();
-const db = require('better-sqlite3')('db/geeves.db', {
+const sqlite3 = require('better-sqlite3');
+const db = sqlite3('db/geeves.db', {
+    verbose: console.log
+});
+const wsjson = sqlite3('db/wsjson.db', {
     verbose: console.log
 });
 const afkContent = [
@@ -363,11 +367,82 @@ function displayTime(seconds) {
     return timeString;
 }
 
+async function autoSetup(guildId, mRoleId, corpId, slot) {
+    const CHECK_DAYS = 4 * 24 * 3600;
+  // 1) cutoff for “not older than 4 days”
+  const cutoff = Math.floor(Date.now() / 1000) - CHECK_DAYS;
+
+  // 2) grab raw_json + corpName + oppCorpId
+  const row = wsjson.prepare(`
+    SELECT *
+      FROM json_cache
+     WHERE guildid   = ?
+       AND eventtype = 'WhiteStarStarted'
+       AND corpId    = ?
+       AND slot      = ?
+       AND timestamp >= ?
+     ORDER BY timestamp DESC
+     LIMIT 1
+  `).get(guildId, corpId, slot, cutoff);
+
+  if (!row) return;  // nothing recent to set up
+
+  // 3) parse JSON for opponent info & members
+  const data         = JSON.parse(row.raw_json);
+  const oppCorp      = row.oppCorpId;
+  const myCorpName   = row.corpName;
+  const oppCorpName  = data.Opponent.CorporationName;
+  const hsOpponents  = JSON.stringify(data.OpponentParticipants || []);
+  const hsMembers    = JSON.stringify(data.OurParticipants      || []);
+
+  // 4) update whiteStar by guild + mRoleId
+  db.prepare(`
+    UPDATE whiteStar
+       SET oppCorp     = ?
+         , myCorpName  = ?
+         , oppCorpName = ?
+         , hsOpponents = ?
+         , hsMembers   = ?
+         , lifeTime    = ?
+         , novaDone    = 1
+     WHERE guild   = ?
+       AND mRoleId = ?
+  `).run(
+    oppCorp,
+    myCorpName,
+    oppCorpName,
+    hsOpponents,
+    hsMembers,
+    Number(row.timestamp)+432000,
+    guildId,
+    mRoleId,
+  );
+  const whatText = `White Star discovered: **${myCorpName}** vs **${oppCorpName}**\nhttps://ws.tsl.rocks/corp/${oppCorp}/`;
+
+  db.prepare(`
+    INSERT INTO awayTimers
+      (guild, mRoleId, lifeTime, what, who, fromwho, emoji)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    guildId,            // which server
+    mRoleId,            // which WS role
+    row.timestamp,                // fire immediately
+    whatText,           // announcement text
+    '10',               // “role notice” bucket → renders with Whitestar emoji
+    null,               // no specific user triggered it
+    myEmojis.Whitestar.inline // show the Whitestar emoji again
+  );
+
+}
+
 async function postAFKs(guild) {
     const curTime = Math.floor(Date.now() / 1000);
     const whiteStar = await db.prepare('SELECT * from whiteStar WHERE guild = ?').all(guild.id);
     if (!whiteStar) return;
     for (const wsAFK of whiteStar) {
+        if (wsAFK.novaDone === 0 && wsAFK.corp !== null) {
+            await autoSetup(guild.id, wsAFK.mRoleId, wsAFK.corp, wsAFK.slot);//check setup if necessary.
+        };
         if (wsAFK && wsAFK?.mRoleId) { //for a weird bug that can happen on other servers where permissions have been played with.
             //if it's just for edit do <Client | Guild>.channels.cache.get(channelId).messages.edit(messageId, { content })
             const afkChan = await guild.channels.cache.get(wsAFK.awayChId);
