@@ -385,16 +385,18 @@ module.exports = {
         if (!interaction.channel.isTextBased()) return;
         if (interaction.isAutocomplete()) {
             if (interaction.options.getSubcommand() === 'new' && interaction.options.getFocused(true)?.name === 'corp') {
+console.log("autocomplete for corp");
                 const guildId = interaction.guildId;
                 if (!corpCacheMap.has(guildId)) {
                     loadCorpCacheForGuild(guildId);
                 }
-            
+console.log("cacheMap has guildId");
                 const focused = interaction.options.getFocused().toLowerCase();
                 const entries = corpCacheMap.get(guildId)?.data || [];
                 const filtered = entries.filter(entry =>
                     entry.name.toLowerCase().includes(focused)
                 ).slice(0, 25);
+                console.log("filtered is " + filtered);
                 console.log(filtered);
                 interaction.respond(filtered).catch(console.error);
             }
