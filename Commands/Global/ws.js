@@ -8,9 +8,7 @@ const {
 } = require('discord.js');
 const wait = require('node:timers/promises').setTimeout;
 const betterSqlite3 = require('better-sqlite3');
-const db = betterSqlite3('./db/geeves.db', {
-    verbose: console.log
-});
+const db = betterSqlite3('./db/geeves.db');
 const wsjsonDB = betterSqlite3('./db/wsjson.db', { readonly: true });
 const corpCacheMap = new Map(); // guildId => { data: [...], timer: Timeout }
 function loadCorpCacheForGuild(guildId) {
@@ -25,7 +23,10 @@ function loadCorpCacheForGuild(guildId) {
             { name: `${base} Slot 2`, value: `${row.corpId}|1` }
         ];
     });
-
+    console.log("data.length is " + data.length);//**logging for testing */
+    if (data.length === 0) {
+        data.push({ name: 'No Auto Setup', value: 'NoAutoSetup' });
+      }
     // Clear old timer if present
     const old = corpCacheMap.get(guildId);
     if (old?.timer) clearTimeout(old.timer);
@@ -167,7 +168,7 @@ module.exports = {
                     .setDescription('Corporation autosetup')
                     .setRequired(true)
                     .setAutocomplete(true)
-            )            
+            )
             .addUserOption(option => option.setName('user1').setDescription('Select user').setRequired(true))
             .addUserOption(option => option.setName('user2').setDescription('Select user'))
             .addUserOption(option => option.setName('user3').setDescription('Select user'))
@@ -394,12 +395,6 @@ module.exports = {
                 const filtered = entries.filter(entry =>
                     entry.name.toLowerCase().includes(focused)
                 ).slice(0, 25);
-                if (filtered.length === 0) {
-                    filtered = [{
-                        name: 'No matches found',
-                        value: 'placeholder|0'
-                    }];
-                }
                 interaction.respond(filtered).catch(console.error);
             }
             
@@ -962,11 +957,10 @@ module.exports = {
                 };
                 async function startWS() {
                     const corpOption = interaction.options.getString('corp');
-                    if (corpOption && !/^[a-f0-9]{64}\|[01]$/.test(corpOption)) {
+                    if (corpOption !== 'NoAutoSetup' && !/^[a-f0-9]{64}\|[01]$/.test(corpOption)) {
                       return interaction.editReply('Invalid input.');
                     }
-                    const [corpId, slot] = corpOption?.split('|') ?? [null, null];
-                    console.log('slot before insert:', slot, typeof slot);
+                    const [corpId, slot] = corpOption === 'NoAutoSetup' ? [null, null] : corpOption.split('|');
 
                     async function getColour() {
                         const colours = [0x00a455, 0x8877ee, 0xcc66dd, 0x50a210, 0x3f88fd, 0x6388c8, 0xf032c9, 0xdd6699, 0xf94965, 0x888888, 0x3399bb, 0x339988, 0xbc8519, 0x9988AA, 0xec5a74, 0xaa66ee, 0xf05d14, 0xaa8877, 0x998800, 0x779900, 0x78906c, 0x77958b, 0x5d98ab, 0x4790d8, 0x8888bb, 0xaa77aa, 0xcc66aa, 0xbb7788];
@@ -976,7 +970,6 @@ module.exports = {
                         return newColour[Math.floor(Math.random() * newColour.length)]
                     };
                     const rColour = await getColour();
-                    console.log("cache size is" + interaction.guild.channels.cache.size);
                     if (interaction.guild.channels.cache.size + 50 > 500) {
                         interaction.editReply("Error: Discord channel safety limit reached. Your discord has " + interaction.guild.channels.cache.size + " channels");
                         return;
@@ -1163,7 +1156,7 @@ module.exports = {
                                     Math.floor((Date.now() / 1000) + end_of_life),
                                     awayChId,
                                     rColour,
-                                    slot,
+                                    Number(slot),
                                     corpId
                                 );
                             
