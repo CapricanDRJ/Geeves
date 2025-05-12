@@ -416,7 +416,7 @@ async function autoSetup(guildId, mRoleId, corpId, slot) {
     guildId,
     mRoleId,
   );
-  const whatText = `White Star discovered: **${myCorpName}** vs **${oppCorpName}**\nhttps://ws.tsl.rocks/corp/${oppCorp}/\n`;
+  const whatText = `White Star discovered: **${myCorpName}** vs **[${oppCorpName}](https://ws.tsl.rocks/corp/${oppCorp}/)**\n`;
 
   db.prepare(`
     INSERT INTO awayTimers
