@@ -382,7 +382,7 @@ async function autoSetup(guildId, mRoleId, corpId, slot) {
        AND slot      = ?
        AND timestamp >= ?
      LIMIT 1
-  `).get(guildId, corpId, slot, cutoff);
+  `).get(guildId, corpId, 1+slot, cutoff);
 
   if (!row) return;  // nothing recent to set up
 
