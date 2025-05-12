@@ -236,7 +236,17 @@ module.exports = async(client, interaction) => {
 
       return; // Stop execution if there are missing permissions
     }
-
+    if (interaction.isCommand() || interaction.isContextMenuCommand()) { // If the command is a command or an contextmenu, it will run the below code.
+        const command = client.commands.get(interaction.commandName) // This is the command (It's the same for ContextMenu as a ContextMenuCommand is just the same as a slash command, only the difference is that ContextMenuCommands are ran through an User Interface.
+        if (command) {
+            try {
+                return command.execute(interaction) // Try to execute the command.
+            } catch (err) { 
+                console.error(err);
+              }
+        }
+        return;
+    };
 
     if (interaction.isButton()) {
 
