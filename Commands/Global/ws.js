@@ -395,6 +395,7 @@ module.exports = {
                 const filtered = entries.filter(entry =>
                     entry.name.toLowerCase().includes(focused)
                 ).slice(0, 25);
+                console.log(filtered);
                 interaction.respond(filtered).catch(console.error);
             }
             
