@@ -616,7 +616,7 @@ module.exports = async(client, interaction) => {
         async function destroyedShip(enemy) {
             let menuButtons = [];
             if (enemy) {
-                const opponents = whiteStar.hsOpponents === '[]' ? JSON.parse(whiteStar.opponents) : JSON.parse(whiteStar.hsOpponents);
+                const opponents = whiteStar.hsOpponents === '[]' ? JSON.parse(whiteStar.opponents) : JSON.parse(whiteStar.hsOpponents).map(o => o.PlayerName);
                 if (opponents.length < 1) { //do something if the opponents list is not populated yet. alert to it?
                     interaction.reply({
                         content: "Error, please setup the opponents first. **/ws opponents**",
