@@ -23,7 +23,6 @@ function loadCorpCacheForGuild(guildId) {
             { name: `${base} Slot 2`, value: `${row.corpId}|1` }
         ];
     });
-    console.log("data.length is " + data.length);//**logging for testing */
     if (data.length === 0) {
         data.push({ name: 'No Auto Setup', value: 'NoAutoSetup' });
       }
@@ -46,6 +45,7 @@ const chanProperties = { // type: [name, leader, restricted]
     4: ["afk", false, false]
 };
 const awayBoard = require('../../awayBoard.js');
+const { start } = require("node:repl");
 let wsnewThrottle = 0; //limit the usage to once every x minutes for /ws
 
 async function checkTemplate(guildId) {
@@ -955,6 +955,7 @@ module.exports = {
                     }
                 };
                 async function startWS() {
+                    console.log('startWS');
                     const corpOption = interaction.options.getString('corp');
                     if (corpOption !== 'NoAutoSetup' && !/^[a-f0-9]{64}\|[01]$/.test(corpOption)) {
                       return interaction.editReply('Invalid Corp.');

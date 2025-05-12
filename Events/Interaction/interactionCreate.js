@@ -201,7 +201,6 @@ module.exports = async(client, interaction) => {
         return;
     };
     if (interaction.isAutocomplete()) {
-        console.log("is autocomplete");
         const command = client.commands.get(interaction.commandName) // This is the command (It's the same for ContextMenu as a ContextMenuCommand is just the same as a slash command, only the difference is that ContextMenuCommands are ran through an User Interface.
         if (command) {
             try {
@@ -212,7 +211,6 @@ module.exports = async(client, interaction) => {
         }
         return;
     };
-    console.log("not autocomplete");
     const requiredPermissions = [
         PermissionFlagsBits.ManageRoles,
         PermissionFlagsBits.ManageChannels,
