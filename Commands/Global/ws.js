@@ -164,8 +164,8 @@ module.exports = {
             .setDescription('Create a set of whitestar channels for the following users')
             .addStringOption(option =>
                 option.setName('corp')
-                    .setDescription('Corporation name')
-                    .setRequired(true)
+                    .setDescription('Corporation autosetup')
+                    .setRequired(false)
                     .setAutocomplete(true)
             )            
             .addUserOption(option => option.setName('user1').setDescription('Select user').setRequired(true))
@@ -962,16 +962,11 @@ module.exports = {
                 };
                 async function startWS() {
                     const corpOption = interaction.options.getString('corp');
-                    if (!corpOption) {
-                        interaction.editReply("Invalid input.");
-                        return;
+                    if (corpOption && !/^[a-f0-9]{64}\|[01]$/.test(corpOption)) {
+                      return interaction.editReply('Invalid input.');
                     }
-                    const [corpId, slot] = corpOption.split('|');                    
-
-                    if (!(corpId && slot && /^[a-f0-9]{64}$/.test(corpId) && ['0', '1'].includes(slot))) {
-                        interaction.editReply("Invalid input.");
-                        return;
-                    }
+                    const [corpId, slot] = corpOption?.split('|') ?? [null, null];
+                    console.log('slot before insert:', slot, typeof slot);
 
                     async function getColour() {
                         const colours = [0x00a455, 0x8877ee, 0xcc66dd, 0x50a210, 0x3f88fd, 0x6388c8, 0xf032c9, 0xdd6699, 0xf94965, 0x888888, 0x3399bb, 0x339988, 0xbc8519, 0x9988AA, 0xec5a74, 0xaa66ee, 0xf05d14, 0xaa8877, 0x998800, 0x779900, 0x78906c, 0x77958b, 0x5d98ab, 0x4790d8, 0x8888bb, 0xaa77aa, 0xcc66aa, 0xbb7788];
@@ -1168,7 +1163,7 @@ module.exports = {
                                     Math.floor((Date.now() / 1000) + end_of_life),
                                     awayChId,
                                     rColour,
-                                    Number(slot),
+                                    slot,
                                     corpId
                                 );
                             
