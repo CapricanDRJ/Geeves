@@ -9,7 +9,7 @@ const {
 const wait = require('node:timers/promises').setTimeout;
 const betterSqlite3 = require('better-sqlite3');
 const db = betterSqlite3('./db/geeves.db');
-const wsjsonDB = betterSqlite3('./db/wsjson.db', { readonly: true });
+const wsjsonDB = betterSqlite3('./db/wsjson.db', {verbose: console.log, readonly: true });
 const corpCacheMap = new Map(); // guildId => { data: [...], timer: Timeout }
 function loadCorpCacheForGuild(guildId) {
     const rows = wsjsonDB.prepare(`
