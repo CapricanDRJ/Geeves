@@ -345,12 +345,8 @@ function setupButtons() {
 };
 const defButtons = setupButtons();
 const sqlite3 = require('better-sqlite3');
-const db = sqlite3('db/geeves.db', {
-    verbose: console.log
-});
-const wsjson = sqlite3('db/wsjson.db', {
-    verbose: console.log
-});
+const db = sqlite3('db/geeves.db');
+const wsjson = sqlite3('db/wsjson.db');
 const afkContent = [
     "TIMERS ",
     0x8b0000,
