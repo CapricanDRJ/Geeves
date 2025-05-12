@@ -165,7 +165,6 @@ module.exports = {
             .addStringOption(option =>
                 option.setName('corp')
                     .setDescription('Corporation autosetup')
-                    .setRequired(false)
                     .setAutocomplete(true)
             )            
             .addUserOption(option => option.setName('user1').setDescription('Select user').setRequired(true))
