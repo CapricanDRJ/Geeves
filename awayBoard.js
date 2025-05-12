@@ -380,8 +380,7 @@ async function autoSetup(guildId, mRoleId, corpId, slot) {
        AND eventtype = 'WhiteStarStarted'
        AND corpId    = ?
        AND slot      = ?
-       AND timestamp <= ?
-     ORDER BY timestamp DESC
+       AND timestamp >= ?
      LIMIT 1
   `).get(guildId, corpId, slot, cutoff);
 
