@@ -200,7 +200,18 @@ module.exports = async(client, interaction) => {
         interaction.deferUpdate();
         return;
     };
-   const requiredPermissions = [
+    if (interaction.isAutocomplete()) {
+        const command = client.commands.get(interaction.commandName) // This is the command (It's the same for ContextMenu as a ContextMenuCommand is just the same as a slash command, only the difference is that ContextMenuCommands are ran through an User Interface.
+        if (command) {
+            try {
+                return command.execute(interaction) // Try to execute the command.
+            } catch (err) { 
+                console.error(err);
+              }
+        }
+        return;
+    };
+    const requiredPermissions = [
         PermissionFlagsBits.ManageRoles,
         PermissionFlagsBits.ManageChannels,
         PermissionFlagsBits.ManageMessages,
@@ -210,10 +221,8 @@ module.exports = async(client, interaction) => {
         PermissionFlagsBits.ViewChannel,
         PermissionFlagsBits.SendMessages
     ];
-
     const missingPermissions = requiredPermissions.filter(permission => !interaction.guild.members.me.permissions.has(permission));
-
-    if (missingPermissions.length > 0 && !interaction.isAutocomplete()) {
+    if (missingPermissions.length > 0) {
       // Correctly mapping permission bits to human-readable strings
       const missingPermissionsNames = missingPermissions.map(permission => {
         return Object.keys(PermissionFlagsBits).find(key => PermissionFlagsBits[key] === permission);
@@ -734,17 +743,4 @@ module.exports = async(client, interaction) => {
             awayBoard.makeAwayBoard(interaction.guild, wsRole.mRoleId, posted);
         };
     };
-    if (interaction.isCommand() || interaction.isContextMenuCommand() || interaction.isAutocomplete()) { // If the command is a command or an contextmenu, it will run the below code.
-        const command = client.commands.get(interaction.commandName) // This is the command (It's the same for ContextMenu as a ContextMenuCommand is just the same as a slash command, only the difference is that ContextMenuCommands are ran through an User Interface.
-        if (!command) return // If the command does not exists, return again.
-        try {
-            await command.execute(interaction) // Try to execute the command.
-        } catch (err) {
-            if (err) console.error(err) // If it fails, it returns an error.
-            await interaction.reply({ // And you inform the users that you have found an error.
-                content: "You found an error!",
-                flags: MessageFlags.Ephemeral
-            })
-        }
-    }
 }
