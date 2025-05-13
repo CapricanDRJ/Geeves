@@ -423,7 +423,7 @@ async function autoSetup(guildId, mRoleId, corpId, slot) {
     mRoleId,            // which WS role
     row.timestamp,                // fire immediately
     whatText,           // announcement text
-    '10',               // “role notice” bucket → renders with Whitestar emoji
+    '20',               // “role notice” bucket → renders with Whitestar emoji
     null,               // no specific user triggered it
     myEmojis.Whitestar.inline // show the Whitestar emoji again
   );
