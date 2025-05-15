@@ -364,7 +364,7 @@ function displayTime(seconds) {
 }
 
 async function autoSetup(guildId, mRoleId, corpId, slot) {
-    const CHECK_DAYS = 2 * 24 * 3600;// up to 2 days back.
+    const CHECK_DAYS = 4 * 24 * 3600;// up to 2 days back.
   // 1) cutoff for “not older than 4 days”
   const cutoff = Math.floor(Date.now() / 1000) - CHECK_DAYS;
 
