@@ -606,7 +606,9 @@ module.exports = async(client, interaction) => {
                     what = '\u200B'+"<@&" + wsRole.mRoleId + "> ";
                 }
             } else {
-                const opponents = whiteStar.hsOpponents === '[]' ? JSON.parse(whiteStar.opponents) : JSON.parse(whiteStar.hsOpponents);
+                const opponents = whiteStar.hsOpponents === '[]'
+                   ? JSON.parse(whiteStar.opponents)
+                   : JSON.parse(whiteStar.hsOpponents).map(o => o.PlayerName);
                 if (!!opponents[Number(interaction.customId)]) {
                     who = '0';
                     what = '\u200B'+opponents[interaction.customId];
