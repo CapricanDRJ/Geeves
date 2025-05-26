@@ -412,8 +412,8 @@ async function autoSetup(guildId, mRoleId, corpId, slot) {
     guildId,
     mRoleId,
   );
-  const whatText = `White Star discovered: **${myCorpName}** vs **[${oppCorpName}](https://ws.tsl.rocks/corp/${oppCorp}/)**\n`;
-
+  
+  const whatText = `White Star discovered: **${myCorpName}** vs **[${oppCorpName}](https://ws.tsl.rocks/corp/${oppCorp}/)**\n`
   db.prepare(`
     INSERT INTO awayTimers
       (guild, mRoleId, lifeTime, what, who, fromwho, emoji)
@@ -427,6 +427,21 @@ async function autoSetup(guildId, mRoleId, corpId, slot) {
     null,               // no specific user triggered it
     myEmojis.Whitestar.inline // show the Whitestar emoji again
   );
+
+  db.prepare(`
+    INSERT INTO awayTimers
+      (guild, mRoleId, lifeTime, what, who, fromwho, emoji)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    guildId,            // which server
+    mRoleId,            // which WS role
+    Number(row.timestamp)+43200,
+    "Preparation period ends.",           // announcement text
+    '20',               // “role notice” bucket → renders with Whitestar emoji
+    null,               // no specific user triggered it
+    myEmojis.Whitestar.inline // show the Whitestar emoji again
+  );
+
 
 }
 
