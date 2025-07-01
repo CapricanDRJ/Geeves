@@ -957,7 +957,9 @@ module.exports = {
                 async function startWS() {
                     console.log('startWS');
                     const corpOption = interaction.options.getString('corp');
+                    console.log(corpOption);
                     if (corpOption !== 'NoAutoSetup' && !/^[a-f0-9]{64}\|[01]$/.test(corpOption)) {
+                        console.log('Invalid Corp option:', corpOption);
                       return interaction.editReply('Invalid Corp.');
                     }
                     const [corpId, slot] = corpOption === 'NoAutoSetup' ? [null, null] : corpOption.split('|');
