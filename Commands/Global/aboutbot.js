@@ -111,7 +111,7 @@ module.exports = {
         .setName("aboutbot")
         .setDescription("Learn about these bots and their creator"),
     async execute(interaction) {
-        if (interaction.commandName === '') {
+        if (interaction.commandName === 'aboutbot') {
             const t = translations.en;
             
             const embed = new EmbedBuilder()
