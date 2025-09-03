@@ -1,15 +1,19 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlagsBitField, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const path = require('path');
-const commandName = path.basename(__filename, path.extname(__filename));
+const {
+    SlashCommandBuilder,
+    EmbedBuilder,
+    MessageFlagsBitField,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle
+} = require("discord.js")
 const MessageFlags = MessageFlagsBitField.Flags;
 
 // Global configuration
 const HOME_DISCORD_URL = 'https://discord.gg/nmajBkGEJz';
 const HOME_DISCORD_NAME = 'The Star League';
-const HOME_EMOJI_ID = '1412896964617572403';  // Placeholder for home server emoji
-const BOOST_EMOJI_ID = '1412896914487115796';  // Placeholder for boost emoji
+const HOME_EMOJI_ID = '1412891992329031793';  // Placeholder for home server emoji
+const BOOST_EMOJI_ID = '1412891911366115460';  // Placeholder for boost emoji
 const THUMBNAIL_URL = 'https://capricandrj.github.io/discord_bots_legal/botabout.png';
-
 
 const translations = {
     en: {
@@ -103,8 +107,8 @@ const translations = {
 };
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName(commandName)
-        .setDescription(translations.en.description)
+        .setName("about") // The name of the slash command
+        .setDescription("Learn about these bots and their creator") // A short description about the slash command.
         .setDescriptionLocalization('de', translations.de.description)
         .setDescriptionLocalization('zh-CN', translations["zh-CN"].description)
         .setDescriptionLocalization('ko', translations.ko.description)
@@ -117,180 +121,80 @@ module.exports = {
         .setDescriptionLocalization('ja', translations.ja.description)
         .setDMPermission(true)
         .setIntegrationTypes(0),
-        
-    allowedButtons: [],
-    
-    commandData: new SlashCommandBuilder()
-        .setName(commandName)
-        .setDescription(translations.en.description)
-        .setDescriptionLocalization('de', translations.de.description)
-        .setDescriptionLocalization('zh-CN', translations["zh-CN"].description)
-        .setDescriptionLocalization('ko', translations.ko.description)
-        .setDescriptionLocalization('ru', translations.ru.description)
-        .setDescriptionLocalization('uk', translations.uk.description)
-        .setDescriptionLocalization('es-ES', translations["es-ES"].description)
-        .setDescriptionLocalization('tr', translations.tr.description)
-        .setDescriptionLocalization('pl', translations.pl.description)
-        .setDescriptionLocalization('fr', translations.fr.description)
-        .setDescriptionLocalization('ja', translations.ja.description)
-        .setDMPermission(true)
-        .setIntegrationTypes(0),
-
     async execute(interaction) {
-        const locale = interaction.locale;
-        const t = translations[locale] || translations.en;
-        
-        const embed = new EmbedBuilder()
-            .setColor(0x7289DA)
-            .setTitle(t.title)
-            .setDescription(t.message2)
-            .setThumbnail(THUMBNAIL_URL)
-            .setFooter({ text: t.footer })
-            .setTimestamp();
+        console.log('about');
+        if (interaction.commandName === 'about') {
+            const locale = interaction.locale;
+            const t = translations[locale] || translations.en;
+            
+            const embed = new EmbedBuilder()
+                .setColor(0x7289DA)
+                .setTitle(t.title)
+                .setDescription(t.message2)
+                .setThumbnail(THUMBNAIL_URL)
+                .setFooter({ text: t.footer })
+                .setTimestamp();
 
-        // Community buttons
-        const communityButtons = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel(t.bugReports)
-                .setURL('https://discord.gg/KMmmaeQa3T'),
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel(t.discussions)
-                .setURL('https://discord.gg/nmajBkGEJz')
-        );
+            // Community buttons
+            const communityButtons = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setStyle(ButtonStyle.Link)
+                    .setLabel(t.bugReports)
+                    .setURL('https://discord.gg/KMmmaeQa3T'),
+                new ButtonBuilder()
+                    .setStyle(ButtonStyle.Link)
+                    .setLabel(t.discussions)
+                    .setURL('https://discord.gg/nmajBkGEJz')
+            );
 
-        // Bot install buttons (row 1)
-        const botButtons1 = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel("Hades' Star ELO")
-                .setEmoji('🤖')
-                .setURL('https://discord.com/oauth2/authorize?client_id=1198035340955504670'),
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel("Hades' Star RS Q")
-                .setEmoji('🤖')
-                .setURL('https://discord.com/oauth2/authorize?client_id=1055503950067007569'),
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel("Hades' Star Trader")
-                .setEmoji('🤖')
-                .setURL('https://discord.com/oauth2/authorize?client_id=1279978547569491968'),
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel("Hades' Star Tech")
-                .setEmoji('🤖')
-                .setURL('https://discord.com/oauth2/authorize?client_id=1313578638460846173')
-        );
+            // Bot install buttons (row 1)
+            const botButtons1 = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setStyle(ButtonStyle.Link)
+                    .setLabel("Hades' Star ELO")
+                    .setEmoji('🤖')
+                    .setURL('https://discord.com/oauth2/authorize?client_id=1198035340955504670'),
+                new ButtonBuilder()
+                    .setStyle(ButtonStyle.Link)
+                    .setLabel("Hades' Star RS Q")
+                    .setEmoji('🤖')
+                    .setURL('https://discord.com/oauth2/authorize?client_id=1055503950067007569'),
+                new ButtonBuilder()
+                    .setStyle(ButtonStyle.Link)
+                    .setLabel("Hades' Star Trader")
+                    .setEmoji('🤖')
+                    .setURL('https://discord.com/oauth2/authorize?client_id=1279978547569491968'),
+                new ButtonBuilder()
+                    .setStyle(ButtonStyle.Link)
+                    .setLabel("Hades' Star Tech")
+                    .setEmoji('🤖')
+                    .setURL('https://discord.com/oauth2/authorize?client_id=1313578638460846173')
+            );
 
-        // Bot install buttons (row 2)
-        const botButtons2 = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel('BiteFinder')
-                .setEmoji('🤖')
-                .setURL('https://discord.com/oauth2/authorize?client_id=1331700134568005743'),
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel('SubScriber')
-                .setEmoji('🤖')
-                .setURL('https://discord.com/application-directory/1381686215715192932'),
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel('Persona')
-                .setEmoji('🤖')
-                .setURL('https://discord.com/oauth2/authorize?client_id=1216792017078583467')
-        );
+            // Bot install buttons (row 2)
+            const botButtons2 = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setStyle(ButtonStyle.Link)
+                    .setLabel('BiteFinder')
+                    .setEmoji('🤖')
+                    .setURL('https://discord.com/oauth2/authorize?client_id=1331700134568005743'),
+                new ButtonBuilder()
+                    .setStyle(ButtonStyle.Link)
+                    .setLabel('SubScriber')
+                    .setEmoji('🤖')
+                    .setURL('https://discord.com/application-directory/1381686215715192932'),
+                new ButtonBuilder()
+                    .setStyle(ButtonStyle.Link)
+                    .setLabel('Persona')
+                    .setEmoji('🤖')
+                    .setURL('https://discord.com/oauth2/authorize?client_id=1216792017078583467')
+            );
 
-        await interaction.reply({
-            embeds: [embed],
-            components: [communityButtons, botButtons1, botButtons2],
-            flags: MessageFlags.Ephemeral
-        });
-    },
-
-    executeCommand: async (interaction) => {
-        const locale = interaction.locale;
-        const t = translations[locale] || translations.en;
-        
-        const embed = new EmbedBuilder()
-            .setColor(0x7289DA)
-            .setTitle(t.title)
-            .setDescription(t.message2)
-            .setThumbnail(THUMBNAIL_URL)
-            .setFooter({ text: t.footer })
-            .setTimestamp();
-
-        // Community buttons
-        const communityButtons = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel(t.bugReports)
-                .setURL('https://discord.gg/KMmmaeQa3T'),
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel(t.discussions)
-                .setURL('https://discord.gg/nmajBkGEJz')
-        );
-
-        // Bot install buttons (row 1)
-        const botButtons1 = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel("Hades' Star ELO")
-                .setEmoji('🤖')
-                .setURL('https://discord.com/oauth2/authorize?client_id=1198035340955504670'),
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel("Hades' Star RS Q")
-                .setEmoji('🤖')
-                .setURL('https://discord.com/oauth2/authorize?client_id=1055503950067007569'),
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel("Hades' Star Trader")
-                .setEmoji('🤖')
-                .setURL('https://discord.com/oauth2/authorize?client_id=1279978547569491968'),
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel("Hades' Star Tech")
-                .setEmoji('🤖')
-                .setURL('https://discord.com/oauth2/authorize?client_id=1313578638460846173')
-        );
-
-        // Bot install buttons (row 2)
-        const botButtons2 = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel('BiteFinder')
-                .setEmoji('🤖')
-                .setURL('https://discord.com/oauth2/authorize?client_id=1331700134568005743'),
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel('SubScriber')
-                .setEmoji('🤖')
-                .setURL('https://discord.com/application-directory/1381686215715192932'),
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel('Persona')
-                .setEmoji('🤖')
-                .setURL('https://discord.com/oauth2/authorize?client_id=1216792017078583467')
-        );
-
-        await interaction.reply({
-            embeds: [embed],
-            components: [communityButtons, botButtons1, botButtons2],
-            flags: MessageFlags.Ephemeral
-        });
-    },
-
-    handleInteraction: async (client, interaction) => {
-        if (interaction.isCommand() && interaction.commandName === commandName) {
-            module.exports.executeCommand(interaction);
+            interaction.reply({
+                embeds: [embed],
+                components: [communityButtons, botButtons1, botButtons2],
+                flags: MessageFlags.Ephemeral
+            });
         }
-    },
-
-    main: (client) => {
-        console.log(`Main function for ${commandName} module loaded.`);
-    },
-};
+    }
+}
