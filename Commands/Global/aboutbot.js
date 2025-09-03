@@ -108,11 +108,10 @@ const translations = {
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("about")
+        .setName("aboutbot")
         .setDescription("Learn about these bots and their creator"),
     async execute(interaction) {
-        console.log('about');
-        if (interaction.commandName === 'about') {
+        if (interaction.commandName === '') {
             const t = translations.en;
             
             const embed = new EmbedBuilder()
