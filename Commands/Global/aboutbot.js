@@ -179,8 +179,7 @@ module.exports = {
 
             interaction.reply({
                 embeds: [embed],
-                components: [communityButtons, botButtons1, botButtons2],
-                flags: MessageFlags.Ephemeral
+                components: [communityButtons, botButtons1, botButtons2]
             });
         }
     }
