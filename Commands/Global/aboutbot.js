@@ -11,8 +11,8 @@ const MessageFlags = MessageFlagsBitField.Flags;
 // Global configuration
 const HOME_DISCORD_URL = 'https://discord.gg/nmajBkGEJz';
 const HOME_DISCORD_NAME = 'The Star League';
-const HOME_EMOJI_ID = '1412891992329031793';
-const BOOST_EMOJI_ID = '1412891911366115460';
+const HOME_EMOJI_ID = '1412896964617572403';
+const BOOST_EMOJI_ID = '1412896914487115796';
 const THUMBNAIL_URL = 'https://capricandrj.github.io/discord_bots_legal/botabout.png';
 
 const translations = {
