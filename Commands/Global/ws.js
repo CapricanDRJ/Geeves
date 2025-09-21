@@ -1180,8 +1180,8 @@ module.exports = {
                             };
                                 const corpName = wsjsonDB.prepare(`
         SELECT corpName FROM json_cache
-        WHERE guildid = ? AND corpId IS NOT NULL AND corpName IS NOT NULL LIMIT 1
-    `).pluck().get(guildId);
+        WHERE corpId = ? AND corpName IS NOT NULL LIMIT 1
+    `).pluck().get(corpId);
                             let message = `${corpName} Slot:${slot} Created Category ${wsCat.name} with Channels `;
                             for (y in chanList) {
                                 message += `<#${chanList[y]}> `;
