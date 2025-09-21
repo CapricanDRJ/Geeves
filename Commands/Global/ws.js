@@ -1175,7 +1175,7 @@ module.exports = {
                                     wait(1000)
                                 };
                             };
-                            let message = `created Category ${wsCat.name} with Channels `;
+                            let message = `Created Slot:${slot} Category ${wsCat.name} with Channels `;
                             for (y in chanList) {
                                 message += `<#${chanList[y]}> `;
                             };
