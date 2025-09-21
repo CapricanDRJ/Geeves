@@ -428,6 +428,7 @@ module.exports = {
                 }
             }
         } else {
+            //no longer needed. Discord fixed it on their side.
             /*
             if (!interaction.guild.members.me.permissionsIn(interaction.channel.id).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
                 await interaction.reply({
@@ -965,6 +966,7 @@ module.exports = {
                       corpOption === 'NoAutoSetup' 
                     }
                     const [corpId, slot] = corpOption === 'NoAutoSetup' ? [null, null] : corpOption.split('|');
+                    console.log(corpOption);
 
                     async function getColour() {
                         const colours = [0x00a455, 0x8877ee, 0xcc66dd, 0x50a210, 0x3f88fd, 0x6388c8, 0xf032c9, 0xdd6699, 0xf94965, 0x888888, 0x3399bb, 0x339988, 0xbc8519, 0x9988AA, 0xec5a74, 0xaa66ee, 0xf05d14, 0xaa8877, 0x998800, 0x779900, 0x78906c, 0x77958b, 0x5d98ab, 0x4790d8, 0x8888bb, 0xaa77aa, 0xcc66aa, 0xbb7788];
@@ -1177,7 +1179,7 @@ module.exports = {
                                     wait(1000)
                                 };
                             };
-                            let message = `Created Slot:${slot} Category ${wsCat.name} with Channels `;
+                            let message = `Created Category ${wsCat.name} with Channels `;
                             for (y in chanList) {
                                 message += `<#${chanList[y]}> `;
                             };
