@@ -428,13 +428,14 @@ module.exports = {
                 }
             }
         } else {
+            /*
             if (!interaction.guild.members.me.permissionsIn(interaction.channel.id).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
                 await interaction.reply({
                     content: 'Sorry, I am missing permission to post here.(view channel/send messages)',
                     flags: MessageFlags.Ephemeral
                 });
                 return;
-            }
+            }*/
             //<GuildMember>.roles.highest.position will return a number that you can compare with other role positions
             console.log(interaction.commandName);
             if (interaction.commandName === 'ws') {
@@ -451,7 +452,7 @@ module.exports = {
                 ];
 
                 const missingPermissions = requiredPermissions.filter(permission => !interaction.guild.members.me.permissions.has(permission));
-/*
+
                 if (missingPermissions.length > 0) {
                     // Correctly mapping permission bits to human-readable strings
                     const missingPermissionsNames = missingPermissions.map(permission => {
@@ -466,7 +467,7 @@ module.exports = {
 
                     return; // Stop execution if there are missing permissions
                 }
-                    */
+                    
                 await interaction.deferReply(); // Do this at the top, and all below will be editReply. Otherwise error crashes the btoa.
                 let subCommand = await interaction.options.getSubcommand();
                 let subCommandGroup = await interaction.options.getSubcommandGroup();
