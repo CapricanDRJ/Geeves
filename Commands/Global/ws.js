@@ -1184,7 +1184,7 @@ module.exports = {
                                 WHERE corpId = ? AND corpName IS NOT NULL LIMIT 1
                             `).pluck().get(corpId);
                             if(corpName !== undefined && slot !== undefined) message += `${corpName} Slot:${slot} `;
-                            else message += "No Auto Setup ";
+                            else message += "[No Auto Setup] ";
 
                             message += `Created Category ${wsCat.name} with Channels `;
                             for (y in chanList) {
