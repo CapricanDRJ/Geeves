@@ -451,7 +451,7 @@ module.exports = {
                 ];
 
                 const missingPermissions = requiredPermissions.filter(permission => !interaction.guild.members.me.permissions.has(permission));
-
+/*
                 if (missingPermissions.length > 0) {
                     // Correctly mapping permission bits to human-readable strings
                     const missingPermissionsNames = missingPermissions.map(permission => {
@@ -466,6 +466,7 @@ module.exports = {
 
                     return; // Stop execution if there are missing permissions
                 }
+                    */
                 await interaction.deferReply(); // Do this at the top, and all below will be editReply. Otherwise error crashes the btoa.
                 let subCommand = await interaction.options.getSubcommand();
                 let subCommandGroup = await interaction.options.getSubcommandGroup();
