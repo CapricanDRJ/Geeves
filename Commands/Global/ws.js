@@ -1183,7 +1183,7 @@ module.exports = {
                                 SELECT corpName FROM json_cache
                                 WHERE corpId = ? AND corpName IS NOT NULL LIMIT 1
                             `).pluck().get(corpId);
-                            if(corpName !== undefined && slot !== undefined) message += `${corpName} Slot:${slot} `;
+                            if(corpName !== undefined && slot !== undefined) message += `${corpName} Slot:${Number(slot) + 1} `;
                             else message += "[No Auto Setup] ";
 
                             message += `Created Category ${wsCat.name} with Channels `;
