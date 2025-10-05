@@ -209,7 +209,6 @@ client.on('disconnect', event => {
 });
 setInterval(async () => {
   await client.users.fetch(client.user.id, { force: true });
-  console.log('Bot connection verified');
 }, 20 * 60 * 1000); // every 20 minutes
 
 client.login(Config.Token).catch(console.error);
