@@ -28,9 +28,9 @@ const db = new Database('db/geeves.db');
 // Command Handling
 client.commands = new Collection();
 
-client.once('ready', (server) => {
+client.once('clientReady', (server) => {
   async function checkTimers() {
-      await client.guilds.cache.forEach(async (guild) => {
+      client.guilds.cache.forEach(async (guild) => {
           if (guild.members.me.permissions.has([
                   PermissionFlagsBits.ManageRoles,
                   PermissionFlagsBits.ManageChannels,
