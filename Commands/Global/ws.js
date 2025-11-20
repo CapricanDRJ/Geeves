@@ -469,6 +469,7 @@ module.exports = {
                     return; // Stop execution if there are missing permissions
                 }
                     
+                await interaction.deferReply(); // Do this at the top, and all below will be editReply. Otherwise error crashes the btoa.
                 let subCommand = await interaction.options.getSubcommand();
                 let subCommandGroup = await interaction.options.getSubcommandGroup();
                 switch (subCommandGroup) {
@@ -478,27 +479,21 @@ module.exports = {
                                 startWS();
                                 break;
                             case 'who':
-                                await interaction.deferReply();
                                 replyWho();
                                 break;
                             case 'nova':
-                                await interaction.deferReply();
                                 nova();
                                 break;
                             case 'opponents':
-                                await interaction.deferReply();
                                 opponent();
                                 break;
                             case 'afk':
-                                await interaction.deferReply();
                                 afk('afk');
                                 break;
                             case 'allied':
-                                await interaction.deferReply();
                                 afk('allied');
                                 break;
                             case 'enemy':
-                                await interaction.deferReply();
                                 afk('enemy');
                                 break;
                             default:
@@ -506,19 +501,15 @@ module.exports = {
                         }
                         break;
                     case 'template':
-                        await interaction.deferReply();
                         template();
                         break;
                     case 'leader':
-                        await interaction.deferReply();
                         leader();
                         break;
                     case 'member':
-                        await interaction.deferReply();
                         member();
                         break;
                     case 'guest':
-                        await interaction.deferReply();
                         guest();
                         break;
                     default:
@@ -966,90 +957,16 @@ module.exports = {
                         return false;
                     }
                 };
-
                 async function startWS() {
                     console.log('startWS');
-                    
-                    // Initialize variables
-                    let corpId = null;
-                    let slot = null;
-                    let corpOption = 'NoAutoSetup';
-                    
-                    // Query corps directly
-                    const rows = wsjsonDB.prepare(`
-                        SELECT DISTINCT corpId, corpName FROM json_cache
-                        WHERE guildid = ? AND corpId IS NOT NULL AND corpName IS NOT NULL
-                    `).all(interaction.guildId);
-                    
-                    if (rows.length > 0) {
-                        // Build corp options from query results
-                        const corpOptions = rows.flatMap(row => {
-                            const base = row.corpName.slice(0, 90); // leave room for " Slot X"
-                            return [
-                                { label: `${base} Slot 1`, value: `${row.corpId}|0` },
-                                { label: `${base} Slot 2`, value: `${row.corpId}|1` }
-                            ];
-                        });
-                        
-                        // Add No Auto Setup option
-                        corpOptions.push({ label: 'No Auto Setup', value: 'NoAutoSetup' });
-                        
-                        const { StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
-                        const selectMenu = new StringSelectMenuBuilder()
-                            .setCustomId('corp_string_select')
-                            .setPlaceholder('Choose corporation...')
-                            .addOptions(corpOptions);
-                        
-                        const row = new ActionRowBuilder().addComponents(selectMenu);
-                        
-                        const response = await interaction.reply({
-                            content: "Please select a corporation for auto-setup:",
-                            components: [row],
-                            ephemeral: true
-                        });
-                        
-                        try {
-                            // Wait for user selection - this pauses execution 
-                            const componentInteraction = await response.awaitMessageComponent({
-                                filter: (i) => i.user.id === interaction.user.id,
-                                time: 60000
-                            });
-                            
-                            corpOption = componentInteraction.values[0];
-                            console.log('Corp selected:', corpOption);
-                            
-                            // Now populate corpId and slot based on selection
-                            if (corpOption !== 'NoAutoSetup' && /^[a-f0-9]{64}\|[01]$/.test(corpOption)) {
-                                [corpId, slot] = corpOption.split('|');
-                                console.log('Parsed corpId:', corpId, 'slot:', slot);
-                            } else {
-                                console.log('Using NoAutoSetup or invalid option');
-                                corpId = null;
-                                slot = null;
-                            }
-                            
-                            // Update the message and continue
-                            await componentInteraction.update({
-                                content: `Selected: ${corpOptions.find(c => c.value === corpOption)?.label || 'No Auto Setup'}`,
-                                components: []
-                            });
-                            
-                            // Defer the original interaction to continue processing
-                            await interaction.deferReply();
-                            
-                        } catch (error) {
-                            console.log('Selection timed out, using NoAutoSetup');
-                            corpOption = 'NoAutoSetup';
-                            corpId = null;
-                            slot = null;
-                        }
-                    } else {
-                        // No corps available, use NoAutoSetup
-                        await interaction.deferReply();
+                    let corpOption = interaction.options.getString('corp');
+                    console.log(corpOption);
+                    if (corpOption !== 'NoAutoSetup' && !/^[a-f0-9]{64}\|[01]$/.test(corpOption)) {
+                        console.log('Invalid Corp option:', corpOption);
+                      corpOption === 'NoAutoSetup' 
                     }
-                    
-                    console.log('Final values - corpOption:', corpOption, 'corpId:', corpId, 'slot:', slot); 
-return;
+                    const [corpId, slot] = corpOption === 'NoAutoSetup' ? [null, null] : corpOption.split('|');
+
                     async function getColour() {
                         const colours = [0x00a455, 0x8877ee, 0xcc66dd, 0x50a210, 0x3f88fd, 0x6388c8, 0xf032c9, 0xdd6699, 0xf94965, 0x888888, 0x3399bb, 0x339988, 0xbc8519, 0x9988AA, 0xec5a74, 0xaa66ee, 0xf05d14, 0xaa8877, 0x998800, 0x779900, 0x78906c, 0x77958b, 0x5d98ab, 0x4790d8, 0x8888bb, 0xaa77aa, 0xcc66aa, 0xbb7788];
                         const used = await db.prepare('SELECT colour FROM whiteStar WHERE guild = ?').all(interaction.guildId);
