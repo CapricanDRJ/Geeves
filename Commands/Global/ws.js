@@ -1035,17 +1035,13 @@ module.exports = {
                             });
                             
                             // Defer the original interaction to continue processing
-                            await interaction.followUp({ content: 'Setting up whitestar channels...', ephemeral: true });
+                            await interaction.deferReply();
                             
                         } catch (error) {
                             console.log('Selection timed out, using NoAutoSetup');
                             corpOption = 'NoAutoSetup';
                             corpId = null;
                             slot = null;
-                            await interaction.editReply({ 
-                                content: 'Selection timed out. Using No Auto Setup.', 
-                                components: [] 
-                            });
                         }
                     } else {
                         // No corps available, use NoAutoSetup
