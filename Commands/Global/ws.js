@@ -12,6 +12,7 @@ const db = betterSqlite3('./db/geeves.db');
 const wsjsonDB = betterSqlite3('./db/wsjson.db', {verbose: console.log, readonly: true });
 const corpCacheMap = new Map(); // guildId => { data: [...], timer: Timeout }
 function loadCorpCacheForGuild(guildId) {
+    if(corpCacheMap.has(guildId)) return; // Already loaded
     const rows = wsjsonDB.prepare(`
         SELECT DISTINCT corpId, corpName FROM json_cache
         WHERE guildid = ? AND corpId IS NOT NULL AND corpName IS NOT NULL
@@ -961,9 +962,29 @@ module.exports = {
                     console.log('startWS');
                     let corpOption = interaction.options.getString('corp');
                     console.log(corpOption);
+                    // Exception handler for Discord bug: if we get a name instead of value, try to resolve it
                     if (corpOption !== 'NoAutoSetup' && !/^[a-f0-9]{64}\|[01]$/.test(corpOption)) {
-                        console.log('Invalid Corp option:', corpOption);
-                      corpOption = 'NoAutoSetup' 
+                        console.log('Received corp name instead of value, attempting to resolve:', corpOption);
+                        
+                        // Load corp cache to find matching entry
+                        loadCorpCacheForGuild(interaction.guildId);
+                        const corpCache = corpCacheMap.get(interaction.guildId);
+                        
+                        if (corpCache && corpCache.data) {
+                            // Try to find entry with matching name
+                            const foundEntry = corpCache.data.find(entry => entry.name === corpOption);
+                            
+                            if (foundEntry) {
+                                console.log('Successfully matched name to value:', foundEntry.value);
+                                corpOption = foundEntry.value;
+                            } else {
+                                console.log('Could not match corp name, falling back to NoAutoSetup');
+                                corpOption = 'NoAutoSetup';
+                            }
+                        } else {
+                            console.log('No corp cache available, falling back to NoAutoSetup');
+                            corpOption = 'NoAutoSetup';
+                        }
                     }
                     const [corpId, slot] = corpOption === 'NoAutoSetup' ? [null, null] : corpOption.split('|');
 
