@@ -963,7 +963,7 @@ module.exports = {
                     console.log(corpOption);
                     if (corpOption !== 'NoAutoSetup' && !/^[a-f0-9]{64}\|[01]$/.test(corpOption)) {
                         console.log('Invalid Corp option:', corpOption);
-                      corpOption === 'NoAutoSetup' 
+                      corpOption = 'NoAutoSetup' 
                     }
                     const [corpId, slot] = corpOption === 'NoAutoSetup' ? [null, null] : corpOption.split('|');
 
