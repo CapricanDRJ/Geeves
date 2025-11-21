@@ -134,7 +134,7 @@ const loadGuildChannels = () => {
   });
 
   guildChannels = newGuildChannels; // Replace the old object with the new one
-  console.log('Guild channels refreshed');
+  //console.log('Guild channels refreshed');
 };
 
 // Initial load of guild channels
