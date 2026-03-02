@@ -1027,8 +1027,7 @@ module.exports = {
                             const mRoleId = await interaction.guild.roles.create({
                                 name: nextWS,
                                 colors: {
-                                    primaryColor: rColour,
-                                    secondaryColor: 0xB9F2FF
+                                    primaryColor: rColour
                                 },
                                 mentionable: true,
                             }).then((role) => role.id).catch(console.error);
