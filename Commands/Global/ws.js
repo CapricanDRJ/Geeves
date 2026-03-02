@@ -450,8 +450,7 @@ module.exports = {
                     PermissionFlagsBits.AttachFiles,
                     PermissionFlagsBits.UseExternalEmojis,
                     PermissionFlagsBits.ViewChannel,
-                    PermissionFlagsBits.SendMessages,
-                    PermissionFlagsBits.PinMessages
+                    PermissionFlagsBits.SendMessages
                 ];
 
                 const missingPermissions = requiredPermissions.filter(permission => !interaction.guild.members.me.permissions.has(permission));
@@ -1101,7 +1100,7 @@ module.exports = {
                                     allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages],
                                 }, {
                                     id: interaction.client.user.id,
-                                    allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory, PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.UseExternalEmojis, PermissionFlagsBits.AttachFiles, PermissionFlagsBits.AddReactions, PermissionFlagsBits.PinMessages],
+                                    allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory, PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.UseExternalEmojis, PermissionFlagsBits.AttachFiles, PermissionFlagsBits.AddReactions],
                                 }];
                                 for (i in extraRoles) {
                                     const extraRole = await interaction.guild.roles.cache.get(extraRoles[i]);
@@ -1137,7 +1136,6 @@ module.exports = {
                                             './files/' + imageId + '.png',
                                         ],
                                     });
-                                    msg.pin();
                                 } catch (e) {
                                     // report error to user?
                                     console.log(e);
@@ -1149,7 +1147,6 @@ module.exports = {
                                     const msg = await channel.send({
                                         content: "```The following commands are required for proper function:\n\/ws opponents\n\/ws nova\n\nTo change default channel names and default roles added such as additional bots, server Admins may use\n/ws template```"
                                     });
-                                    msg.pin();
                                 } catch (e) {
                                     // report error to user?
                                     console.log(e);
