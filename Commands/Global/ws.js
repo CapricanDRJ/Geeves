@@ -6,6 +6,7 @@ const {
     ChannelType,
     MessageFlagsBitField
 } = require('discord.js');
+console.log(PermissionFlagsBits);
 const wait = require('node:timers/promises').setTimeout;
 const betterSqlite3 = require('better-sqlite3');
 const db = betterSqlite3('./db/geeves.db');
@@ -1071,7 +1072,7 @@ module.exports = {
                             permissionOverwrites: [
                                 {
                                     id: interaction.client.user.id,
-                                    allow: [PermissionFlagsBits.ViewChannel,PermissionFlagsBits.ManageChannels, PermissionFlagsBits.AddReactions]
+                                    allow: [PermissionFlagsBits.ViewChannel,PermissionFlagsBits.ManageChannels, PermissionFlagsBits.AddReactions, PermissionFlagsBits.PinMessages]
                                 }
                             ]
                         }).catch(console.log);
