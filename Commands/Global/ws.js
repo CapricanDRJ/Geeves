@@ -1098,7 +1098,7 @@ module.exports = {
                                     allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages],
                                 }, {
                                     id: interaction.client.user.id,
-                                    allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory, PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.UseExternalEmojis, PermissionFlagsBits.AttachFiles, PermissionFlagsBits.AddReactions],
+                                    allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory, PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.UseExternalEmojis, PermissionFlagsBits.AttachFiles, PermissionFlagsBits.AddReactions, PermissionFlagsBits.PinMessages],
                                 }];
                                 for (i in extraRoles) {
                                     const extraRole = await interaction.guild.roles.cache.get(extraRoles[i]);
