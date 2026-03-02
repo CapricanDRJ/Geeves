@@ -6,7 +6,6 @@ const {
     ChannelType,
     MessageFlagsBitField
 } = require('discord.js');
-console.log(PermissionFlagsBits);
 const wait = require('node:timers/promises').setTimeout;
 const betterSqlite3 = require('better-sqlite3');
 const db = betterSqlite3('./db/geeves.db');
@@ -1027,7 +1026,7 @@ module.exports = {
                         async function newRole(nextWS) {
                             const mRoleId = await interaction.guild.roles.create({
                                 name: nextWS,
-                                color: rColour,
+                                colors: [rColour],
                                 mentionable: true,
                             }).then((role) => role.id).catch(console.error);
                             console.log('role id?: ' + mRoleId);
@@ -1072,7 +1071,7 @@ module.exports = {
                             permissionOverwrites: [
                                 {
                                     id: interaction.client.user.id,
-                                    allow: [PermissionFlagsBits.ViewChannel,PermissionFlagsBits.ManageChannels, PermissionFlagsBits.AddReactions, PermissionFlagsBits.PinMessages]
+                                    allow: [PermissionFlagsBits.ViewChannel,PermissionFlagsBits.ManageChannels, PermissionFlagsBits.AddReactions]
                                 }
                             ]
                         }).catch(console.log);
