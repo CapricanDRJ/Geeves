@@ -450,7 +450,8 @@ module.exports = {
                     PermissionFlagsBits.AttachFiles,
                     PermissionFlagsBits.UseExternalEmojis,
                     PermissionFlagsBits.ViewChannel,
-                    PermissionFlagsBits.SendMessages
+                    PermissionFlagsBits.SendMessages,
+                    PermissionFlagsBits.PinMessages
                 ];
 
                 const missingPermissions = requiredPermissions.filter(permission => !interaction.guild.members.me.permissions.has(permission));
