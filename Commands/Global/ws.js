@@ -1027,7 +1027,8 @@ module.exports = {
                             const mRoleId = await interaction.guild.roles.create({
                                 name: nextWS,
                                 colors: {
-                                    primaryColor: rColour
+                                    primaryColor: rColour,
+                                    secondaryColor: interaction.guild.features.includes('EnhancedRoleColors') ? 0xB9F2FF : undefined
                                 },
                                 mentionable: true,
                             }).then((role) => role.id).catch(console.error);
@@ -1082,7 +1083,6 @@ module.exports = {
                             db.prepare('INSERT INTO channels (guild, channelId, mRoleId, lRoleId, cType) VALUES(?,?,?,?,?)').run(interaction.guildId, wsCat.id, mRoleId, lRoleId, '0');
                             //chanList.push(wsCat.id); remove to not push category into the list.
                             //end create category
-
                             async function createchan(chname, cat, mRoleId, lRoleId, cType) {
                                 const leader = chanProperties[cType][1];
                                 const restricted = chanProperties[cType][2];
