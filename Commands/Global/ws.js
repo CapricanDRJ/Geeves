@@ -1023,9 +1023,10 @@ module.exports = {
                             } while (interaction.guild.roles.cache.find((role) => role.name === nextWS));
                             return nextWS;
                         };
-                        async function newRole(nextWS) {
+                        async function newRole(nextWS, pin = false) {
                             const mRoleId = await interaction.guild.roles.create({
                                 name: nextWS,
+                                permissions: (pin && interaction.appPermissions?.has(PermissionFlagsBits.PinMessages)) ? [PermissionFlagsBits.PinMessages] : [],
                                 colors: {
                                     primaryColor: rColour,
                                     secondaryColor: interaction.guild.features.includes('EnhancedRoleColors') ? 0xB9F2FF : undefined
@@ -1051,7 +1052,7 @@ module.exports = {
 
                         const nextWS = await findnextWS();
                         const mRoleId = await newRole(nextWS);
-                        const lRoleId = await newRole(nextWS + 'Lead');
+                        const lRoleId = await newRole(nextWS + 'Lead', true);
                         const chanList = [];
                         //need to create check, if role creation failed, do not move ahead
                         //create category
