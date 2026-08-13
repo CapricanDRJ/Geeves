@@ -626,16 +626,17 @@ async function makeAwayBoard(guild, mRoleId, posted) {
         value: shipCounter,
         inline: false
     });
-    afkChan.messages.fetch().then((messages) => {
-        afkChan.bulkDelete(messages.filter((msg) => 
-            !msg.content.includes(myEmojis.E.inline) &&
+afkChan.messages.fetch().then((messages) => {
+        afkChan.bulkDelete(messages.filter((msg) => {
+            console.log(msg); // TEMP DEBUG - remove after checking output
+            return !msg.content.includes(myEmojis.E.inline) &&
             !msg.content.includes('\u200B') &&
             (
                 (((Number(msg.createdTimestamp) / 1000) + 43000) < curTime && msg.author.bot && msg.id != whiteStar.awayMsgId) ||
                 msg.author.id != guild.members.me.id ||
                 (msg.content === '' && msg.author.bot && msg.id != whiteStar.awayMsgId)
-            )
-        )); // 43000 = 12 hours in seconds
+            );
+        }));
     }).catch(console.error);
     let msgCheck = await afkChan.messages.fetch({
         limit: 1
